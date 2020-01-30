@@ -1,0 +1,8 @@
+{
+  "apiHost": "https://api.thinkrelay.com",
+  "integrationId": "UABJJC",
+  "apiKey": "nfNq7PAHmsjQmMgerLrmwQvtfNGbPNFlywQhplegYwPA",
+  "buttonURL":"https://api.thinkrelay.com/resources/images/sdk_button.png",
+  "partnerToken": "F9E93D721E717B0F71B3",
+  "privateKey": "afa9417b1ae37e18f32dd15844dc812dccdc30a5"
+}

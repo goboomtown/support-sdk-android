@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.goboomtown.supportsdk.view.SupportButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -42,23 +43,23 @@ public class MainActivity extends AppCompatActivity
     public static final String TAG = "MainActivity";
 
     private FrameLayout mFragmentContainer;
-    private View                mView;
-    private SupportButton    mSupportButton;
-
-    private int             mConfigResource = R.raw.support_sdk;
-
+    private View mView;
+    private SupportButton mSupportButton;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle(R.string.app_name);
 
         mFragmentContainer = findViewById(R.id.fragment_container);
 
         mSupportButton = findViewById(R.id.supportButton);
         mSupportButton.setListener(this);
 
-
-        int configResource; // = R.raw.support_sdk;
+        int configResource = R.raw.support_sdk;
         mSupportButton.loadConfiguration(configResource, null);
 
         Map<String, String> myPubData = new HashMap<>();
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity
         mSupportButton.advertiseServiceWithPublicData(myPubData, myPrivData);
     }
 
-     @Override
+    @Override
     protected void onResume() {
         super.onResume();
     }
@@ -171,3 +172,4 @@ public class MainActivity extends AppCompatActivity
     public void supportButtonDidFailToAdvertiseService() {
         Log.i(TAG, "error when advertising service");
     }
+}

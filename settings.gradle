@@ -1,2 +1,5 @@
 include ':app'
 rootProject.name='Support SDK Demo'
+
+include ':supportsdk'
+project(":supportsdk").projectDir = new File(settingsDir, "supportsdk")
