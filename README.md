@@ -1,4 +1,4 @@
-# Boomtown Support SDK for Android (v.1.0.0)
+# Boomtown Product Support Platform SDK for Android
 
 #### Minimum Requirements
 - Android 4.4 (API Level 19)
