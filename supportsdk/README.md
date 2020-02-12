@@ -1,4 +1,4 @@
-# Boomtown Support SDK for Android (v.1.0.0)
+# Boomtown Product Support Platform SDK for Android
 
 #### Minimum Requirements
 - Android 4.4 (API Level 19)
@@ -82,7 +82,7 @@ _Note:_ An example Android application that uses this library may be found in th
 ```
 SupportButton supportButton = (SupportButton) findViewById(R.id.supportButton);
 supportButton.setListener(this);
-supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
+supportButton.loadConfigurationFile(R.raw.support_sdk, customerInfo: null);
 
 ```
 
