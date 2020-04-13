@@ -1,7 +1,7 @@
 apply plugin: 'idea'
 apply plugin: 'com.android.library'
 
-apply plugin: 'com.github.dcendents.android-maven'
+//apply plugin: 'com.github.dcendents.android-maven'
 
 apply plugin: 'maven'
 
@@ -76,6 +76,7 @@ android {
             dimension = "cloudapi"
         }
         gplay {
+            getIsDefault().set(true) // that does the magic
             dimension = "androidplatform"
         }
         pax {
