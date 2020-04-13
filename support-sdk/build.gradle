@@ -1,0 +1,190 @@
+apply plugin: 'idea'
+apply plugin: 'com.android.library'
+
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.goboomtown'
+
+ext {
+    global_compileSdkVersion = 29
+    global_buildToolsVersion = '29.0.2'
+    global_supportLibVersion = '28.0.0'
+    global_minSdkVersion = 17
+    android_build_tools_version = "29.0.2"
+    android_support_lib_version = "28.0.0"
+    swagger_annotations_version = "1.5.0"
+    jackson_version = "2.4.2"
+    jersey_version = "2.22"
+    jodatime_version = "2.3"
+    junit_version = "4.12"
+    smack_lib_version = "4.3.1" //"4.1.0"
+    ext.commons_compress_version = "1.18"
+}
+
+android {
+    def versionMajor = 1
+    def versionMinor = 0
+    def versionPatch = 0
+
+    compileSdkVersion global_compileSdkVersion
+    buildToolsVersion global_buildToolsVersion
+    defaultConfig {
+//        multiDexEnabled true
+        minSdkVersion global_minSdkVersion
+        targetSdkVersion global_compileSdkVersion
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lintOptions {
+        abortOnError false
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    // Rename the aar correctly
+    android.libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = "support-sdk-${variant.baseName}-${versionMajor}.${versionMinor}.${versionPatch}.aar"
+//                 output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
+
+    flavorDimensions "androidplatform", "cloudapi"
+
+    productFlavors {
+        production {
+            dimension = "cloudapi"
+        }
+        stage {
+            dimension = "cloudapi"
+        }
+        gplay {
+            dimension = "androidplatform"
+        }
+        pax {
+            minSdkVersion 19
+            ext.global_minSdkVersion = 19
+            dimension = "androidplatform"
+        }
+        clover {
+            dimension = "androidplatform"
+            minSdkVersion 17
+            ext.global_minSdkVersion = 17
+            targetSdkVersion(25)
+        }
+    }
+
+
+    defaultPublishConfig "release"
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+//        exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
+//        exclude 'META-INF/LICENSE'
+//        exclude 'META-INF/LICENSE.txt'
+//        exclude 'META-INF/NOTICE'
+//        exclude 'META-INF/NOTICE.txt'
+//        exclude 'AndroidManifest.xml'
+//        exclude 'R.txt'
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+configurations {
+    all*.exclude group: 'xpp3', module: 'xpp3'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
+
+//    implementation files('libs/*.aar')
+
+//    implementation 'com.android.support:multidex:1.0.3'
+
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation("androidx.appcompat:appcompat:1.0.0") {
+        exclude module: 'support-v4'
+    }
+
+//    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.0.1'
+//
+//    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
+
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+
+//    embed project(path: ':boomtown-boomtownchat-android', configuration: 'default')
+//    embed project(path: ':boomtown-video-android', configuration: 'default')
+
+//    implementation project(path: ':boomtown-boomtownchat-android', configuration: 'default')
+//    implementation project(path: ':boomtown-video-android', configuration: 'default')
+
+// Start old Support SDK dependencies
+//    embed "com.wefika:flowlayout:0.4.1"
+//    embed "com.squareup.okhttp3:okhttp:3.12.1"
+//    embed "org.igniterealtime.smack:smack-android-extensions:$smack_lib_version"
+//    embed "org.igniterealtime.smack:smack-tcp:$smack_lib_version"
+//    embed "joda-time:joda-time:$jodatime_version"
+//    embed 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
+//    embed "org.apache.commons:commons-compress:$commons_compress_version"
+//    embed('com.twilio:video-android:5.1.0') {
+//        exclude group: 'com.android.support', module: 'support-annotations'
+//    }
+// End old Support SDK dependencies
+
+//  Start Support SDK dependencies
+    implementation "com.wefika:flowlayout:0.4.1"
+    implementation "com.squareup.okhttp3:okhttp:3.12.1"
+    implementation "org.igniterealtime.smack:smack-android-extensions:$smack_lib_version"
+    implementation "org.igniterealtime.smack:smack-tcp:$smack_lib_version"
+    implementation "joda-time:joda-time:$jodatime_version"
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
+    implementation "org.apache.commons:commons-compress:$commons_compress_version"
+    implementation('com.twilio:video-android:5.1.0') {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+//  End Support SDK dependencies
+
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testImplementation "junit:junit:$junit_version"
+}
+
+def siteUrl = 'https://github.com/goboomtown/support-sdk-android'      // Homepage URL of the library
+def gitUrl = 'https://github.com/goboomtown/support-sdk-android.git'   // Git repository URL
+

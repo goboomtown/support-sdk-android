@@ -1,0 +1,20 @@
+<resources>
+  <string name="app_name">Support SDK</string>
+  <string name="unable_to_send_presence">プレゼンススタンザを送信できません</string>
+  <string name="conn_failed_before_login">ログイン前に接続が突然失敗しました</string>
+
+  <string name="type_message">メッセージを入力</string>
+  <string name="send">送信</string>
+  <string name="unable_to_start_bt_chat">Boomtownのチャットを開始できません</string>
+  <string name="msg_joining_room">チャットルームに参加する</string>
+  <string name="msg_connecting_to_chat_server">チャットサーバーに接続する</string>
+
+  <string name="chat_error">チャットエラー</string>
+  <string name="chat_room_login_fail">このチャットルームにログインできませんでした。 数分後にもう一度お試しください。</string>
+  <string name="chat_room_connect_fail">このチャットルームに接続しようとすると予期しないエラーが発生しました。</string>
+  <string name="chat_not_connected">チャットは接続されていません</string>
+  <string name="chat_room_joinroom_fail">このチャットルームに参加しようとすると予期しないエラーが発生しました。 数分後にもう一度お試しください。</string>
+
+  <string name="cdesc_an_icon_representing_a_chat_room">チャットルームを表すアイコン</string>
+  <string name="kb_empty_preview_message">ここをクリックしてナレッジベースの記事にアクセスしてください。</string>
+</resources>

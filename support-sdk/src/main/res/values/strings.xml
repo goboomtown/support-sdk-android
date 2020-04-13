@@ -1,0 +1,118 @@
+<resources>
+    <string name="app_name">Support SDK</string>
+    <string name="action_done">Done</string>
+    <string name="action_search">Search</string>
+    <string name="action_resolve">End Chat</string>
+    <string name="action_end_call">End Call</string>
+    <string name="ticket">Reference</string>
+    <string name="msg_not_in_room">You have not joined the room so you will be unable to send messages.</string>
+    <string name="cancel_failed">"Unable to cancel issue."</string>
+    <string name="resolve_failed">"Unable to resolve issue."</string>
+    <string name="connecting_to_chat_server">Connecting to chat server</string>
+    <string name="joining_room">Joining room</string>
+    <string name="cancelling_issue">Canceling issue</string>
+    <string name="resolving_issue">Resolving issue</string>
+    <string name="get_video_chat_help">Get video chat help with Connect!</string>
+
+    <string name="search_section_recent_searches">RECENT SEARCHES</string>
+    <string name="search_section_top_results">TOP RESULTS</string>
+
+    <string name="error_no_results">No results.</string>
+    <string name="error_unable_to_create_issue">Unable to create issue</string>
+    <string name="error_unable_to_rate_issue">Unable to rate issue</string>
+    <string name="error_unable_to_resolve_issue">Unable to resolve issue</string>
+    <string name="error_unable_to_retrieve_issue">Unable to retrieve issue</string>
+    <string name="error_unable_to_retrieve_chat_information">Unable to retrieve chat information</string>
+    <string name="reason_member_info_missing">Member information is missing or incomplete.</string>
+    <string name="error_unable_to_get_provider_info">Unable to retrieve provider information</string>
+    <string name="error_unable_to_get_settings">Unable to retrieve settings</string>
+    <string name="error_unable_to_get_customer_info">Unable to retrieve customer information</string>
+    <string name="error_invalid_customer_id">You must set the SupportSDK.customerId with a valid customerId</string>
+    <!--    <string name="error_file_not_found">Unable to locate and open file.</string>-->
+    <string name="cdesc_emoticonimg">emoticon image</string>
+
+    <string name="unable_to_send_presence">unable to send Presence stanza</string>
+    <string name="conn_failed_before_login">connection abruptly failed before login</string>
+
+    <string name="type_message">type message</string>
+    <string name="send">Send</string>
+    <string name="unable_to_start_bt_chat">Unable to start a Boomtown chat</string>
+    <string name="msg_joining_room">Joining room</string>
+    <string name="msg_connecting_to_chat_server">Connecting to chat server</string>
+
+    <string name="chat_error">Chat Error</string>
+    <string name="chat_room_login_fail">We were unable to login to this chat room.  Try again in a few minutes.</string>
+    <string name="chat_room_connect_fail">There was an unexpected error trying to connect to this chat room.</string>
+    <string name="chat_not_connected">Chat is not connected</string>
+    <string name="chat_room_joinroom_fail">There was an unexpected error trying to join this chat room.  Please try again in a few minutes.</string>
+
+    <string name="cdesc_an_icon_representing_a_chat_room">an icon representing a chat room</string>
+    <string name="kb_empty_preview_message">Click here to go to the knowledge base article.</string>
+
+    <string name="warn_unable_to_obtain_chat_server_information">Unable to obtain chat server information.</string>
+
+    <string name="warn_screen_sharing_device_too_old">Unfortunately your Android version is too old to support screen sharing.</string>
+    <string name="warn_screen_sharing_not_yet_supported">Unfortunately screen sharing is not yet supported for your Android version.</string>
+
+    <string name="label_knowledge_base">Knowledge Base</string>
+    <string name="label_chat_with_us">Chat with Us</string>
+    <string name="label_call_me">Call Me</string>
+    <string name="label_call_me_confirmation">Thank you. We will contact you as soon as possible.</string>
+    <string name="label_search_knowledge">Search Knowledge</string>
+    <string name="label_web_support">Web Support</string>
+    <string name="label_email_support">Email Support</string>
+    <string name="label_phone_support">Phone Support</string>
+    <string name="label_share_screen">Share Screen</string>
+    <string name="label_video_chat">Video Chat</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_callback_number">Phone Number to Call:</string>
+    <string name="label_callback_description">How can we help you today?</string>
+
+    <string name="placeholder_callback_number">Enter phone number</string>
+    <string name="placeholder_enter_email_address">Enter email address</string>
+    <string name="placeholder_callback_description">Please describe what you are experiencing (optional)</string>
+
+    <string name="label_uploading_photo">Uploading photo</string>
+    <string name="label_take_photo">Take Photo</string>
+    <string name="label_choose_from_library">Choose from Library</string>
+    <string name="title_select_file">Select File</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_add_photo">Add Photo!</string>
+
+    <string name="warn_unable_to_connect_to_chat_server">Unable to connect to chat server</string>
+    <string name="warn_unable_to_join_chat_room">Unable to join chat room</string>
+    <string name="warn_no_response_when_joining_chat_room">No response when joining room</string>
+    <string name="text_would_you_like_to_try_to_join_again">Would you like to try to join the chat room again?</string>
+
+    <string name="warn_unable_to_add_attachment">Unable to add attachment.</string>
+    <string name="warn_unable_to_retrieve_kb">Unable to retrieve knowledge base article</string>
+    <string name="error_unable_to_load_configuration">unable to load configuration JSON</string>
+    <string name="error_could_not_load_file_with_resource_id">could not load file with resource ID=</string>
+    <string name="warn_screen_share_unavailable">Screen sharing is not available</string>
+
+    <string name="text_yes">Yes</string>
+    <string name="text_no">No</string>
+    <string name="text_ok">OK</string>
+    <string name="text_submit">Submit</string>
+    <string name="text_ask_location">May we ask for your location?</string>
+    <string name="text_why_location">We use your location to inform customers of your proximity to their location for a job.</string>
+    <string name="text_ask_camera">May we ask for your camera?</string>
+    <string name="text_why_camera">We use your camera so you can take pictures for your user Avatar, Certificate of Insurance, and file uploads.</string>
+    <string name="text_ask_storage">May we ask for access to your photos?</string>
+    <string name="text_why_storage">We use your photos for your user Avatar, Certificate of Insurance, and file uploads.</string>
+    <string name="text_ask_av_capture">May we ask to record audio/video?</string>
+    <string name="text_why_av_capture">We use audio/video recording for taking snapshots during video calls.</string>
+    <string name="text_ask_ext_storage">May we ask to write files/photos/media to your storage device?</string>
+    <string name="text_why_ext_storage">We use external storage for storing and uploading photos, file attachments, avatars, certificate of insurance, and other files.</string>
+    <string name="text_ask_system_alert">May we ask to display a system alert overlay on your device?</string>
+    <string name="text_why_system_alert">We use the system alert overlay to display an annotation view on your device while sharing the screen on a video chat.</string>
+    <string name="text_ask_foreground">May we ask for foreground permission?</string>
+    <string name="text_why_foreground">Screen sharing requires foreground permission on Android Q and higher.</string>
+    <string name="text_how_was_your_experience">How was your experience?</string>
+    <string name="text_anything_to_add">Anything to add?</string>
+
+    <string name="text_unavailable">Support is currently unavailable</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
