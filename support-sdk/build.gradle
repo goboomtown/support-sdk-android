@@ -112,8 +112,15 @@ task sourcesJar(type: Jar) {
 }
 
 task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//    classpath = project. project.source sourceSets.main.runtimeClasspath
+
+//    source = android.sourceSets.main.java.srcDirs
+
+//    classpath = android.sourceSets.main.runtimeClasspath
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//    exclude '**/R.html', '**/R.*.html', '**/index.html'
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -128,6 +135,8 @@ artifacts {
 
 configurations {
     all*.exclude group: 'xpp3', module: 'xpp3'
+
+    all*.exclude group: 'org.jetbrains', module: 'annotations'
 }
 
 dependencies {
@@ -152,7 +161,7 @@ dependencies {
 
 //    implementation project(path: ':boomtown-boomtownchat-android', configuration: 'default')
 //    implementation project(path: ':boomtown-video-android', configuration: 'default')
-    
+
 //  Start Support SDK dependencies
     implementation "com.wefika:flowlayout:0.4.1"
     implementation "com.squareup.okhttp3:okhttp:4.5.0"

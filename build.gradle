@@ -18,6 +18,22 @@ buildscript {
     }
 }
 
+ext {
+    global_compileSdkVersion = 29
+    global_buildToolsVersion = '29.0.2'
+    global_supportLibVersion = '28.0.0'
+    global_minSdkVersion = 17
+    android_build_tools_version = "29.0.2"
+    android_support_lib_version = "28.0.0"
+    swagger_annotations_version = "1.5.0"
+    jackson_version = "2.4.2"
+    jersey_version = "2.22"
+    jodatime_version = "2.3"
+    junit_version = "4.12"
+    smack_lib_version = "4.3.1" //"4.1.0"
+    ext.commons_compress_version = "1.18"
+}
+
 allprojects {
     repositories {
         google()
