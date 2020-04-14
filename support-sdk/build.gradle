@@ -106,11 +106,25 @@ android {
     }
 }
 
-task jar(type: Jar) {
-    //from android.sourceSets.main.java
-    from 'build/intermediates/classes/release/'
-    archiveName 'support-sdk-android.jar'
+//task jar(type: Jar) {
+//    //from android.sourceSets.main.java
+//    from 'build/intermediates/classes/release/'
+//    archiveName 'support-sdk-android.jar'
+//}
+
+task clearJar(type: Delete) {
+    delete 'build/libs/' + POM_ARTIFACT_ID + '_' + VERSION_NAME + '.jar'
 }
+
+task makeJar(type: Copy) {
+    from('build/bundles/release/')
+    into('release/')
+    include('classes.jar')
+    rename ('classes.jar', POM_ARTIFACT_ID + '_' +  VERSION_NAME + '.jar')
+}
+
+makeJar.dependsOn(clearJar, build)
+
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -135,7 +149,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives jar
+//    archives jar
     archives javadocJar
     archives sourcesJar
 }
