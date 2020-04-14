@@ -106,6 +106,12 @@ android {
     }
 }
 
+task jar(type: Jar) {
+    //from android.sourceSets.main.java
+    from 'build/intermediates/classes/release/'
+    archiveName 'support-sdk-android.jar'
+}
+
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
@@ -129,6 +135,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
+    archives jar
     archives javadocJar
     archives sourcesJar
 }
