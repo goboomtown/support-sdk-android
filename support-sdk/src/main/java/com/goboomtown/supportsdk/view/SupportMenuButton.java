@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.goboomtown.supportsdk.R;
 
@@ -13,8 +14,10 @@ import com.goboomtown.supportsdk.R;
  */
 public class SupportMenuButton extends LinearLayout {
 
-    public EditText         mLabelView;
+//    public EditText         mLabelView;
+    public TextView mLabelView;
     public ImageButton      mImageButton;
+//    public com.google.android.material.button.MaterialButton mImageButton;
 
     public OnClickListener  onClickListener;
 

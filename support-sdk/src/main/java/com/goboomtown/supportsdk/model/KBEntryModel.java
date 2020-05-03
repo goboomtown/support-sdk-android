@@ -22,11 +22,17 @@ public class KBEntryModel {
     private String    subtitle;
     private String    type;
     private String    visibility;
-    public  int     level;
+    private String    avatar;
+    private String    preview;
+    private String    url;
+    public  int         level;
 
     private boolean     collapsed = true;
 
     private ArrayList<Object> children = new ArrayList<>();
+
+    public KBEntryModel() {
+    }
 
     public KBEntryModel(JSONObject entryJSON) {
         this.title = title;
@@ -48,6 +54,9 @@ public class KBEntryModel {
         title          = entryJSON.optString("title");
         type           = entryJSON.optString("type");
         visibility     = entryJSON.optString("visibility");
+        avatar         = entryJSON.optString("avatar");
+        preview        = entryJSON.optString("preview");
+        url            = entryJSON.optString("url");
     }
 
 
@@ -71,7 +80,7 @@ public class KBEntryModel {
 
 
     public  ArrayList<KBEntryModel> addChildrenFromEntries(ArrayList<KBEntryModel> entries) {
-        ArrayList<KBEntryModel> remainingEntries = new ArrayList<KBEntryModel>(entries);
+        ArrayList<KBEntryModel> remainingEntries = new ArrayList<>(entries);
         for ( KBEntryModel entry : entries ) {
             if (  entry.parentId.equalsIgnoreCase(id) ) {
                 entry.level = level + 1;

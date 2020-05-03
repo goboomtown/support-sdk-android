@@ -1,14 +1,21 @@
 package com.goboomtown.supportsdk.view;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import androidx.annotation.NonNull;
+
+import android.content.DialogInterface;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -28,7 +35,7 @@ import okhttp3.ResponseBody;
 /**
  * TODO: document your custom view class.
  */
-public class RatingView extends LinearLayout {
+public class RatingView {
 
     public SupportButton    supportButton;
     public SupportSDK       supportSDK;
@@ -50,41 +57,45 @@ public class RatingView extends LinearLayout {
 
 
     public RatingView(Context context) {
-        super(context);
         mContext = context;
+    }
 
-        View view = inflate(mContext, R.layout.rating_view, this);
+    public void show() {
+        androidx.appcompat.app.AlertDialog.Builder dialogBuilder = new androidx.appcompat.app.AlertDialog.Builder(mContext);
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View dialogView = inflater.inflate(R.layout.rating_dialog, null);
+        dialogBuilder.setView(dialogView);
 
         rating = 0;
 
-        rate1 = view.findViewById(R.id.rate1);
-        rate2 = view.findViewById(R.id.rate2);
-        rate3 = view.findViewById(R.id.rate3);
-        rate4 = view.findViewById(R.id.rate4);
-        rate5 = view.findViewById(R.id.rate5);
+        rate1 = dialogView.findViewById(R.id.rate1);
+        rate2 = dialogView.findViewById(R.id.rate2);
+        rate3 = dialogView.findViewById(R.id.rate3);
+        rate4 = dialogView.findViewById(R.id.rate4);
+        rate5 = dialogView.findViewById(R.id.rate5);
         setUpRatingsButtons();
 
-        mCallbackDescriptionEditText = view.findViewById(R.id.callbackDescription);
+        mCallbackDescriptionEditText = dialogView.findViewById(R.id.callbackDescription);
 
         mCallbackDescriptionEditText.setEnabled(true);
         mCallbackDescriptionEditText.setSingleLine(false);
 
-        Button cancelButton = view.findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(v -> {
-            if ( mPopupWindow != null ) {
-                mPopupWindow.dismiss();
-            }
-        });
-        mOkButton = view.findViewById(R.id.okButton);
-//        enableOkButton(callbackNumber);
-        mOkButton.setEnabled(true);
-        mOkButton.setOnClickListener(v -> {
-            if ( mPopupWindow != null ) {
-                mPopupWindow.dismiss();
+        dialogBuilder.setTitle(mContext.getResources().getString(R.string.label_rate));
+//        dialogBuilder.setMessage("please send me to your feedback.");
+        dialogBuilder.setPositiveButton(mContext.getResources().getString(R.string.text_submit), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
                 String desc = mCallbackDescriptionEditText.getText().toString();
                 rateIssue(supportSDK.rateableIssueId, rating, desc);
             }
         });
+        dialogBuilder.setNegativeButton(mContext.getResources().getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
+            }
+        });
+
+        androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
+        dialog.show();
     }
 
 
@@ -148,7 +159,7 @@ public class RatingView extends LinearLayout {
 
     private void enableSubmitButtonIfPossible() {
         boolean shouldEnable = rating != 0;
-        mOkButton.setEnabled(shouldEnable);
+//        mOkButton.setEnabled(shouldEnable);
     }
 
     private void rateIssue(String issue_id, int rating, String description) {

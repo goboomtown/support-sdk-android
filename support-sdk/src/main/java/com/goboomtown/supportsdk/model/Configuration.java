@@ -58,6 +58,7 @@ public class Configuration {
             throw new IllegalStateException(e);
         }
         configAPIHost           = result.optString(kKeyAPIHost);
+        configAPIHost = changeDomain(configAPIHost);
         configPartnerToken      = result.optString(kKeyPartnerToken);
         configPrivateKey        = result.optString(kKeyPrivateKey);
         configAPIIntegrationId  = result.optString(kKeyIntegrationId);
@@ -73,6 +74,11 @@ public class Configuration {
                 configAPIHost != null &&
                 configAPIKey != null &&
                 configAPIIntegrationId != null;
+    }
+
+    private String changeDomain(String host) {
+        String newHost = host.replaceAll(".thinkrelay.com", ".goboomtown.com");
+        return newHost;
     }
 
     /**

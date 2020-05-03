@@ -27,9 +27,13 @@
     <string name="error_unable_to_get_provider_info">Unable to retrieve provider information</string>
     <string name="error_unable_to_get_settings">Unable to retrieve settings</string>
     <string name="error_unable_to_get_customer_info">Unable to retrieve customer information</string>
+    <string name="error_bad_phone_number">Please enter a valid phone number.</string>
     <string name="error_invalid_customer_id">You must set the SupportSDK.customerId with a valid customerId</string>
     <!--    <string name="error_file_not_found">Unable to locate and open file.</string>-->
     <string name="cdesc_emoticonimg">emoticon image</string>
+
+    <string name="desc_support_menu_button">Support Menu Button image</string>
+    <string name="desc_kb_acticle_type_image">KB Article type image</string>
 
     <string name="unable_to_send_presence">unable to send Presence stanza</string>
     <string name="conn_failed_before_login">connection abruptly failed before login</string>
@@ -65,6 +69,7 @@
     <string name="label_share_screen">Share Screen</string>
     <string name="label_video_chat">Video Chat</string>
     <string name="label_cancel">Cancel</string>
+    <string name="label_rate">Please rate your service</string>
     <string name="label_callback_number">Phone Number to Call:</string>
     <string name="label_callback_description">How can we help you today?</string>
 

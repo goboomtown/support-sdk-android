@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <color name="colorPrimary">#3F51B5</color>-->
+<!--    <color name="colorPrimaryDark">#303F9F</color>-->
+<!--    <color name="colorAccent">#FF4081</color>-->
+
+    <color name="black_overlay">#66000000</color>
+    <color name="controller_grey">#EAEAEA</color>
+
+    <color name="half_transparent_grey">#9FA2A2A2</color>
+
+<!--    <color name="red">#FF0000</color>-->
+
+    <color name="green">#00FF00</color>
+
+    <color name="redOpaque">#55FF0000</color>
+
+    <color name="boomtown_aqua">#3ED4CA</color>
+    <color name="boomtown_lt_gray">#EDF0F1</color>
+    <color name="boomtown_dark_gray">#969797</color>
+
+<!--    <color name="bgColor"></color>-->
+<!--    <color name="textColor"></color>-->
+<!--    <color name="metaTextColor"></color>-->
+
+    <color name="colorPrimary">@color/boomtown_lt_gray</color>
+    <color name="colorPrimaryDark">@android:color/black</color>
+    <color name="colorAccent">@color/boomtown_lt_gray</color>
+    <color name="windowBackground">@android:color/white</color>
+    <color name="colorBackground">@android:color/white</color>
+    <color name="textColorPrimary">@android:color/black</color>
+    <color name="textColor">@android:color/black</color>
+    <color name="colorButtonNormal">@android:color/black</color>
+    <color name="colorControlActivated">@android:color/black</color>
+    <color name="colorControlNormal">@android:color/black</color>
+    <color name="backgroundTint">@android:color/black</color>
+
+
+<!--    <color name="colorPrimary">#212121</color>-->
+<!--    <color name="colorPrimaryVariant">#000000</color>-->
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorSecondary">#2962FF</color>
+    <color name="colorSecondaryVariant">#0039CB</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    <color name="colorError">#F44336</color>
+    <color name="colorOnError">#FFFFFF</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#212121</color>
+<!--    <color name="android:colorBackground">@color/background</color>-->
+    <color name="colorOnBackground">#ff0000</color>
+    <color name="navigationBarColor">#ff0000</color>
+
+    <color name="linkColor">#acacac</color>
+</resources>

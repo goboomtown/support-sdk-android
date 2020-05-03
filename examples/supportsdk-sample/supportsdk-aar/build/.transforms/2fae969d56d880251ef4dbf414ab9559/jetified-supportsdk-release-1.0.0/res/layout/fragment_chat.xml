@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chatContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:padding="10dp">
+
+    <!--<Button-->
+        <!--android:id="@+id/btn_get_video_chat_help"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:text="@string/get_video_chat_help" />-->
+
+    <LinearLayout
+        android:id="@+id/panelInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:weightSum="10">
+        <!--android:layout_below="@+id/btn_get_video_chat_help"-->
+
+        <com.goboomtown.widget.WebImageView
+            android:id="@+id/avatar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_weight="2"
+            android:contentDescription="@null"
+            android:scaleType="fitXY" />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="8" />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/autocompleteList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/messageEdit"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/white"
+        android:divider="@null"
+        android:listSelector="@android:color/white"
+        android:transcriptMode="alwaysScroll" />
+
+    <ImageButton
+        android:id="@+id/chatUploadButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:foregroundGravity="center_horizontal"
+        android:paddingBottom="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/paperclip" />
+
+    <EditText
+        android:id="@+id/messageEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/chatSendButton"
+        android:layout_toRightOf="@+id/chatUploadButton"
+        android:inputType="text"
+        android:hint="@string/text_enter_message" />
+
+    <Button
+        android:id="@+id/chatSendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/background_dark"
+        android:text="@string/text_send"
+        android:textColor="@android:color/background_light" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/messagesContainer"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="10dp" />
+
+    <ListView
+        android:id="@+id/messagesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/messageEdit"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_below="@+id/panelInfo"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="10dp"
+        android:divider="@null"
+        android:listSelector="@android:color/transparent"
+        android:transcriptMode="alwaysScroll" />
+
+</RelativeLayout>
+

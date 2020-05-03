@@ -594,7 +594,7 @@ public class BTConnectPresenceService {
             if (package_name != null) {
                 ApplicationInfo info = context.getPackageManager().getApplicationInfo(package_name, PackageManager.GET_META_DATA);
 //                if ( info instanceof ApplicationInfo && info.metaData instanceof Bundle) {
-                if ( info!=null && info.metaData!=null ) {
+                if ( info.metaData!=null ) {
                     device_os = info.metaData.getString(DEVICE_OS_METADATA_KEY);
                 }
             }

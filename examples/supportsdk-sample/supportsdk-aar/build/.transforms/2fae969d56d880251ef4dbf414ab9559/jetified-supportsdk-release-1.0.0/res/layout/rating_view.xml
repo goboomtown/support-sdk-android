@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:background="@drawable/border_rounded">
+
+    <TextView
+        android:id="@+id/callbackNumberLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:text="@string/text_how_was_your_experience" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp" >
+
+        <ImageView
+            android:id="@+id/rate1"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:contentDescription="1"
+            android:src="@drawable/star_off_sm"
+            tools:ignore="HardcodedText" >
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/rate2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:contentDescription="2"
+            android:src="@drawable/star_off_sm"
+            tools:ignore="HardcodedText" >
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/rate3"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:contentDescription="3"
+            android:src="@drawable/star_off_sm"
+            tools:ignore="HardcodedText" >
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/rate4"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:contentDescription="4"
+            android:src="@drawable/star_off_sm"
+            tools:ignore="HardcodedText" >
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/rate5"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:contentDescription="5"
+            android:src="@drawable/star_off_sm"
+            tools:ignore="HardcodedText" >
+        </ImageView>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/callbackDescriptionLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/text_anything_to_add" />
+
+    <EditText
+        android:id="@+id/callbackDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:gravity="top"
+        android:hint="@string/text_anything_to_add"
+        android:inputType="textMultiLine"
+        android:lines="10"
+        android:singleLine="false"
+        android:textAlignment="viewStart" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/label_cancel" />
+
+        <Button
+            android:id="@+id/okButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/text_submit" />
+
+    </LinearLayout>
+
+</LinearLayout>

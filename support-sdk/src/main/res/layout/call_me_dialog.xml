@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp" >
+<!--    android:backgroundTint="?android:attr/colorBackground" >-->
+    <!--    android:background="@drawable/border_rounded">-->
+
+    <TextView
+        android:id="@+id/callbackNumberLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:text="@string/label_callback_number" />
+
+    <EditText
+        android:id="@+id/callbackNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:hint="@string/placeholder_callback_number"
+        android:inputType="phone"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textAlignment="viewStart" />
+
+    <TextView
+        android:id="@+id/callbackDescriptionLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:text="@string/label_callback_description" />
+
+    <EditText
+        android:id="@+id/callbackDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:gravity="top"
+        android:hint="@string/placeholder_callback_description"
+        android:inputType="textMultiLine"
+        android:lines="10"
+        android:singleLine="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+</LinearLayout>

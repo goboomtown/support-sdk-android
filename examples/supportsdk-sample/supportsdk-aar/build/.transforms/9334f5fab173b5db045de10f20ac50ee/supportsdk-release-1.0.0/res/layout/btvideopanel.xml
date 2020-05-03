@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/grid_item_padding"
+    android:id="@+id/panel">
+
+    <!--xmlns:custom="http://schemas.android.com/apk/res-auto"-->
+
+<!--    <com.twilio.video.VideoView-->
+    <com.goboomtown.video.twilio.BTVideoPanelTwilio
+        android:id="@+id/videoPanelTwilio"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/avatar_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/user" />
+
+    <com.goboomtown.video.BTAnnotationView
+        android:id="@+id/annotation_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_camera"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:id="@+id/text_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/display_name_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@color/black_overlay"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textColor="@android:color/white" />
+
+        <RelativeLayout
+            android:id="@+id/panel_videopanel_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:visibility="invisible">
+
+            <RelativeLayout
+                android:id="@+id/wrap_buttonFullScreen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true">
+                <Button
+                    android:id="@+id/buttonFullScreen"
+                    android:layout_width="40sp"
+                    android:layout_height="40sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/ic_fullscreen_selector"
+                    android:text=""/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/buttonFullScreen"
+                    android:gravity="center"
+                    android:text="@string/btn_label_full_screen"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/wrap_buttonVidSnapshot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@id/wrap_buttonFullScreen"
+                android:layout_marginRight="10dp">
+                <Button
+                    android:id="@+id/buttonVideoSnapshot"
+                    android:layout_width="40sp"
+                    android:layout_height="40sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/ic_camera_selector"
+                    android:text=""/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/buttonVideoSnapshot"
+                    android:gravity="center"
+                    android:text="@string/btn_label_snapshot"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/wrap_buttonClearAnnotation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@id/wrap_buttonVidSnapshot"
+                android:layout_marginRight="10dp">
+                <Button
+                    android:id="@+id/buttonClearAnnotaton"
+                    android:layout_width="40sp"
+                    android:layout_height="40sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/ic_trash_selector"
+                    android:text=""/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/buttonClearAnnotaton"
+                    android:gravity="center"
+                    android:text="@string/btn_label_clear_annotation"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@id/wrap_buttonClearAnnotation"
+                android:layout_marginRight="10dp">
+                <Button
+                    android:id="@+id/buttonSelectColor"
+                    android:layout_width="40sp"
+                    android:layout_height="40sp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/ic_pencil_selector"
+                    android:text=""/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/buttonSelectColor"
+                    android:gravity="center"
+                    android:text="@string/btn_label_select_color"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp" />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/no_video_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@color/half_transparent_grey"
+        android:gravity="center_vertical|center_horizontal"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/video_cannot_be_viewed"
+        android:visibility="gone" />
+
+</FrameLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="top|center_horizontal"
+        android:left="0dp" android:right="0dp" android:top="0dp" android:bottom="0dp">
+        <shape android:shape="oval">
+            <stroke android:width="10sp"
+                android:color="#56C3BF" />
+            <solid android:color="#56C3BF" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ic_fullscreen_exit_black_24dp" android:gravity="top|center_horizontal"
+        android:left="1sp" android:right="0dp" android:top="6sp" android:bottom="0dp">
+    </item>
+</layer-list>

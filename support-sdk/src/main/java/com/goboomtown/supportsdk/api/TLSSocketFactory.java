@@ -64,10 +64,22 @@ public class TLSSocketFactory extends SSLSocketFactory {
         return enableTLSOnSocket(internalSSLSocketFactory.createSocket(address, port, localAddress, localPort));
     }
 
+//    private Socket enableTLSOnSocket(Socket socket) {
+//        if ( (socket instanceof SSLSocket) ) {
+//            ((SSLSocket)socket).setEnabledProtocols(new String[] {"TLSv1.2"});
+//            // log supported sockets
+//            String[] protocols = ((SSLSocket) socket).getEnabledProtocols();
+//            for (String p : protocols) {
+//                Log.d(TAG, "this socket supports protocol: " + p);
+//            }
+//        }
+//        return socket;
+//    }
+
     private Socket enableTLSOnSocket(Socket socket) {
-        if ( (socket instanceof SSLSocket) ) {
-            ((SSLSocket)socket).setEnabledProtocols(new String[] {"TLSv1.2"});
-            // log supported sockets
+        if (socket instanceof SSLSocket) {
+//            ((SSLSocket) socket).setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"});
+            ((SSLSocket) socket).setEnabledProtocols(new String[] {"TLSv1.2", "TLSv1.3"});
             String[] protocols = ((SSLSocket) socket).getEnabledProtocols();
             for (String p : protocols) {
                 Log.d(TAG, "this socket supports protocol: " + p);
@@ -75,4 +87,5 @@ public class TLSSocketFactory extends SSLSocketFactory {
         }
         return socket;
     }
+
 }

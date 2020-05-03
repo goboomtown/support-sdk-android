@@ -1,8 +1,6 @@
-//apply plugin: 'idea'
+apply plugin: 'idea'
 apply plugin: 'com.android.library'
 
-
-//apply plugin: 'maven'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'com.github.goboomtown'
@@ -21,9 +19,19 @@ ext {
     junit_version = "4.12"
     smack_lib_version = "4.3.1" //"4.1.0"
     ext.commons_compress_version = "1.18"
+    okhttp_version = "3.12.8" // "3.12.1" //"4.5.0"
 }
 
+
 android {
+    signingConfigs {
+        debug {
+            storeFile file('/Users/larry/Documents/Development/GizmoCreative/android/support-sdk-android/keystore/boomtown.keystore')
+            storePassword 'b00mtown'
+            keyAlias = 'boomtown'
+            keyPassword 'b00mtown'
+        }
+    }
     def versionMajor = 1
     def versionMinor = 0
     def versionPatch = 0
@@ -31,6 +39,7 @@ android {
     compileSdkVersion global_compileSdkVersion
     buildToolsVersion global_buildToolsVersion
     defaultConfig {
+//        multiDexEnabled true
         minSdkVersion global_minSdkVersion
         targetSdkVersion global_compileSdkVersion
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -75,7 +84,6 @@ android {
             dimension = "cloudapi"
         }
         gplay {
-            getIsDefault().set(true) // that does the magic
             dimension = "androidplatform"
         }
         pax {
@@ -95,84 +103,55 @@ android {
     defaultPublishConfig "release"
 
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-//        exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
-//        exclude 'META-INF/LICENSE'
-//        exclude 'META-INF/LICENSE.txt'
-//        exclude 'META-INF/NOTICE'
-//        exclude 'META-INF/NOTICE.txt'
-//        exclude 'AndroidManifest.xml'
-//        exclude 'R.txt'
+        exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
     }
 }
 
-//task jar(type: Jar) {
-//    //from android.sourceSets.main.java
-//    from 'build/intermediates/classes/release/'
-//    archiveName 'support-sdk-android.jar'
-//}
-
-task clearJar(type: Delete) {
-    delete 'build/libs/' + POM_ARTIFACT_ID + '_' + VERSION_NAME + '.jar'
-}
-
-task makeJar(type: Copy) {
-    from('build/bundles/release/')
-    into('release/')
-    include('classes.jar')
-    rename ('classes.jar', POM_ARTIFACT_ID + '_' +  VERSION_NAME + '.jar')
-}
-
-makeJar.dependsOn(clearJar, build)
-
-
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+//    classifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {
-//    source = android.sourceSets.main.java.srcDirs
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//    classpath = project. project.source sourceSets.main.runtimeClasspath
-
-//    source = android.sourceSets.main.java.srcDirs
-
-//    classpath = android.sourceSets.main.runtimeClasspath
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//    exclude '**/R.html', '**/R.*.html', '**/index.html'
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+//    classifier = 'javadoc'
     from javadoc.destinationDir
 }
 
+task classesJar(type: Jar) {
+    from "$buildDir/intermediates/classes/release"
+}
+
 artifacts {
-//    archives jar
+    archives classesJar
     archives javadocJar
     archives sourcesJar
 }
 
 configurations {
     all*.exclude group: 'xpp3', module: 'xpp3'
-
-    all*.exclude group: 'org.jetbrains', module: 'annotations'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.aar'])
-
-//    implementation files('libs/*.aar')
+//    implementation 'com.android.support:multidex:1.0.3'
 
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation("androidx.appcompat:appcompat:1.0.0") {
         exclude module: 'support-v4'
     }
 
-//    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.0.1'
-//
-//    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
+    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.1.1'
+
+    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
 
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
@@ -183,9 +162,27 @@ dependencies {
 //    implementation project(path: ':boomtown-boomtownchat-android', configuration: 'default')
 //    implementation project(path: ':boomtown-video-android', configuration: 'default')
 
+//    implementation project(':boomtown-boomtownchat-android')
+//    implementation project(':boomtown-video-android')
+
+    implementation 'com.google.android.material:material:1.1.0'
+
+// Start old Support SDK dependencies
+//    embed "com.wefika:flowlayout:0.4.1"
+//    embed "com.squareup.okhttp3:okhttp:3.12.1"
+//    embed "org.igniterealtime.smack:smack-android-extensions:$smack_lib_version"
+//    embed "org.igniterealtime.smack:smack-tcp:$smack_lib_version"
+//    embed "joda-time:joda-time:$jodatime_version"
+//    embed 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
+//    embed "org.apache.commons:commons-compress:$commons_compress_version"
+//    embed('com.twilio:video-android:5.1.0') {
+//        exclude group: 'com.android.support', module: 'support-annotations'
+//    }
+// End old Support SDK dependencies
+
 //  Start Support SDK dependencies
     implementation "com.wefika:flowlayout:0.4.1"
-    implementation "com.squareup.okhttp3:okhttp:4.5.0"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "org.igniterealtime.smack:smack-android-extensions:$smack_lib_version"
     implementation "org.igniterealtime.smack:smack-tcp:$smack_lib_version"
     implementation "joda-time:joda-time:$jodatime_version"
@@ -194,6 +191,8 @@ dependencies {
     implementation('com.twilio:video-android:5.1.0') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
+    implementation 'org.conscrypt:conscrypt-android:2.4.0'
+
 //  End Support SDK dependencies
 
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
@@ -204,4 +203,3 @@ dependencies {
 
 def siteUrl = 'https://github.com/goboomtown/support-sdk-android'      // Homepage URL of the library
 def gitUrl = 'https://github.com/goboomtown/support-sdk-android.git'   // Git repository URL
-

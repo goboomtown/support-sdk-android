@@ -2,14 +2,17 @@ package com.goboomtown.supportsdk.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +20,7 @@ import android.widget.ExpandableListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.goboomtown.activity.KBActivity;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.model.KBEntryModel;
@@ -25,9 +29,16 @@ import com.goboomtown.supportsdk.util.JSONHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -96,7 +107,7 @@ public class KBSearchFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_kbsearch, container, false);
-        searchView = (SearchView) view.findViewById(R.id.searchView);
+        searchView = view.findViewById(R.id.searchView);
         final KBSearchFragment thisFragment = this;
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -113,14 +124,10 @@ public class KBSearchFragment extends Fragment
             }
         });
 
-        expandableListView  = (ExpandableListView) view.findViewById(R.id.expandableListView);
-        expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener()
-        {
-            public boolean onGroupClick(ExpandableListView arg0, View itemView, int itemPosition, long itemId)
-            {
-                expandableListView.expandGroup(itemPosition);
-                return true;
-            }
+        expandableListView  = view.findViewById(R.id.expandableListView);
+        expandableListView.setOnGroupClickListener((arg0, itemView, itemPosition, itemId) -> {
+            expandableListView.expandGroup(itemPosition);
+            return true;
         });
 
         setupAdapter();
@@ -142,21 +149,18 @@ public class KBSearchFragment extends Fragment
         final KBSearchFragment listener = this;
         Activity activity = getActivity();
         if ( activity != null ) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    expandableListAdapter = new KBExpandableListAdapter(activity, sectionHeadings, createEntries());
-                    ArrayList<Drawable> groupIcons = new ArrayList<>();
-                    groupIcons.add(getResources().getDrawable(R.drawable.ic_search_24px));
-                    groupIcons.add(null);
-                    expandableListAdapter.groupIcons = groupIcons;
-                    if ( expandableListView!=null ) {
-                        expandableListAdapter.mListener = listener;
-                        expandableListAdapter.expanded = true;
-                        expandableListView.setAdapter(expandableListAdapter);
-                        for ( int n=0; n<expandableListAdapter.getGroupCount(); n++ ) {
-                            expandableListView.expandGroup(n);
-                        }
+            activity.runOnUiThread(() -> {
+                expandableListAdapter = new KBExpandableListAdapter(activity, sectionHeadings, createEntries());
+                ArrayList<Drawable> groupIcons = new ArrayList<>();
+                groupIcons.add(getResources().getDrawable(R.drawable.ic_search_24px));
+                groupIcons.add(null);
+                expandableListAdapter.groupIcons = groupIcons;
+                if ( expandableListView!=null ) {
+                    expandableListAdapter.mListener = listener;
+                    expandableListAdapter.expanded = true;
+                    expandableListView.setAdapter(expandableListAdapter);
+                    for ( int n=0; n<expandableListAdapter.getGroupCount(); n++ ) {
+                        expandableListView.expandGroup(n);
                     }
                 }
             });
@@ -168,12 +172,65 @@ public class KBSearchFragment extends Fragment
     public void adapterDidSelectEntry(int groupPosition, int childPosition, Object object) {
         if ( object instanceof KBEntryModel) {
             KBEntryModel entry = (KBEntryModel) object;
-         } else if ( object instanceof String) {
+            if ( entry != null ) {
+                retrieveKB(entry.id());
+            }
+        } else if ( object instanceof String) {
             String entry = (String) object;
             if ( groupPosition == 0 ) {
                 searchView.setQuery(entry, false);
             }
         }
+    }
+
+
+    public void retrieveKB(String id) {
+        String url = SupportSDK.kSDKV1Endpoint + "/kb/get?id=" + id;
+
+        supportSDK.get(url, new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                boolean success = false;
+
+                JSONObject jsonObject = SupportSDK.successJSONObject(response);
+                if ( jsonObject != null ) {
+                    if ( jsonObject.has("results") ) {
+                        try {
+                            JSONArray resultsJSON = jsonObject.getJSONArray("results");
+                            JSONObject result = resultsJSON.getJSONObject(0);
+                            KBEntryModel entry = new KBEntryModel(result);
+                            if ( entry != null ) {
+                                success = true;
+                                showArticle(entry);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                if ( !success ) {
+                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                }
+            }
+        });
+    }
+
+
+    private void showArticle(KBEntryModel article) {
+        String title = article.title();
+        String body = article.body();
+        String html = "<html><body>" + body + "</body></html>";
+        Intent intent = new Intent(mContext, KBActivity.class);
+        intent.putExtra(KBActivity.ARG_URL, "");
+        intent.putExtra(KBActivity.ARG_HTML, html);
+        intent.putExtra(KBActivity.ARG_TITLE, title);
+        mContext.startActivity(intent);
     }
 
 

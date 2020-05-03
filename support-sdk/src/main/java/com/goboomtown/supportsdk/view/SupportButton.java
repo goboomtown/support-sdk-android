@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.PopupWindow;
 
 import com.goboomtown.supportsdk.R;
@@ -55,6 +56,12 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
 
     private static final String TAG = SupportButton.class.getSimpleName();
 
+    public enum MenuStyle {
+        MENU,
+        BUTTON
+    };
+
+
     // TODO: remove unused constants and/or rename with all-caps per Java convention for constants
     private static final String SupportSDKErrorDomain = "com.goboomtown.supportsdk";
 
@@ -72,6 +79,7 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
     public static final String kUserPhone                    = "members_users_phone";
 
     public  boolean     useSupportView;
+    public  MenuStyle   menuStyle;
 
     private SupportSDK      supportSDK;
     private ChatFragment    chatFragment;
@@ -102,6 +110,8 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         void supportButtonDidFailWithError(String description, String reason);
 
         void supportButtonDidGetSettings();
+
+        void supportButtonDidFailToGetSettings();
 
         void supportButtonDisplayView(View view);
 
@@ -203,10 +213,19 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         if (this.supportSDK.memberLocationID == null) {
             this.supportSDK.memberLocationID = this.supportSDK.defaultMemberLocationID;
         }
-        if ( useSupportView ) {
-            createSupportMenuView();
-        } else {
-            showSupportDialog();
+        switch(menuStyle) {
+            case BUTTON:
+                mActivity.get().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        createSupportMenuView();
+                    }
+                });
+                break;
+            case MENU:
+            default:
+                showSupportDialog();
+                break;
         }
     }
 
@@ -370,17 +389,21 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         }
     }
 
-    @Override
     public void supportSDKDidFailWithError(String description, String reason) {
         if (mListener != null) {
             mListener.supportButtonDidFailWithError(description, reason);
         }
     }
 
-    @Override
     public void supportSDKDidGetSettings() {
         if (mListener != null) {
             mListener.supportButtonDidGetSettings();
+        }
+    }
+
+    public void supportSDKDidFailToGetSettings() {
+        if (mListener != null) {
+            mListener.supportButtonDidFailToGetSettings();
         }
     }
 
@@ -464,10 +487,9 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
 
         List<String> availableItems = new ArrayList<>();
         if ( supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
-            SupportMenuButton menuButton = new SupportMenuButton(mContext.get());
-            menuButton.mLabelView.setText(getResources().getString(R.string.label_chat_with_us));
-            menuButton.mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.a_chat));
-            menuButton.mImageButton.setContentDescription(menuButton.mLabelView.getText());
+            SupportMenuButton menuButton = supportMenuButton(mContext,
+                    getResources().getString(R.string.label_chat_with_us),
+                    R.drawable.a_chat);
             menuButton.setOnClickListener(v -> {
                 if ( supportSDK.supportUnavailable ) {
                     AlertDialog.Builder unavailableBuilder = new AlertDialog.Builder(mContext.get());
@@ -483,26 +505,23 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
             supportMenuView.mButtons.add(menuButton);
         }
         if ( supportSDK.showSupportCallMe ) {
-            SupportMenuButton menuButton = new SupportMenuButton(mContext.get());
-            menuButton.mLabelView.setText(supportSDK.callMeButtonText);
-            menuButton.mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.phone_call));
-            menuButton.mImageButton.setContentDescription(menuButton.mLabelView.getText());
+            SupportMenuButton menuButton = supportMenuButton(mContext,
+                    supportSDK.callMeButtonText,
+                    R.drawable.phone_call);
             menuButton.setOnClickListener(v -> getCallbackNumber());
             supportMenuView.mButtons.add(menuButton);
         }
         if ( supportSDK.showKnowledgeBase ) {
-            SupportMenuButton menuButton = new SupportMenuButton(mContext.get());
-            menuButton.mLabelView.setText(getResources().getString(R.string.label_search_knowledge));
-            menuButton.mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.book_bookmark));
-            menuButton.mImageButton.setContentDescription(menuButton.mLabelView.getText());
+            SupportMenuButton menuButton = supportMenuButton(mContext,
+                    getResources().getString(R.string.label_search_knowledge),
+                    R.drawable.book_bookmark);
             menuButton.setOnClickListener(v -> showKnowledgeBase());
             supportMenuView.mButtons.add(menuButton);
         }
         if ( supportSDK.supportWebsiteURL!=null && supportSDK.showSupportWebsite ) {
-            SupportMenuButton menuButton = new SupportMenuButton(mContext.get());
-            menuButton.mLabelView.setText(getResources().getString(R.string.label_web_support));
-            menuButton.mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.book_bookmark));
-            menuButton.mImageButton.setContentDescription(menuButton.mLabelView.getText());
+            SupportMenuButton menuButton = supportMenuButton(mContext,
+                    getResources().getString(R.string.label_web_support),
+                    R.drawable.book_bookmark);
             menuButton.setOnClickListener(v -> visitWebsite());
             supportMenuView.mButtons.add(menuButton);
         }
@@ -512,10 +531,9 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
             PackageManager packageManager = mContext.get().getPackageManager();
             List<ResolveInfo> list = packageManager.queryIntentActivities(emailIntent, 0);
             if ( list.size() > 0 ) {
-                SupportMenuButton menuButton = new SupportMenuButton(mContext.get());
-                menuButton.mLabelView.setText(getResources().getString(R.string.label_email_support));
-                menuButton.mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.letter));
-                menuButton.mImageButton.setContentDescription(menuButton.mLabelView.getText());
+                SupportMenuButton menuButton = supportMenuButton(mContext,
+                        getResources().getString(R.string.label_email_support),
+                        R.drawable.letter);
                 menuButton.setOnClickListener(v -> sendEmail());
                 supportMenuView.mButtons.add(menuButton);
             }
@@ -523,10 +541,9 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         if ( supportSDK.supportPhoneNumber!=null && supportSDK.showSupportPhone ) {
             PackageManager packageManager = mContext.get().getPackageManager();
             if ( packageManager!=null && packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) ) {
-                SupportMenuButton menuButton = new SupportMenuButton(mContext.get());
-                menuButton.mLabelView.setText(getResources().getString(R.string.label_phone_support));
-                menuButton.mImageButton.setImageDrawable(getResources().getDrawable(R.drawable.phone));
-                menuButton.mImageButton.setContentDescription(menuButton.mLabelView.getText());
+                SupportMenuButton menuButton = supportMenuButton(mContext,
+                        getResources().getString(R.string.label_phone_support),
+                        R.drawable.phone);
                 menuButton.setOnClickListener(v -> phone());
                 supportMenuView.mButtons.add(menuButton);
             }
@@ -536,6 +553,21 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         if (mListener != null) {
             mListener.supportButtonDisplayView(supportMenuView);
         }
+    }
+
+
+    private SupportMenuButton supportMenuButton(WeakReference<Context> context, String label, int drawableId) {
+        SupportMenuButton menuButton = new SupportMenuButton(context.get());
+        menuButton.mLabelView.setText(label);
+        Object button = menuButton.mImageButton;
+        if ( button instanceof ImageButton ) {
+            ImageButton imageButton = (ImageButton) button;
+            imageButton.setImageDrawable(getResources().getDrawable(drawableId));
+        } else {
+
+        }
+        menuButton.mImageButton.setContentDescription(label);
+        return menuButton;
     }
 
 
@@ -581,15 +613,7 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
             callMeView.supportButton = button;
             callMeView.supportSDK = supportSDK;
             callMeView.mActivity = mActivity.get();
-            mPopupWindow = new PopupWindow(
-                    callMeView,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            callMeView.mPopupWindow = mPopupWindow;
-            mPopupWindow.setFocusable(true);
-            mPopupWindow.update();
-            mPopupWindow.showAtLocation(button, Gravity.CENTER,0,0);
+            callMeView.show();
         });
     }
 
@@ -602,15 +626,7 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
                 ratingView.supportButton = button;
                 ratingView.supportSDK = supportSDK;
                 ratingView.mActivity = mActivity.get();
-                mPopupWindow = new PopupWindow(
-                        ratingView,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                );
-                ratingView.mPopupWindow = mPopupWindow;
-                mPopupWindow.setFocusable(true);
-                mPopupWindow.update();
-                mPopupWindow.showAtLocation(button, Gravity.CENTER, 0, 0);
+                ratingView.show();
             });
         }
     }

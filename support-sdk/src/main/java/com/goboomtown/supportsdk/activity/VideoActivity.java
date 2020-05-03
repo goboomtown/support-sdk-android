@@ -22,8 +22,10 @@ public class VideoActivity extends com.goboomtown.video.VideoActivity {
 
     @Override
     public void didFailToCreateSessionWithError(Error error) {
-        Log.d(TAG, error.getMessage());
-        warn(error.getMessage());
+        if ( error!=null && error.getMessage()!=null ) {
+            Log.d(TAG, error.getMessage());
+            warn(error.getMessage());
+        }
     }
 
 

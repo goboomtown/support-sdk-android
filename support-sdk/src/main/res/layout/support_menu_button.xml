@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:padding="20dp">
 
     <ImageButton
@@ -13,15 +15,27 @@
         android:padding="20dp"
         android:tint="@color/red"
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/button_background_selector" />
+        android:background="@drawable/button_background_selector"
+        android:contentDescription="@string/desc_support_menu_button" />
 
-    <EditText
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+<!--        android:id="@+id/imageButton"-->
+<!--        android:layout_width="75dp"-->
+<!--        android:layout_height="75dp"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        app:cornerRadius="10dp"-->
+<!--        app:strokeColor="?attr/editTextColor"-->
+<!--        app:iconTint="@color/red"-->
+<!--        app:icon="@drawable/star_on_sm"/>-->
+
+    <TextView
         android:id="@+id/labelView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
-        android:enabled="false"
-        android:inputType="none" />
+        android:paddingTop="10dp"
+        android:labelFor="@id/imageButton" />
 
 </LinearLayout>

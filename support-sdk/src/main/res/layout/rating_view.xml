@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp"
+    android:backgroundTint="?android:attr/colorBackground"
     android:background="@drawable/border_rounded">
 
     <TextView
@@ -12,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:text="@string/text_how_was_your_experience" />
 
     <LinearLayout
@@ -31,6 +33,7 @@
             android:layout_weight="1"
             android:contentDescription="1"
             android:src="@drawable/star_off_sm"
+            android:tint="?attr/editTextColor"
             tools:ignore="HardcodedText" >
         </ImageView>
 
@@ -42,6 +45,7 @@
             android:layout_weight="1"
             android:contentDescription="2"
             android:src="@drawable/star_off_sm"
+            android:tint="?attr/editTextColor"
             tools:ignore="HardcodedText" >
         </ImageView>
 
@@ -53,6 +57,7 @@
             android:layout_weight="1"
             android:contentDescription="3"
             android:src="@drawable/star_off_sm"
+            android:tint="?attr/editTextColor"
             tools:ignore="HardcodedText" >
         </ImageView>
 
@@ -64,6 +69,7 @@
             android:layout_weight="1"
             android:contentDescription="4"
             android:src="@drawable/star_off_sm"
+            android:tint="?attr/editTextColor"
             tools:ignore="HardcodedText" >
         </ImageView>
 
@@ -74,6 +80,7 @@
             android:layout_weight="1"
             android:contentDescription="5"
             android:src="@drawable/star_off_sm"
+            android:tint="?attr/editTextColor"
             tools:ignore="HardcodedText" >
         </ImageView>
     </LinearLayout>
@@ -82,6 +89,7 @@
         android:id="@+id/callbackDescriptionLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:text="@string/text_anything_to_add" />
 
     <EditText
@@ -94,11 +102,13 @@
         android:inputType="textMultiLine"
         android:lines="10"
         android:singleLine="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textAlignment="viewStart" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="?android:attr/buttonBarStyle"
         android:orientation="horizontal">
 
         <Button
@@ -106,6 +116,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_margin="5dp"
+            style="@style/TextButton"
             android:text="@string/label_cancel" />
 
         <Button
@@ -113,6 +125,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_margin="5dp"
+            style="@style/TextButton"
             android:text="@string/text_submit" />
 
     </LinearLayout>

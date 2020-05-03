@@ -73,6 +73,11 @@ public final class SupportSDKProactive implements SupportSDK.SupportSDKListener 
         }
     }
 
+    @Override
+    public void supportSDKDidFailToGetSettings() {
+
+    }
+
     /**
      * POST a new {@link CheckAppHealth} with given name, status, and description.
      *
@@ -352,15 +357,15 @@ public final class SupportSDKProactive implements SupportSDK.SupportSDKListener 
             throw e;
         }
         try {
-            String ep = SupportSDK.kV3Endpoint.concat(EP_CONTEXT_PUT_DUMP_FILE);
-            Log.i(TAG, "upload file (name=" + file.getAbsolutePath() + ", len=" + file.length() + ") to " + ep);
+//            String ep = SupportSDK.kV3Endpoint.concat(EP_CONTEXT_PUT_DUMP_FILE);
+            Log.i(TAG, "upload file (name=" + file.getAbsolutePath() + ", len=" + file.length() + ") to " + EP_CONTEXT_PUT_DUMP_FILE);
             // write file contents to JSON
             JSONObject fileUpload = new JSONObject();
             fileUpload.put("file_data", Utils.base64Encode(file));
             // upload
             final Thread t = Thread.currentThread();
             final long runStartTime = System.currentTimeMillis();
-            sdk.post(ep, fileUpload, new PostCallback(fileUpload) {
+            sdk.post(EP_CONTEXT_PUT_DUMP_FILE, fileUpload, new PostCallback(fileUpload) {
 
                 @Override
                 public void onFailure(Call call, IOException e) {

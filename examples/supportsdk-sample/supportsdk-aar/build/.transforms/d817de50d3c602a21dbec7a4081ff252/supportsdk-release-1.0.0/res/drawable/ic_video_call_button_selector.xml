@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:constantSize="true">
+    <item android:drawable="@drawable/ic_video_call_blue_24dp" android:state_pressed="true" /> <!-- pressed -->
+    <item android:drawable="@drawable/ic_video_call_blue_24dp" android:state_focused="true" /> <!-- focused -->
+    <item android:drawable="@drawable/ic_video_call_black_24dp" /> <!-- default -->
+</selector>

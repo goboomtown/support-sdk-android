@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="30sp"
+            android:layout_gravity="right"
+            android:background="@android:color/transparent"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/txtInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="30sp"
+            android:layout_gravity="right"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/contentPanel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/avatarLeft"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:orientation="vertical"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp">
+
+                <com.goboomtown.widget.WebImageView
+                    android:id="@+id/attachment"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp" />
+
+                <LinearLayout
+                    android:id="@+id/contentWithBackground"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="400dp"
+                    android:layout_gravity="right"
+                    android:background="@drawable/in_message_bg"
+                    android:orientation="vertical"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp">
+
+                    <TextView
+                        android:id="@+id/txtMessage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:linksClickable="true"
+                        android:maxWidth="340dp"
+                        android:textColor="@android:color/black" />
+
+                    <WebView
+                        android:id="@+id/htmlMessage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxWidth="340dp"
+                        tools:ignore="WebViewLayout"
+                        />
+
+                    <!--<com.wefika.flowlayout.FlowLayout-->
+                        <!--android:id="@+id/wrap_chat_msg_act_btns"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:gravity="start|top" />-->
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/avatarRight"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:baselineAlignBottom="true" />
+
+        </LinearLayout>
+
+        <com.wefika.flowlayout.FlowLayout
+            android:id="@+id/wrap_chat_msg_act_btns"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/typingContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/typingIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/typing_someone" />
+
+    </LinearLayout>
+
+</RelativeLayout>

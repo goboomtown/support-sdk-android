@@ -4,11 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.util.AndroidException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +13,9 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import com.goboomtown.activity.KBActivity;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.model.KBEntryModel;
-import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.view.SupportButton;
 
 public class KBExpandableListAdapter extends BaseExpandableListAdapter {
@@ -64,8 +55,14 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition))
-                .get(childPosititon);
+        Object object = null;
+        try {
+            object = this.listDataChild.get(this.listDataHeader.get(groupPosition))
+                    .get(childPosititon);
+        } catch ( Exception e ) {
+
+        }
+        return object;
     }
 
     @Override
@@ -106,12 +103,9 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             final String text = (String) child;
             articleLabel.setText(text);
         }
-        convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( mListener != null ) {
-                    mListener.adapterDidSelectEntry(groupPosition, childPosition, child);
-                }
+        convertView.setOnClickListener(v -> {
+            if ( mListener != null ) {
+                mListener.adapterDidSelectEntry(groupPosition, childPosition, child);
             }
         });
 
@@ -175,6 +169,10 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
 
         String title = (String) getGroup(groupPosition);
         sectionHeaderLabel.setText(title);
+
+        if ( expanded && expandableListView!=null ) {
+            expandableListView.expandGroup(groupPosition);
+        }
 
         return convertView;
     }

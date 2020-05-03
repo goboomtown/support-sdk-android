@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+     <com.goboomtown.video.BTAnnotationView
+        android:id="@+id/annotation_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/buttonStopRecording"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:layout_gravity="center|right"
+        android:visibility="invisible"
+        android:background="@drawable/end_call_circle_on"
+        android:text=""/>
+
+</FrameLayout>

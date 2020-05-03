@@ -1,0 +1,2 @@
+//include ':supportsdk-aar'
+//project(":supportsdk-aar").projectDir = new File(settingsDir, "supportsdk-aar")

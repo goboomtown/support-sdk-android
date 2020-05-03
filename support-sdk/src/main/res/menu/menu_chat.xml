@@ -8,16 +8,16 @@
         android:orderInCategory="99"
         android:icon="@drawable/end_call_circle_on"
         android:title="@string/action_end_call"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_resolve"
         android:orderInCategory="100"
         android:title="@string/action_resolve"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_done"
         android:orderInCategory="101"
         android:title="@string/action_done"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
 </menu>

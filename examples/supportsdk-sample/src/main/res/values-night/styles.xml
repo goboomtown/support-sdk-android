@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <!--<item name="colorPrimary">@color/colorPrimary</item>-->
+        <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+        <!--<item name="colorAccent">@color/colorAccent</item>-->
+
+        <!--        <item name="buttonTheme">@style/ButtonTheme</item>-->
+        <item name="colorButtonNormal">#acacac</item>
+        <item name="buttonBarButtonStyle">@style/Widget.MyApp.ButtonBarButtonStyle</item>
+    </style>
+
+
+    <style name="Widget.MyApp.ButtonBarButtonStyle" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="colorButtonNormal">#acacac</item>
+    </style>
+
+</resources>

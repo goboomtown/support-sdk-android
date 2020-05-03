@@ -18,18 +18,17 @@ import androidx.core.os.ConfigurationCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.IInterface;
 import android.util.Base64;
 import android.util.Log;
 import android.view.ViewGroup;
 
 import com.goboomtown.supportsdk.BuildConfig;
 import com.goboomtown.supportsdk.R;
-import com.goboomtown.supportsdk.fragment.KBExpandableListAdapter;
+import com.goboomtown.supportsdk.model.BTMerchant;
 import com.goboomtown.supportsdk.model.Configuration;
+import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.service.MediaProjectionService;
-import com.goboomtown.supportsdk.view.SupportView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,21 +71,22 @@ public class SupportSDK
     private static final String TAG = SupportSDK.class.getSimpleName();
     private static final String SupportSDKHelpName = "SupportSDK";
 
+    /* Customer information keys */
+    private static final String kCustomerId                   = "members_id";
+    private static final String kCustomerExternalId           = "members_external_id";
+    private static final String kCustomerLocationId           = "members_locations_id";
+    private static final String kCustomerLocationExternalId   = "members_locations_external_id";
+    private static final String kCustomerLocationMid          = "members_locations_mid";
+    private static final String kUserId                       = "members_users_id";
+    private static final String kUserExternalId               = "members_users_external_id";
+    private static final String kUserEmail                    = "members_users_email";
+    private static final String kUserPhone                    = "members_users_phone";
+
     private static final int    REQUEST_SCREEN_CAPTURE = 100;
 
-    public static String SupportSDKBaseURL  =  "https://api.goboomtown.com";
-
-//    private static final OkHttpClient client = new OkHttpClient.Builder()
-//            .connectTimeout(60, TimeUnit.SECONDS)
-//            .writeTimeout(60, TimeUnit.SECONDS)
-//            .readTimeout(60, TimeUnit.SECONDS)
-//            .build();
     public RestClient client = null;
 
-    public static String kEndpoint          = "/api/v2";
-    public static String kV2kEndpoint       = "/api/v2";
-    public static String kV3Endpoint        = "/api/v3";
-    public static String kSDKV1Endpoint     = "/sdk/v1";
+    public static String kSDKV1Endpoint = "/sdk/v1";
 
     private WeakReference<Context> mContext;
 
@@ -94,20 +94,19 @@ public class SupportSDK
 
     private Configuration   configuration;
     public  SessionManager  sessionManager;
-    public SupportView supportView;
     public  int             screenCapturePermissionResultCode;
     public  Intent          screenCapturePermissionData;
 
-    public Boolean isLocationPermitted = false;
-    public Boolean isCameraPermitted = false;
-    public Boolean isStoragePermitted = false;
-    public Boolean isForegroundPermitted = false;
-    public Boolean isVideoCapturePermitted = false;
-    public Boolean isAudioCapturePermitted = false;
-    public Boolean isExtStorageWriteable = false;
-    public Boolean isSystemOverlayPermitted = false;
+    public  Boolean isLocationPermitted = false;
+    public  Boolean isCameraPermitted = false;
+    public  Boolean isStoragePermitted = false;
+    public  Boolean isForegroundPermitted = false;
+    public  Boolean isVideoCapturePermitted = false;
+    public  Boolean isAudioCapturePermitted = false;
+    public  Boolean isExtStorageWriteable = false;
+    public  Boolean isSystemOverlayPermitted = false;
 
-    public Locale   locale;
+    public  Locale   locale;
 
     /**
      * ID of provider
@@ -188,8 +187,15 @@ public class SupportSDK
 
 
     @Override
-    public void posConnectorDidRetrieveAccount(Object merchant) {
-
+    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
+        if ( merchant != null ) {
+            Log.d(TAG, merchant.name);
+            HashMap<String, String> customerInfo = new HashMap<>();
+            customerInfo.put(kCustomerExternalId, merchant.mid);
+            customerInfo.put(kCustomerLocationMid, merchant.mid);
+            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
+            restGetCustomerInformationWithInfo(customerInfo, null);
+        }
     }
 
     @Override
@@ -205,13 +211,9 @@ public class SupportSDK
      * @param customerInfo list of possible customer identification keys and values
      */
     public void loadConfiguration(int configResourceId, HashMap<String, String> customerInfo) {
-//        if ( customerId == null ) {
-//            Log.e(TAG, "Unable to load configuration. You must set the SupportSDK.customerId with a valid customerId.");
-//            if (mListener != null) {
-//                mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_get_customer_info), mContext.get().getString(R.string.error_invalid_customer_id));
-//            }
-//            return;
-//        }
+        if ( cloudConfigComplete ) {
+            return;
+        }
         cloudConfigComplete = false;
         try {
             boolean loaded = configuration.read(configResourceId);
@@ -250,8 +252,12 @@ public class SupportSDK
                     activity.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
             // This initiates a prompt dialog for the user to confirm screen projection.
-            activity.startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(),
-                    REQUEST_SCREEN_CAPTURE);
+            try {
+                activity.startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(),
+                        REQUEST_SCREEN_CAPTURE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -281,19 +287,6 @@ public class SupportSDK
         sessionManager.entity_name = "sdk";
         Boolean rc = sessionManager.createSession(id, token);
     }
-
-//    public void startVideoChatSession(BoomtownComm call) {
-//        if (call == null || call.video_conference_id == null || call.video_conference_id.isEmpty()) {
-//            String sb = getString(com.goboomtown.core.R.string.no_active_call) + " " +
-//                    getString(com.goboomtown.core.R.string.msg_unable_to_join_conference);
-//            showErrorMessage(getString(R.string.unable_to_start_boomtown_video_support), sb);
-//            return;
-//        }
-//        Intent intent = new Intent(this, VideoActivity.class);
-//        intent.putExtra(VideoSettings.AvsSessionId, call.video_conference_id);
-//        intent.putExtra(VideoSettings.AvsSessionDisplayName, String.format("%s %s", tech.first_name, tech.last_name));
-//        startActivityForResult(intent, BaseToolBoxActivity.REQUEST_VIDEOCHAT);
-//    }
 
 
     private void setAPIInfo() {
@@ -622,53 +615,13 @@ public class SupportSDK
 
 
     private void handleUnknownCustomer(String message) {
-//        if (mListener != null) {
-//            mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_get_customer_info), message);
-//        }
         memberID            = defaultMemberID;
         memberUserID        = defaultMemberUserID;
         memberLocationID    = defaultMemberLocationID;
     }
 
 
-    /*
-     Printing description of response:
-     {
-         altPartnerTeams =     (
-         );
-         apiHost = "https://api.integ.thinkrelay.com";
-         callmeButtonText = "Call Me";
-         "current_server_time" = "2020-01-22 13:36:37";
-         defaultMember =     {
-             memberDeviceId = J3B3BZ;
-             memberId = D23ATA;
-             memberLocationId = "D23ATA-CJ2";
-             memberUserId = "D23ATA-7SL";
-         };
-         integrationEnabled = 1;
-         integrationId = 92PZPN;
-         partnerAvatar = "https://api1.integ.thinkrelay.com/api/v2/avatar/partners/H3F/100,100";
-         partnerTeam = "H3F-YEN";
-         routeTo = "";
-         status = 200;
-         success = 1;
-         supportCallmeEnabled = 1;
-         supportEmail = "smarttechsupport@goboomtown.com";
-         supportEmailEnabled = 1;
-         supportPhone = "+1 (419) 690-1610";
-         supportPhoneEnabled = 1;
-         supportProactiveEnabled = 1;
-         supportScreenShareEnabled = 1;
-         supportVideoEnabled = "<null>";
-         supportWebsite = "https://www.goboomtown.com/";
-         supportWebsiteEnabled = 1;
-         unavailable = 0;
-         unavailableSummary = "<null>";
-     }
-     */
-
-
-    private void restGetSettings() {
+     private void restGetSettings() {
         String uri = String.format("%s/app/get", SupportSDK.kSDKV1Endpoint);
 
         JSONObject params = new JSONObject();
@@ -676,9 +629,9 @@ public class SupportSDK
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                cloudConfigComplete = true;
+                cloudConfigComplete = false;
                 if (mListener != null) {
-                    mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_get_settings), e.getLocalizedMessage());
+                    mListener.supportSDKDidFailToGetSettings();
                 }
             }
 
@@ -728,7 +681,7 @@ public class SupportSDK
                 cloudConfigComplete = true;
                 if (!success) {
                     if (mListener != null) {
-                        mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_get_settings), message);
+                        mListener.supportSDKDidFailToGetSettings();
                     }
                     Log.i(TAG, "unable to get app settings, response (" + message + ")");
                 } else {
@@ -801,9 +754,16 @@ public class SupportSDK
                 if ( jsonObject != null ) {
                     if ( jsonObject.has("results") ) {
                         try {
+                            kbViewModel = new KBViewModel();
+                            kbViewModel.entries = new ArrayList<>();
                             JSONArray resultsJSON = jsonObject.getJSONArray("results");
-
-                            kbViewModel = new KBViewModel(resultsJSON);
+                            for ( int n=0; n<resultsJSON.length(); n++ ) {
+                                JSONObject entryJSON = resultsJSON.getJSONObject(n);
+                                KBEntryModel entry = new KBEntryModel(entryJSON);
+                                if ( entry != null ) {
+                                    kbViewModel.entries.add(entry);
+                                }
+                            }
                             if ( kbListener != null ) {
                                 kbListener.supportSDKDidSearchKB(kbViewModel);
                             }
@@ -832,6 +792,7 @@ public class SupportSDK
     public interface SupportSDKListener {
         void supportSDKDidFailWithError(String description, String reason);
         void supportSDKDidGetSettings();
+        void supportSDKDidFailToGetSettings();
     }
 
     public interface SupportSDKKBListener {
@@ -855,12 +816,12 @@ public class SupportSDK
     }
 
 
-    private static byte[] encrypt(byte[] raw, byte[] clear) throws Exception {
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES/ECB/NoPadding");
-        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-        cipher.init(1, skeySpec);
-        return cipher.doFinal(clear);
-    }
+//    private static byte[] encrypt(byte[] raw, byte[] clear) throws Exception {
+//        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES/ECB/NoPadding");
+//        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
+//        cipher.init(1, skeySpec);
+//        return cipher.doFinal(clear);
+//    }
 
     private static byte[] decrypt(String key, String data) throws Exception {
         byte[] keyBytes = new byte[32];

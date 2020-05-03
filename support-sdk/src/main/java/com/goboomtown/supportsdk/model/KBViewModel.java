@@ -3,21 +3,14 @@ package com.goboomtown.supportsdk.model;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.minidns.record.A;
-
-import java.lang.reflect.Array;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 public class KBViewModel {
 
-    private static final int kMaxDepth = 1;
+    private static final int kMaxDepth = 3;
 
     private ArrayList<KBEntryModel> folders = new ArrayList<>();
     public  ArrayList<KBEntryModel> entries = new ArrayList<>();
@@ -41,16 +34,20 @@ public class KBViewModel {
 
 
     public KBViewModel(KBEntryModel rootEntry) {
-        kbRoot = rootEntry;
-        for ( Object child : kbRoot.children() ) {
-            if ( child instanceof KBEntryModel ) {
-                folders.add((KBEntryModel)child);
-            }
-        }
+        kbRoot = new KBEntryModel();
+        kbRoot.children().add(rootEntry);
+//        for ( Object child : rootEntry.children() ) {
+//            if ( child instanceof KBEntryModel ) {
+//                folders.add((KBEntryModel)child);
+//            }
+//        }
+        rootEntry.setCollapsed(false);
+        folders.clear();
+        folders.add(rootEntry);
     }
 
 
-    private void processEntries(JSONArray entriesJSON) {
+    private void processEntriesOld(JSONArray entriesJSON) {
         KBEntryModel parent = null;
         ArrayList<KBEntryModel> remainingEntries = new ArrayList<>();
         entries = new ArrayList<>();
@@ -78,8 +75,38 @@ public class KBViewModel {
     }
 
 
+    private void processEntries(JSONArray entriesJSON) {
+        KBEntryModel parent = null;
+        kbRoot = new KBEntryModel();
+        ArrayList<KBEntryModel> remainingEntries = new ArrayList<>();
+        entries = new ArrayList<>();
+        for ( int n=0; n<entriesJSON.length(); n++  ) {
+            try {
+                JSONObject entryJSON = entriesJSON.getJSONObject(n);
+                KBEntryModel entry = new KBEntryModel(entryJSON);
+                entries.add(entry);
+                if ( entry.isRoot() ) {
+                    entry.level = 0;
+                    kbRoot.children().add(entry);
+                    parent = entry;
+                } else {
+                    remainingEntries.add(entry);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        while ( remainingEntries.size() > 0 ) {
+            for ( Object object : kbRoot.children() ) {
+                KBEntryModel entry = (KBEntryModel) object;
+                remainingEntries = entry.addChildrenFromEntries(remainingEntries);
+            }
+        }
+    }
+
+
     private void updateVisibleEntries() {
-        baseLevel = kbRoot.level+1;;
+        baseLevel = kbRoot.level+1;
         visibleEntries = new ArrayList<>();
         for ( Object entry : kbRoot.children() ) {
             addVisibleChildrenOfEntry((KBEntryModel)entry);
@@ -88,7 +115,8 @@ public class KBViewModel {
 
 
     private void addVisibleChildrenOfEntry(KBEntryModel baseEntry) {
-        if ( (baseEntry.level-baseLevel) > kMaxDepth ) {
+        int depth = baseEntry.level-baseLevel;
+        if ( depth > kMaxDepth ) {
             return;
         }
         visibleEntries.add(baseEntry);
@@ -136,11 +164,41 @@ public class KBViewModel {
 
     public HashMap<String, List<Object>> allEntriesByFolderName() {
         HashMap<String, List<Object>> list = new HashMap<> ();
+//        visibleEntries.clear();
         for ( KBEntryModel folder : folders) {
+//            visibleEntries.clear();
+//            addChildrenOfEntry(folder);
             list.put(folder.title(), folder.articles());
+//            ArrayList<Object> entries = new ArrayList<>();
+//            for ( Object object : visibleEntries ) {
+//                entries.add(object);
+//            }
+//            list.put(folder.title(), entries);
         }
         return list;
     }
+
+
+    private void addChildrenOfEntry(KBEntryModel baseEntry) {
+        int depth = baseEntry.level-baseLevel;
+        if ( depth > kMaxDepth ) {
+            return;
+        }
+        visibleEntries.add(baseEntry);
+        if ( !baseEntry.isCollapsed() ) {
+            for ( Object object : baseEntry.children() ) {
+                if ( object instanceof  KBEntryModel ) {
+                    KBEntryModel entry = (KBEntryModel) object;
+                    if (entry.isFolder()) {
+                        addVisibleChildrenOfEntry(entry);
+                    } else {
+                        visibleEntries.add(entry);
+                    }
+                }
+            }
+        }
+    }
+
 
 
     public static class KBEntryModelComparator implements Comparator<KBEntryModel> {

@@ -11,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 
 import androidx.fragment.app.Fragment;
@@ -25,10 +24,6 @@ import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.view.SupportButton;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -43,7 +38,6 @@ public class KBListFragment extends Fragment
     public static final String KBSEARCHFRAGMENT_TAG = "com.goboomtown.supportsdk.kbsearchfragment";
 
     private static final String ARG_COLUMN_COUNT = "column-count";
-    private int             mColumnCount = 1;
     public  SupportButton   mSupportButton = null;
     public  SupportSDK      supportSDK = null;
     public  Context         mContext;
@@ -74,10 +68,6 @@ public class KBListFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
-
         setHasOptionsMenu(true);
     }
 
@@ -87,7 +77,7 @@ public class KBListFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_article_list, container, false);
 
-        expandableListView = (ExpandableListView) view.findViewById(R.id.expandableListView);
+        expandableListView = view.findViewById(R.id.expandableListView);
 
         if ( kbViewModel == null ) {
             if ( supportSDK.kbViewModel() != null ) {
@@ -126,16 +116,13 @@ public class KBListFragment extends Fragment
         final KBListFragment listener = this;
         Activity activity = getActivity();
         if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    expandableListAdapter = new KBExpandableListAdapter(activity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
-                    if ( expandableListView!=null && expandableListAdapter!=null ) {
-                        expandableListAdapter.mListener = listener;
-                        expandableListAdapter.expandableListView = expandableListView;
-                        expandableListView.setAdapter(expandableListAdapter);
-                        expandableListAdapter.notifyDataSetChanged();
-                    }
+            activity.runOnUiThread(() -> {
+                expandableListAdapter = new KBExpandableListAdapter(activity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
+                if ( expandableListView!=null && expandableListAdapter!=null ) {
+                    expandableListAdapter.mListener = listener;
+                    expandableListAdapter.expandableListView = expandableListView;
+                    expandableListView.setAdapter(expandableListAdapter);
+                    expandableListAdapter.notifyDataSetChanged();
                 }
             });
         }
@@ -159,13 +146,17 @@ public class KBListFragment extends Fragment
         kbListFragment.mContext = mContext;
         kbListFragment.supportSDK = supportSDK;
         kbListFragment.mSupportButton = mSupportButton;
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        ViewGroup viewGroup = (ViewGroup) mView.getParent();
-        int viewId = viewGroup.getId();
-        fragmentTransaction.replace(viewId, kbListFragment, KBLISTFRAGMENT_TAG);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        try {
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            ViewGroup viewGroup = (ViewGroup) mView.getParent();
+            int viewId = viewGroup.getId();
+            fragmentTransaction.replace(viewId, kbListFragment, KBLISTFRAGMENT_TAG);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -185,13 +176,17 @@ public class KBListFragment extends Fragment
         KBSearchFragment kbSearchFragment = new KBSearchFragment();
         kbSearchFragment.mContext = mContext;
         kbSearchFragment.supportSDK = supportSDK;
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        ViewGroup viewGroup = (ViewGroup) mView.getParent();
-        int viewId = viewGroup.getId();
-        fragmentTransaction.replace(viewId, kbSearchFragment, KBSEARCHFRAGMENT_TAG);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        try {
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            ViewGroup viewGroup = (ViewGroup) mView.getParent();
+            int viewId = viewGroup.getId();
+            fragmentTransaction.replace(viewId, kbSearchFragment, KBSEARCHFRAGMENT_TAG);
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

@@ -8,7 +8,9 @@ import com.clover.sdk.util.CloverAccount;
 import com.clover.sdk.v1.ResultStatus;
 import com.clover.sdk.v1.ServiceConnector;
 import com.clover.sdk.v1.merchant.Merchant;
+import com.clover.sdk.v1.merchant.MerchantAddress;
 import com.clover.sdk.v1.merchant.MerchantConnector;
+import com.goboomtown.supportsdk.model.BTMerchant;
 
 
 public class POSConnector extends POSConnectorBase
@@ -48,46 +50,50 @@ public class POSConnector extends POSConnectorBase
 
 
     private void getMerchant() {
-        merchantConnector.getMerchant(new MerchantConnector.MerchantCallback<Merchant>() {
-            @Override
-            public void onServiceSuccess(Merchant result, ResultStatus status) {
-                super.onServiceSuccess(result, status);
+        try {
+            merchantConnector.getMerchant(new MerchantConnector.MerchantCallback<Merchant>() {
+                @Override
+                public void onServiceSuccess(Merchant merchant, ResultStatus status) {
+                    super.onServiceSuccess(merchant, status);
 
-                if ( mListener != null ) {
-                    mListener.posConnectorDidRetrieveAccount(result);
+                    BTMerchant btMerchant = new BTMerchant();
+                    btMerchant.mid          = merchant.getMid();
+                    btMerchant.deviceId     = merchant.getDeviceId();
+                    btMerchant.name         = merchant.getName();
+                    MerchantAddress address = merchant.getAddress();
+                    btMerchant.address1     = address.getAddress1();
+                    btMerchant.city         = address.getCity();
+                    btMerchant.state        = address.getState();
+                    btMerchant.zip          = address.getZip();
+                    btMerchant.country      = address.getCountry();
+                    btMerchant.latitude     = address.getLatitude();
+                    btMerchant.longitude    = address.getLongitude();
+                    btMerchant.supportEmail = merchant.getSupportEmail();
+                    Account account         = merchant.getAccount();
+                    if (mListener != null) {
+                        mListener.posConnectorDidRetrieveAccount(btMerchant);
+                    }
                 }
 
-//                updateMerchant("get merchant success", status, result);
-//
-//                address1Edit.setText(result.getAddress().getAddress1());
-//                address2Edit.setText(result.getAddress().getAddress2());
-//                address3Edit.setText(result.getAddress().getAddress3());
-//                cityEdit.setText(result.getAddress().getCity());
-//                stateEdit.setText(result.getAddress().getState());
-//                zipEdit.setText(result.getAddress().getZip());
-//                countryEdit.setText(result.getAddress().getCountry());
-//
-//                phoneEdit.setText(result.getPhoneNumber());
-            }
-
-            @Override
-            public void onServiceFailure(ResultStatus status) {
-                super.onServiceFailure(status);
-//                updateMerchant("get merchant failure", status, null);
-                if ( mListener != null ) {
-                    mListener.posConnectorDidToFailRetrieveAccount(status.getStatusMessage());
+                @Override
+                public void onServiceFailure(ResultStatus status) {
+                    super.onServiceFailure(status);
+                    if (mListener != null) {
+                        mListener.posConnectorDidToFailRetrieveAccount(status.getStatusMessage());
+                    }
                 }
-            }
 
-            @Override
-            public void onServiceConnectionFailure() {
-                super.onServiceConnectionFailure();
-//                updateMerchant("get merchant bind failure", null, null);
-                if ( mListener != null ) {
-                    mListener.posConnectorDidToFailRetrieveAccount("");
+                @Override
+                public void onServiceConnectionFailure() {
+                    super.onServiceConnectionFailure();
+                    if (mListener != null) {
+                        mListener.posConnectorDidToFailRetrieveAccount("");
+                    }
                 }
-            }
-        });
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

@@ -215,7 +215,7 @@ public class BTConnectIssue
         BTConnectIssue issue = null;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String jsonString = prefs.getString(kSupportSDKCurrentIssue,"");
-        if ( jsonString!=null && !jsonString.isEmpty() ) {
+        if ( !jsonString.isEmpty() ) {
             JSONObject json;
             try {
                 json = new JSONObject(jsonString);

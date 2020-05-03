@@ -8,11 +8,13 @@ import android.os.Handler;
 import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.Toast;
 
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -34,7 +36,7 @@ import okhttp3.ResponseBody;
 /**
  * TODO: document your custom view class.
  */
-public class CallMeView extends LinearLayout {
+public class CallMeView {
 
     public SupportButton    supportButton;
     public SupportSDK       supportSDK;
@@ -43,21 +45,34 @@ public class CallMeView extends LinearLayout {
     private Context     mContext;
     public  PopupWindow mPopupWindow;
 
+    private String      mCallbackNumber;
     private EditText    mCallbackNumberEditText;
     private EditText    mCallbackDescriptionEditText;
     private Button      mOkButton;
 
     public CallMeView(Context context, String callbackNumber) {
-        super(context);
         mContext = context;
+        mCallbackNumber = callbackNumber;
+    }
 
-        View view = inflate(mContext, R.layout.call_me_view, this);
+    private void enableOkButton(String phoneNumber) {
+        if ( mOkButton != null ) {
+            boolean validated = validatePhoneNumber(phoneNumber);
+            mOkButton.setEnabled(validated);
+            mOkButton.setClickable(validated);
+        }
+    }
 
-        mCallbackNumberEditText = view.findViewById(R.id.callbackNumber);
-        mCallbackDescriptionEditText = view.findViewById(R.id.callbackDescription);
+    public void show() {
+        androidx.appcompat.app.AlertDialog.Builder dialogBuilder = new androidx.appcompat.app.AlertDialog.Builder(mContext);
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View dialogView = inflater.inflate(R.layout.call_me_dialog, null);
+        dialogBuilder.setView(dialogView);
 
-        if ( callbackNumber!=null && !callbackNumber.equalsIgnoreCase("null") ) {
-            mCallbackNumberEditText.setText(callbackNumber);
+        mCallbackNumberEditText = dialogView.findViewById(R.id.callbackNumber);
+        mCallbackDescriptionEditText = dialogView.findViewById(R.id.callbackDescription);
+        if ( mCallbackNumber!=null && !mCallbackNumber.equalsIgnoreCase("null") ) {
+            mCallbackNumberEditText.setText(mCallbackNumber);
         }
         mCallbackNumberEditText.setEnabled(true);
         mCallbackDescriptionEditText.setEnabled(true);
@@ -80,30 +95,45 @@ public class CallMeView extends LinearLayout {
             }
         });
 
-        Button cancelButton = view.findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(v -> {
-            if ( mPopupWindow != null ) {
-                mPopupWindow.dismiss();
+        dialogBuilder.setTitle(mContext.getResources().getString(R.string.label_call_me));
+//        dialogBuilder.setMessage("please send me to your feedback.");
+        dialogBuilder.setPositiveButton(mContext.getResources().getString(R.string.text_submit), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
             }
         });
-        mOkButton = view.findViewById(R.id.okButton);
-        enableOkButton(callbackNumber);
-        mOkButton.setOnClickListener(v -> {
-            if ( mPopupWindow != null ) {
-                mPopupWindow.dismiss();
-                createIssue(supportSDK.memberID, supportSDK.memberUserID, supportSDK.memberLocationID,
-                        mCallbackNumberEditText.getText().toString(), mCallbackDescriptionEditText.getText().toString());
+        dialogBuilder.setNegativeButton(mContext.getResources().getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                //pass
             }
         });
+
+        androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button button = ((androidx.appcompat.app.AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        if ( validatePhoneNumber(mCallbackNumberEditText.getText().toString()) ) {
+                            dialog.dismiss();
+                            createIssue(supportSDK.memberID,
+                                    supportSDK.memberUserID,
+                                    supportSDK.memberLocationID,
+                                    mCallbackNumberEditText.getText().toString(),
+                                    mCallbackDescriptionEditText.getText().toString());
+                        } else {
+                            Toast.makeText(mContext, mContext.getResources().getString(R.string.error_bad_phone_number), Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+        dialog.show();
     }
 
-    private void enableOkButton(String phoneNumber) {
-        if ( mOkButton != null ) {
-            boolean validated = validatePhoneNumber(phoneNumber);
-            mOkButton.setEnabled(validated);
-            mOkButton.setClickable(validated);
-        }
-    }
 
     private boolean validatePhoneNumber(String phoneNumber) {
         String pattern = "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?: *x(\\d+))?\\s*$";
@@ -197,7 +227,7 @@ public class CallMeView extends LinearLayout {
 
     private void showConfirmation(String message) {
          mActivity.runOnUiThread(() -> {
-             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity, AlertDialog.THEME_HOLO_LIGHT);
+             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
              builder.setTitle(null);
              builder.setMessage(message);
              builder.setCancelable(false);
@@ -210,21 +240,13 @@ public class CallMeView extends LinearLayout {
              }
              // Hide after some seconds
              final Handler handler  = new Handler();
-             final Runnable runnable = new Runnable() {
-                 @Override
-                 public void run() {
-                     if (alert.isShowing()) {
-                         alert.dismiss();
-                     }
+             final Runnable runnable = () -> {
+                 if (alert.isShowing()) {
+                     alert.dismiss();
                  }
              };
 
-             alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                 @Override
-                 public void onDismiss(DialogInterface dialog) {
-                     handler.removeCallbacks(runnable);
-                 }
-             });
+             alert.setOnDismissListener(dialog -> handler.removeCallbacks(runnable));
 
              handler.postDelayed(runnable, 3000);
          });

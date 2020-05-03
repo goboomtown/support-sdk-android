@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
+import org.conscrypt.Conscrypt;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,11 +23,14 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +41,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
+import okhttp3.ConnectionSpec;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -63,6 +68,9 @@ public class RestClient {
      * @param customCACert override default CA keystore by providing this cert
      */
     public RestClient(InputStream customCACert) {
+        Provider provider = Conscrypt.newProvider();
+        Security.insertProviderAt(provider, 1);
+
         try {
             KeyStore keyStore = null;
             if (customCACert != null) {
@@ -109,7 +117,12 @@ public class RestClient {
     protected OkHttpClient createClient() {
         OkHttpClient client = null;
         try {
+//            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+//                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+//                .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+//                .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
             OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                    .connectionSpecs(Collections.singletonList(ConnectionSpec.RESTRICTED_TLS))
                     .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
                     .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
@@ -120,7 +133,14 @@ public class RestClient {
                 clientBuilder.sslSocketFactory(sslCtx.getSocketFactory(), trustManager);
                 Log.w(TAG, "using self-signed cert trust mgr for HTTPS");
             } else {
-                clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
+                try {
+//                    clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
+//                    clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
+                    clientBuilder.sslSocketFactory(new TLSSocketFactory(), new InternalX509TrustManager());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
             client = clientBuilder.build();
         } catch (Exception e) {
