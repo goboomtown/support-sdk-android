@@ -100,7 +100,7 @@ android {
     }
 
 
-    defaultPublishConfig "release"
+    defaultPublishConfig "debug"
 
     packagingOptions {
         exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
