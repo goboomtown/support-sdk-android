@@ -70,7 +70,8 @@ public class KBSearchFragment extends Fragment
     private ArrayList<Object> recentSearches    = new ArrayList<>();
     private ArrayList<Object> topResults        = new ArrayList<>();
 
-    private String  query;
+    private String      query;
+    private Activity    mActivity;
 
     public KBSearchFragment() {
     }
@@ -96,6 +97,8 @@ public class KBSearchFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mActivity = getActivity();
 
         sectionHeadings.add(getResources().getString(R.string.search_section_recent_searches));
         sectionHeadings.add(getResources().getString(R.string.search_section_top_results));
@@ -147,10 +150,9 @@ public class KBSearchFragment extends Fragment
 
     private void setupAdapter() {
         final KBSearchFragment listener = this;
-        Activity activity = getActivity();
-        if ( activity != null ) {
-            activity.runOnUiThread(() -> {
-                expandableListAdapter = new KBExpandableListAdapter(activity, sectionHeadings, createEntries());
+        if ( mActivity != null ) {
+            mActivity.runOnUiThread(() -> {
+                expandableListAdapter = new KBExpandableListAdapter(mActivity, sectionHeadings, createEntries());
                 ArrayList<Drawable> groupIcons = new ArrayList<>();
                 groupIcons.add(getResources().getDrawable(R.drawable.ic_search_24px));
                 groupIcons.add(null);
@@ -311,8 +313,10 @@ public class KBSearchFragment extends Fragment
         if ( kbViewModel!=null && kbViewModel.entries.size()>0 ) {
             topResults.clear();
             topResults.addAll(kbViewModel.entries);
-            addRecentSearch(query);
-            setupAdapter();
+            if ( mActivity != null ) {
+                addRecentSearch(query);
+                setupAdapter();
+            }
         } else {
             warn(getString(R.string.label_search_knowledge), getString(R.string.error_no_results));
         }

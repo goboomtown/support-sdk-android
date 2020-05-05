@@ -107,6 +107,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void supportButtonDidFailToGetSettings() {
+
+    }
+
+    @Override
     public void supportButtonDisplayView(final View view) {
         runOnUiThread(new Runnable() {
             @Override

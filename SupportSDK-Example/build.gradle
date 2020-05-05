@@ -10,6 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -59,6 +60,8 @@ configurations {
 
 
 dependencies {
+    implementation 'com.android.support:multidex:1.0.3'
+
     //  Start Support SDK dependencies
     implementation "com.wefika:flowlayout:0.4.1"
     implementation "com.squareup.okhttp3:okhttp:4.5.0"

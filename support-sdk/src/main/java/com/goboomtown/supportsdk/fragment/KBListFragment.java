@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -42,10 +43,11 @@ public class KBListFragment extends Fragment
     public  SupportSDK      supportSDK = null;
     public  Context         mContext;
     private OnListFragmentInteractionListener mListener;
-    private KBViewModel kbViewModel = null;
-    private ExpandableListView  expandableListView;
+    private KBViewModel             kbViewModel = null;
+    private ExpandableListView      expandableListView;
     private KBExpandableListAdapter expandableListAdapter;
-    private View            mView;
+    private View                    mView;
+    private FragmentActivity        mActivity;
 
     public KBListFragment() {
     }
@@ -69,6 +71,14 @@ public class KBListFragment extends Fragment
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
+        mActivity = getActivity();
+        if ( kbViewModel == null ) {
+            if ( supportSDK.kbViewModel() != null ) {
+                kbViewModel = supportSDK.kbViewModel();
+            } else {
+                supportSDK.getKB(this);
+            }
+        }
     }
 
 
@@ -79,13 +89,6 @@ public class KBListFragment extends Fragment
 
         expandableListView = view.findViewById(R.id.expandableListView);
 
-        if ( kbViewModel == null ) {
-            if ( supportSDK.kbViewModel() != null ) {
-                kbViewModel = supportSDK.kbViewModel();
-            } else {
-                supportSDK.getKB(this);
-            }
-        }
         if ( kbViewModel != null ) {
             setupAdapter(kbViewModel);
         }
@@ -114,10 +117,9 @@ public class KBListFragment extends Fragment
 
     private void setupAdapter(KBViewModel kbViewModel) {
         final KBListFragment listener = this;
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(() -> {
-                expandableListAdapter = new KBExpandableListAdapter(activity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
+        if (mActivity != null) {
+            mActivity.runOnUiThread(() -> {
+                expandableListAdapter = new KBExpandableListAdapter(mActivity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
                 if ( expandableListView!=null && expandableListAdapter!=null ) {
                     expandableListAdapter.mListener = listener;
                     expandableListAdapter.expandableListView = expandableListView;
@@ -147,7 +149,7 @@ public class KBListFragment extends Fragment
         kbListFragment.supportSDK = supportSDK;
         kbListFragment.mSupportButton = mSupportButton;
         try {
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             ViewGroup viewGroup = (ViewGroup) mView.getParent();
             int viewId = viewGroup.getId();
@@ -177,7 +179,7 @@ public class KBListFragment extends Fragment
         kbSearchFragment.mContext = mContext;
         kbSearchFragment.supportSDK = supportSDK;
         try {
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             ViewGroup viewGroup = (ViewGroup) mView.getParent();
             int viewId = viewGroup.getId();

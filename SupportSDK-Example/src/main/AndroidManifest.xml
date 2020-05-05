@@ -12,13 +12,23 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|keyboardHidden|screenSize|uiMode"
+            android:launchMode="singleTask"
+            android:screenOrientation="user"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.goboomtown.supportsdk.activity.VideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|uiMode" />
+        <activity
+            android:name="com.goboomtown.activity.KBActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|uiMode" />
     </application>
 
 </manifest>
