@@ -3,9 +3,9 @@
     <item android:left="0dp" android:right="0dp"  android:top="0dp"
         android:bottom="0dp">
         <shape android:shape="rectangle">
-            <stroke android:width="2dp" android:color="@android:color/black" />
+            <stroke android:width="2dp" android:color="@color/loginFieldBorderColor" />
             <corners android:radius="10dp"/>
-            <solid android:color="@android:color/white" />
+            <solid android:color="@color/loginFieldBackgroundColor" />
         </shape>
     </item>
 

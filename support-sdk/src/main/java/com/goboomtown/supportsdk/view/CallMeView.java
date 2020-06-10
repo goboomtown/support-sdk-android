@@ -111,8 +111,11 @@ public class CallMeView {
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
-                Button button = ((androidx.appcompat.app.AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                button.setOnClickListener(new View.OnClickListener() {
+                Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
+                Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setTextColor(mContext.getResources().getColor(R.color.callMeButtonBackgroundColor));
+                negativeButton.setTextColor(mContext.getResources().getColor(R.color.callMeButtonTextColor));
+                positiveButton.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View view) {
@@ -137,6 +140,7 @@ public class CallMeView {
 
     private boolean validatePhoneNumber(String phoneNumber) {
         String pattern = "^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?: *x(\\d+))?\\s*$";
+//        pattern = "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$";
         Matcher m;
         Pattern r = Pattern.compile(pattern);
         if ( phoneNumber!=null && !phoneNumber.isEmpty() ) {

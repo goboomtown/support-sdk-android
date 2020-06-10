@@ -95,6 +95,23 @@ public class RatingView {
         });
 
         androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
+                Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setTextColor(mContext.getResources().getColor(R.color.ratingButtonBackgroundColor));
+                negativeButton.setTextColor(mContext.getResources().getColor(R.color.ratingButtonTextColor));
+//                positiveButton.setOnClickListener(new View.OnClickListener() {
+//
+//                    @Override
+//                    public void onClick(View view) {
+//                        String desc = mCallbackDescriptionEditText.getText().toString();
+//                        rateIssue(supportSDK.rateableIssueId, rating, desc);
+//                    }
+//                });
+            }
+        });
         dialog.show();
     }
 

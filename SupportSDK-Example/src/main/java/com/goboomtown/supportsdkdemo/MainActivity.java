@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void supportButtonDidGetSettings() {
         Log.d(TAG, "#helpButtonDidGetSettings");
+//        mSupportButton.menuStyle = SupportButton.MenuStyle.BUTTON;
     }
 
     @Override

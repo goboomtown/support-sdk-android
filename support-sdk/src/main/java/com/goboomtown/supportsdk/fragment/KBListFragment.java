@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -76,7 +78,12 @@ public class KBListFragment extends Fragment
             if ( supportSDK.kbViewModel() != null ) {
                 kbViewModel = supportSDK.kbViewModel();
             } else {
-                supportSDK.getKB(this);
+                if ( supportSDK.isKBRequested )  {
+                    supportSDK.mKBListener = this;
+                } else {
+                    supportSDK.isKBRequested = true;
+                    supportSDK.getKB(this);
+                }
             }
         }
     }
@@ -101,7 +108,9 @@ public class KBListFragment extends Fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_kblist, menu);
-     }
+        MenuItem home = menu.findItem(R.id.action_home);
+        home.setVisible(supportSDK.kbSubscreensOnStack>0);
+    }
 
 
     @Override
@@ -109,6 +118,10 @@ public class KBListFragment extends Fragment
         int id = item.getItemId();
         if (id == R.id.action_search) {
             showSearchFragment();
+            return true;
+        }
+        else if (id == R.id.action_home) {
+            backToHome();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -125,6 +138,9 @@ public class KBListFragment extends Fragment
                     expandableListAdapter.expandableListView = expandableListView;
                     expandableListView.setAdapter(expandableListAdapter);
                     expandableListAdapter.notifyDataSetChanged();
+                    for(int i=0; i < expandableListAdapter.getGroupCount(); i++) {
+                        expandableListView.expandGroup(i);
+                    }
                 }
             });
         }
@@ -142,6 +158,22 @@ public class KBListFragment extends Fragment
         }
     }
 
+
+    private void backToHome() {
+        for ( int n=0; n<supportSDK.kbSubscreensOnStack; n++ ) {
+            FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
+            fragmentManager.popBackStackImmediate();
+        }
+        supportSDK.kbSubscreensOnStack = 0;
+//        if ( mActivity instanceof AppCompatActivity ) {
+//            AppCompatActivity activity = (AppCompatActivity) mActivity;
+//            ActionBar actionBar = activity.getSupportActionBar();
+//            if ( actionBar != null ) {
+//                actionBar.hide();
+//            }
+//        }
+    }
+
     private void showFolder(KBEntryModel entry) {
         KBViewModel kbViewModel = new KBViewModel(entry);
         KBListFragment kbListFragment = new KBListFragment(kbViewModel);
@@ -156,6 +188,7 @@ public class KBListFragment extends Fragment
             fragmentTransaction.replace(viewId, kbListFragment, KBLISTFRAGMENT_TAG);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
+            supportSDK.kbSubscreensOnStack++;
         } catch (Exception e) {
             e.printStackTrace();
         }

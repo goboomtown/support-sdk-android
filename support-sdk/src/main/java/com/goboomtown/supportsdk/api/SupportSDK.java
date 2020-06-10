@@ -106,6 +106,10 @@ public class SupportSDK
     public  Boolean isExtStorageWriteable = false;
     public  Boolean isSystemOverlayPermitted = false;
 
+    public int      kbSubscreensOnStack;
+    public boolean isKBRequested = false;
+    public SupportSDKKBListener mKBListener;
+
     public  Locale   locale;
 
     /**
@@ -688,7 +692,10 @@ public class SupportSDK
                     if (mListener != null) {
                         mListener.supportSDKDidGetSettings();
                     }
-                    getKB(null);
+                    if ( !isKBRequested ) {
+                        isKBRequested = true;
+                        getKB(null);
+                    }
                     if ( mCustomerInfo != null ) {
                         restGetCustomerInformationWithInfo(mCustomerInfo, null);
                     }
@@ -699,6 +706,7 @@ public class SupportSDK
 
 
     public void getKB(final SupportSDKKBListener kbListener) {
+        mKBListener = kbListener;
         String url = SupportSDK.kSDKV1Endpoint + "/kb/get";
 
         get(url, new Callback() {
@@ -719,8 +727,8 @@ public class SupportSDK
                             JSONArray resultsJSON = jsonObject.getJSONArray("results");
 
                             kbViewModel = new KBViewModel(resultsJSON);
-                            if ( kbListener != null ) {
-                                kbListener.supportSDKDidRetrieveKB(kbViewModel);
+                            if ( mKBListener != null ) {
+                                mKBListener.supportSDKDidRetrieveKB(kbViewModel);
                             }
                             success = true;
                         } catch (JSONException e) {

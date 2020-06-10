@@ -6,26 +6,35 @@ import java.util.ArrayList;
 
 public class KBEntryModel {
 
-    private String    title;
-    private String    body;
-    private String    created;
-    private String    folderName;
-    private String    id;
-    private String    keywords;
-    private String    ownerPartnerId;
-    private String    parentId;
-    private String    rootName;
-    private String    rootParentId;
-    private boolean   searchable;
-    private String    shortName;
-    private String    status;
-    private String    subtitle;
-    private String    type;
-    private String    visibility;
-    private String    avatar;
-    private String    preview;
-    private String    url;
-    public  int         level;
+    public enum KBType {
+        ARTICLE,
+        FOLDER,
+        LIBRARY
+    };
+
+    private String  title;
+    private String  body;
+    private String  created;
+    private String  folderName;
+    private String  id;
+    private String  keywords;
+    private String  ownerPartnerId;
+    private String  parentId;
+    private String  rootName;
+    private String  rootParentId;
+    private String  searchable;
+    private String  shortName;
+    private String  status;
+    private String  subtitle;
+    private int     type;
+    private String  visibility;
+    private String  avatar;
+    private String  preview;
+    private String  url;
+    private String  desc;
+    private String  path;
+    private String  actual_path;
+    public  int     level;
 
     private boolean     collapsed = true;
 
@@ -47,16 +56,19 @@ public class KBEntryModel {
         parentId       = entryJSON.optString("parent_id");
         rootName       = entryJSON.optString("root_name");
         rootParentId   = entryJSON.optString("root_parent_id");
-        searchable     = entryJSON.optBoolean("searchable", false);
+        searchable     = entryJSON.optString("searchable");
         shortName      = entryJSON.optString("short_name");
         status         = entryJSON.optString("status");
         subtitle       = entryJSON.optString("sub_title");
         title          = entryJSON.optString("title");
-        type           = entryJSON.optString("type");
+        type           = entryJSON.optInt("type", 0);
         visibility     = entryJSON.optString("visibility");
         avatar         = entryJSON.optString("avatar");
         preview        = entryJSON.optString("preview");
         url            = entryJSON.optString("url");
+        desc           = entryJSON.optString("desc");
+        path           = entryJSON.optString("path");
+        actual_path    = entryJSON.optString("actual_path");
     }
 
 
@@ -97,16 +109,15 @@ public class KBEntryModel {
 
 
     public boolean isFolder() {
-        return type.equalsIgnoreCase("Folder");
+        return type==KBType.FOLDER.ordinal() || type==KBType.LIBRARY.ordinal();
     }
 
-
     public boolean isArticle() {
-        return type.equalsIgnoreCase("Article");
+        return type==KBType.ARTICLE.ordinal();
     }
 
     public boolean isRoot() {
-        return rootParentId.isEmpty();
+        return type==KBType.LIBRARY.ordinal();
     }
 
 

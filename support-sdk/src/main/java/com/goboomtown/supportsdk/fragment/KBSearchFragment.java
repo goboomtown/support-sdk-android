@@ -241,7 +241,12 @@ public class KBSearchFragment extends Fragment
             recentSearches.add(search);
             saveRecentSearches(getActivity());
             setupAdapter();
-            expandableListAdapter.updateData(sectionHeadings, createEntries());
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    expandableListAdapter.updateData(sectionHeadings, createEntries());
+                }
+            });
         }
     }
 

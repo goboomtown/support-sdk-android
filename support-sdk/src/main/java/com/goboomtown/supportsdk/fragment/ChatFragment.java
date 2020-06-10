@@ -4,13 +4,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+
+import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -51,6 +56,22 @@ public class ChatFragment extends BaseChatFragment {
     public  Context         mContext;
     private MenuItem        mMenuItemEndCall;
     private boolean         isScreenShare = false;
+
+    public void configureAppearance()
+    {
+//        super.configureAppearance();
+        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = colorFromValue(R.color.chatSendButtonDisabledColor);
+        BoomtownChat.sharedInstance().chatSendButtonColor           = colorFromValue(R.color.chatSendButtonEnabledColor);
+        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
+        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
+        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = colorFromValue(R.color.chatActionButtonBorderColor);
+        chatUploadButton.setColorFilter(R.color.chatIconColor);
+    }
+
+    private int colorFromValue(int value) {
+        return getResources().getColor(value);
+    }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

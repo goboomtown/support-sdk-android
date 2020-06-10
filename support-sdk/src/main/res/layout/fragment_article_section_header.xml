@@ -31,11 +31,24 @@ android:layout_height="wrap_content"
 android:orientation="vertical"
 android:padding="8dp">
 
-<TextView
-    android:id="@+id/sectionHeaderLabel"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-    android:textSize="17sp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft">
+
+        <ImageView
+            android:id="@+id/sectionHeaderIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@string/desc_kb_acticle_type_image" />
+
+        <TextView
+            android:id="@+id/sectionHeaderLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -57,8 +57,10 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
     private static final String TAG = SupportButton.class.getSimpleName();
 
     public enum MenuStyle {
+        NO_MENU,
         MENU,
-        BUTTON
+        BUTTON,
+        ICON_LIST
     };
 
 
@@ -84,6 +86,7 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
     private SupportSDK      supportSDK;
     private ChatFragment    chatFragment;
     private KBListFragment  kbListFragment;
+    public  ArrayList<SupportMenuEntry> mEntries = new ArrayList<>();
 
     private String mExampleString; // TODO: use a default from R.string...
     private int mExampleColor = Color.RED; // TODO: use a default from R.color...
@@ -202,18 +205,8 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
     }
 
     public void click() {
-        if (this.supportSDK.memberID == null) {
-            this.supportSDK.memberID = this.supportSDK.defaultMemberID;
-        }
-
-        if (this.supportSDK.memberUserID == null) {
-            this.supportSDK.memberUserID = this.supportSDK.defaultMemberUserID;
-        }
-
-        if (this.supportSDK.memberLocationID == null) {
-            this.supportSDK.memberLocationID = this.supportSDK.defaultMemberLocationID;
-        }
         switch(menuStyle) {
+            case ICON_LIST:
             case BUTTON:
                 mActivity.get().runOnUiThread(new Runnable() {
                     @Override
@@ -230,16 +223,6 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
     }
 
     private void clicked() {
-        if ( supportSDK.memberID == null ) {
-            supportSDK.memberID = supportSDK.defaultMemberID;
-        }
-        if ( supportSDK.memberUserID == null ) {
-            supportSDK.memberUserID = supportSDK.defaultMemberUserID;
-        }
-        if ( supportSDK.memberLocationID == null ) {
-            supportSDK.memberLocationID = supportSDK.defaultMemberLocationID;
-        }
-
 //        This is for testing purposes
 //        supportSDK.memberID = "WA3QMJ";
 //        supportSDK.memberUserID = "WA3QMJ-5XK";
@@ -303,7 +286,7 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
 
     public void setChatTitle(String title) {
         if (mListener != null) {
-            mListener.supportButtonSetTitle(title);
+            mListener.supportButtonSetTitle("");
         }
     }
 
@@ -396,6 +379,18 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
     }
 
     public void supportSDKDidGetSettings() {
+        if (this.supportSDK.memberID == null) {
+            this.supportSDK.memberID = this.supportSDK.defaultMemberID;
+        }
+
+        if (this.supportSDK.memberUserID == null) {
+            this.supportSDK.memberUserID = this.supportSDK.defaultMemberUserID;
+        }
+
+        if (this.supportSDK.memberLocationID == null) {
+            this.supportSDK.memberLocationID = this.supportSDK.defaultMemberLocationID;
+        }
+        createSupportEntries();
         if (mListener != null) {
             mListener.supportButtonDidGetSettings();
         }
@@ -407,19 +402,64 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         }
     }
 
-    private void showSupportDialog() {
-        List<String> availableItems = new ArrayList<>();
+    private void createSupportEntries() {
+        mEntries.clear();
         if ( supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
-            availableItems.add(getResources().getString(R.string.label_chat_with_us));
+            SupportMenuEntry entry = new SupportMenuEntry();
+            entry.label = getResources().getString(R.string.label_chat_with_us);
+            entry.resourceId = R.drawable.a_chat;
+            entry.onClickListener = new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if ( supportSDK.supportUnavailable ) {
+                        AlertDialog.Builder unavailableBuilder = new AlertDialog.Builder(mContext.get());
+                        unavailableBuilder.setTitle(R.string.text_unavailable);
+                        unavailableBuilder.setMessage(supportSDK.supportUnavailableSummary);
+                        unavailableBuilder.setNeutralButton(mContext.get().getString(R.string.text_ok),
+                                (unavailableDialog, which) -> unavailableDialog.dismiss());
+                        unavailableBuilder.show();
+                    } else {
+                        getOrCreateIssue();
+                    }
+                }
+            };
+            mEntries.add(entry);
         }
         if ( supportSDK.showSupportCallMe ) {
-            availableItems.add(supportSDK.callMeButtonText);
+            SupportMenuEntry entry = new SupportMenuEntry();
+            entry.label = supportSDK.callMeButtonText;
+            entry.resourceId = R.drawable.phone_call;
+            entry.onClickListener = new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getCallbackNumber();
+                }
+            };
+            mEntries.add(entry);
         }
         if ( supportSDK.showKnowledgeBase ) {
-            availableItems.add(getResources().getString(R.string.label_search_knowledge));
+            SupportMenuEntry entry = new SupportMenuEntry();
+            entry.label = getResources().getString(R.string.label_search_knowledge);
+            entry.resourceId = R.drawable.book_bookmark;
+            entry.onClickListener = new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showKnowledgeBase();
+                }
+            };
+            mEntries.add(entry);
         }
         if ( supportSDK.supportWebsiteURL!=null && supportSDK.showSupportWebsite ) {
-            availableItems.add(getResources().getString(R.string.label_web_support));
+            SupportMenuEntry entry = new SupportMenuEntry();
+            entry.label = getResources().getString(R.string.label_web_support);
+            entry.resourceId = R.drawable.globe;
+            entry.onClickListener = new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    visitWebsite();
+                }
+            };
+            mEntries.add(entry);
         }
         if ( supportSDK.supportEmailAddress!=null && supportSDK.showSupportEmail ) {
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
@@ -427,15 +467,68 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
             PackageManager packageManager = mContext.get().getPackageManager();
             List<ResolveInfo> list = packageManager.queryIntentActivities(emailIntent, 0);
             if ( list.size() > 0 ) {
-                availableItems.add(getResources().getString(R.string.label_email_support));
+                SupportMenuEntry entry = new SupportMenuEntry();
+                entry.label = getResources().getString(R.string.label_email_support);
+                entry.resourceId = R.drawable.letter;
+                entry.onClickListener = new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        sendEmail();
+                    }
+                };
+                mEntries.add(entry);
             }
         }
         if ( supportSDK.supportPhoneNumber!=null && supportSDK.showSupportPhone ) {
             PackageManager packageManager = mContext.get().getPackageManager();
             if ( packageManager!=null && packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) ) {
-                availableItems.add(getResources().getString(R.string.label_phone_support));
+                SupportMenuEntry entry = new SupportMenuEntry();
+                entry.label = getResources().getString(R.string.label_phone_support);
+                entry.resourceId = R.drawable.phone;
+                entry.onClickListener = new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        phone();
+                    }
+                };
+                mEntries.add(entry);
             }
         }
+    }
+
+
+    private void showSupportDialog() {
+        List<String> availableItems = new ArrayList<>();
+        for ( SupportMenuEntry entry : mEntries ) {
+            availableItems.add(entry.label);
+        }
+//        if ( supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
+//            availableItems.add(getResources().getString(R.string.label_chat_with_us));
+//        }
+//        if ( supportSDK.showSupportCallMe ) {
+//            availableItems.add(supportSDK.callMeButtonText);
+//        }
+//        if ( supportSDK.showKnowledgeBase ) {
+//            availableItems.add(getResources().getString(R.string.label_search_knowledge));
+//        }
+//        if ( supportSDK.supportWebsiteURL!=null && supportSDK.showSupportWebsite ) {
+//            availableItems.add(getResources().getString(R.string.label_web_support));
+//        }
+//        if ( supportSDK.supportEmailAddress!=null && supportSDK.showSupportEmail ) {
+//            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+//            emailIntent.setType("message/rfc822");
+//            PackageManager packageManager = mContext.get().getPackageManager();
+//            List<ResolveInfo> list = packageManager.queryIntentActivities(emailIntent, 0);
+//            if ( list.size() > 0 ) {
+//                availableItems.add(getResources().getString(R.string.label_email_support));
+//            }
+//        }
+//        if ( supportSDK.supportPhoneNumber!=null && supportSDK.showSupportPhone ) {
+//            PackageManager packageManager = mContext.get().getPackageManager();
+//            if ( packageManager!=null && packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) ) {
+//                availableItems.add(getResources().getString(R.string.label_phone_support));
+//            }
+//        }
         availableItems.add(getResources().getString(R.string.label_cancel));
 
         CharSequence[] theItems = new CharSequence[availableItems.size()];
@@ -448,107 +541,55 @@ public class SupportButton extends View implements SupportSDK.SupportSDKListener
         builder.setItems(items, (dialog, item) -> {
             dialog.dismiss();
             String label = (String) items[item];
-            if ( label.equalsIgnoreCase(getResources().getString(R.string.label_chat_with_us))) {
-                if ( supportSDK.supportUnavailable ) {
-                    AlertDialog.Builder unavailableBuilder = new AlertDialog.Builder(mContext.get());
-                    unavailableBuilder.setTitle(R.string.text_unavailable);
-                    unavailableBuilder.setMessage(supportSDK.supportUnavailableSummary);
-                    unavailableBuilder.setNeutralButton(mContext.get().getString(R.string.text_ok),
-                            (unavailableDialog, which) -> unavailableDialog.dismiss());
-                    unavailableBuilder.show();
-                } else {
-                    getOrCreateIssue();
+            for ( SupportMenuEntry entry : mEntries ) {
+                if ( label.equalsIgnoreCase(entry.label) ) {
+                    View v = new View(mContext.get());
+                    v.setOnClickListener(entry.onClickListener);
+                    v.performClick();
+                    break;
                 }
             }
-            else if ( label.equalsIgnoreCase(supportSDK.callMeButtonText) ) {
-                getCallbackNumber();
-            }
-            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_search_knowledge)) ) {
-                showKnowledgeBase();
-            }
-            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_web_support))) {
-                visitWebsite();
-            }
-            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_email_support))) {
-                sendEmail();
-            }
-            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_phone_support))) {
-                phone();
+//            if ( label.equalsIgnoreCase(getResources().getString(R.string.label_chat_with_us))) {
+//                if ( supportSDK.supportUnavailable ) {
+//                    AlertDialog.Builder unavailableBuilder = new AlertDialog.Builder(mContext.get());
+//                    unavailableBuilder.setTitle(R.string.text_unavailable);
+//                    unavailableBuilder.setMessage(supportSDK.supportUnavailableSummary);
+//                    unavailableBuilder.setNeutralButton(mContext.get().getString(R.string.text_ok),
+//                            (unavailableDialog, which) -> unavailableDialog.dismiss());
+//                    unavailableBuilder.show();
+//                } else {
+//                    getOrCreateIssue();
+//                }
+//            }
+//            else if ( label.equalsIgnoreCase(supportSDK.callMeButtonText) ) {
+//                getCallbackNumber();
+//            }
+//            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_search_knowledge)) ) {
+//                showKnowledgeBase();
+//            }
+//            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_web_support))) {
+//                visitWebsite();
+//            }
+//            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_email_support))) {
+//                sendEmail();
+//            }
+//            else if ( label.equalsIgnoreCase(getResources().getString(R.string.label_phone_support))) {
+//                phone();
+//            }
+        });
+        mActivity.get().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog dialog = builder.show();
             }
         });
-        AlertDialog dialog = builder.show();
     }
 
 
     private void createSupportMenuView() {
-        SupportMenuView supportMenuView = new SupportMenuView(mContext.get());
+        SupportMenuView supportMenuView = new SupportMenuView(mContext.get(), mActivity.get(),  mEntries, menuStyle);
         supportMenuView.mActivity = mActivity.get();
         supportMenuView.supportSDK = supportSDK;
-
-        List<String> availableItems = new ArrayList<>();
-        if ( supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
-            SupportMenuButton menuButton = supportMenuButton(mContext,
-                    getResources().getString(R.string.label_chat_with_us),
-                    R.drawable.a_chat);
-            menuButton.setOnClickListener(v -> {
-                if ( supportSDK.supportUnavailable ) {
-                    AlertDialog.Builder unavailableBuilder = new AlertDialog.Builder(mContext.get());
-                    unavailableBuilder.setTitle(R.string.text_unavailable);
-                    unavailableBuilder.setMessage(supportSDK.supportUnavailableSummary);
-                    unavailableBuilder.setNeutralButton(mContext.get().getString(R.string.text_ok),
-                            (unavailableDialog, which) -> unavailableDialog.dismiss());
-                    unavailableBuilder.show();
-                } else {
-                    getOrCreateIssue();
-                }
-            });
-            supportMenuView.mButtons.add(menuButton);
-        }
-        if ( supportSDK.showSupportCallMe ) {
-            SupportMenuButton menuButton = supportMenuButton(mContext,
-                    supportSDK.callMeButtonText,
-                    R.drawable.phone_call);
-            menuButton.setOnClickListener(v -> getCallbackNumber());
-            supportMenuView.mButtons.add(menuButton);
-        }
-        if ( supportSDK.showKnowledgeBase ) {
-            SupportMenuButton menuButton = supportMenuButton(mContext,
-                    getResources().getString(R.string.label_search_knowledge),
-                    R.drawable.book_bookmark);
-            menuButton.setOnClickListener(v -> showKnowledgeBase());
-            supportMenuView.mButtons.add(menuButton);
-        }
-        if ( supportSDK.supportWebsiteURL!=null && supportSDK.showSupportWebsite ) {
-            SupportMenuButton menuButton = supportMenuButton(mContext,
-                    getResources().getString(R.string.label_web_support),
-                    R.drawable.book_bookmark);
-            menuButton.setOnClickListener(v -> visitWebsite());
-            supportMenuView.mButtons.add(menuButton);
-        }
-        if ( supportSDK.supportEmailAddress!=null && supportSDK.showSupportEmail ) {
-            Intent emailIntent = new Intent(Intent.ACTION_SEND);
-            emailIntent.setType("message/rfc822");
-            PackageManager packageManager = mContext.get().getPackageManager();
-            List<ResolveInfo> list = packageManager.queryIntentActivities(emailIntent, 0);
-            if ( list.size() > 0 ) {
-                SupportMenuButton menuButton = supportMenuButton(mContext,
-                        getResources().getString(R.string.label_email_support),
-                        R.drawable.letter);
-                menuButton.setOnClickListener(v -> sendEmail());
-                supportMenuView.mButtons.add(menuButton);
-            }
-        }
-        if ( supportSDK.supportPhoneNumber!=null && supportSDK.showSupportPhone ) {
-            PackageManager packageManager = mContext.get().getPackageManager();
-            if ( packageManager!=null && packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) ) {
-                SupportMenuButton menuButton = supportMenuButton(mContext,
-                        getResources().getString(R.string.label_phone_support),
-                        R.drawable.phone);
-                menuButton.setOnClickListener(v -> phone());
-                supportMenuView.mButtons.add(menuButton);
-            }
-        }
-        supportMenuView.refresh();
 
         if (mListener != null) {
             mListener.supportButtonDisplayView(supportMenuView);

@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:enabled="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/callMeLabelTextColor"
         android:text="@string/label_callback_number" />
 
     <EditText
@@ -24,6 +25,7 @@
         android:hint="@string/placeholder_callback_number"
         android:inputType="phone"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/callMeLabelTextColor"
         android:textAlignment="viewStart" />
 
     <TextView
@@ -31,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/callMeLabelTextColor"
         android:text="@string/label_callback_description" />
 
     <EditText
@@ -43,6 +46,7 @@
         android:inputType="textMultiLine"
         android:lines="10"
         android:singleLine="false"
+        android:textColor="@color/callMeLabelTextColor"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
 </LinearLayout>

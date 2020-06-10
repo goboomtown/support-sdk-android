@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:enabled="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/ratingLabelTextColor"
         android:text="@string/text_how_was_your_experience" />
 
     <LinearLayout
@@ -89,6 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/ratingLabelTextColor"
         android:text="@string/text_anything_to_add" />
 
     <EditText
@@ -101,6 +103,7 @@
         android:inputType="textMultiLine"
         android:lines="10"
         android:singleLine="false"
+        android:textColor="@color/ratingLabelTextColor"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
 </LinearLayout>

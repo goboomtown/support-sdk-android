@@ -47,35 +47,7 @@ public class KBViewModel {
     }
 
 
-    private void processEntriesOld(JSONArray entriesJSON) {
-        KBEntryModel parent = null;
-        ArrayList<KBEntryModel> remainingEntries = new ArrayList<>();
-        entries = new ArrayList<>();
-        for ( int n=0; n<entriesJSON.length(); n++  ) {
-            try {
-                JSONObject entryJSON = entriesJSON.getJSONObject(n);
-                KBEntryModel entry = new KBEntryModel(entryJSON);
-                entries.add(entry);
-                if ( entry.isRoot() ) {
-                    entry.level = 0;
-                    kbRoot = entry;
-                    parent = entry;
-                } else {
-                    remainingEntries.add(entry);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        while ( remainingEntries.size() > 0 ) {
-            if ( parent != null ) {
-                remainingEntries = parent.addChildrenFromEntries(remainingEntries);
-            }
-        }
-    }
-
-
-    private void processEntries(JSONArray entriesJSON) {
+     private void processEntries(JSONArray entriesJSON) {
         KBEntryModel parent = null;
         kbRoot = new KBEntryModel();
         ArrayList<KBEntryModel> remainingEntries = new ArrayList<>();
@@ -97,9 +69,13 @@ public class KBViewModel {
             }
         }
         while ( remainingEntries.size() > 0 ) {
+            int lastRemainingCount = remainingEntries.size();
             for ( Object object : kbRoot.children() ) {
                 KBEntryModel entry = (KBEntryModel) object;
                 remainingEntries = entry.addChildrenFromEntries(remainingEntries);
+            }
+            if ( remainingEntries.size() == lastRemainingCount ) {
+                remainingEntries.clear();
             }
         }
     }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="loginBackgroundColor">#F7F7F7</color>
+    <color name="loginFieldBorderColor">#E0E0E0</color>
+    <color name="loginFieldBackgroundColor">#F3F8F8</color>
+    <color name="loginFieldTextColor">#ACACAC</color>
+    <color name="loginButtonColor">#1DBBBB</color>
+
+    <color name="homeIconColor">#EF5E0D</color>
+    <color name="homeLineColor">#E0E0E0</color>
+    <color name="homeTextColor">#4F4F4F</color>
+    <color name="homeSelectedColor">#EBEBEB</color>
+
+    <color name="callMeHeaderTextColor">#4F4F4F</color>
+    <color name="callMeLabelTextColor">#626363</color>
+    <color name="callMeHintTextColor">#ACACAC</color>
+    <color name="callMeButtonTextColor">#ACACAC</color>
+    <color name="callMeButtonBackgroundColor">#1AA8A8</color>
+
+    <color name="ratingHeaderTextColor">#4F4F4F</color>
+    <color name="ratingLabelTextColor">#626363</color>
+    <color name="ratingHintTextColor">#ACACAC</color>
+    <color name="ratingButtonTextColor">#ACACAC</color>
+    <color name="ratingButtonBackgroundColor">#1AA8A8</color>
+
+    <color name="chatRefidTextColor">#4f4f4f</color>
+    <color name="chatNavBarColor">#F7F7F7</color>
+    <color name="chatSendButtonEnabledColor">#626363</color>
+    <color name="chatSendButtonDisabledColor">#ACACAC</color>
+    <color name="chatTimeStampColor">#ACACAC</color>
+    <color name="chatActionButtonTextColor">#838383</color>
+    <color name="chatActionButtonSelectedTextColor">#ffffff</color>
+    <color name="chatActionButtonBorderColor">#E0E0E0</color>
+    <color name="chatIconColor">#838383</color>
+
+    <color name="kbFolderNameTextColor">#4F4F4F</color>
+    <color name="kbFolderL0BackgroundColor">#ACACAC</color>
+    <color name="kbTextColor">#4F4F4F</color>
+</resources>
+

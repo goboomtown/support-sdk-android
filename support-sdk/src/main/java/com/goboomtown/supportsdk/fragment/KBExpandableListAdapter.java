@@ -97,6 +97,10 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         Object child = getChild(groupPosition, childPosition);
         if ( child instanceof KBEntryModel ) {
             final KBEntryModel entry = (KBEntryModel) child;
+            if ( entry.isFolder() ) {
+                iconView.setImageDrawable(this.context.getResources().getDrawable(R.drawable.book_bookmark));
+                iconView.setVisibility(View.VISIBLE);
+            }
             String childText = entry.title();
             articleLabel.setText(childText);
         }  else if ( child instanceof String ) {
@@ -165,7 +169,12 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.fragment_article_section_header, parent, false);
         }
 
+        convertView.setBackgroundColor(this.context.getResources().getColor(R.color.kbFolderL0BackgroundColor));
+
+        ImageView iconView = convertView.findViewById(R.id.sectionHeaderIcon);
+        iconView.setImageDrawable(this.context.getResources().getDrawable(R.drawable.book_bookmark));
         TextView sectionHeaderLabel = convertView.findViewById(R.id.sectionHeaderLabel);
+        sectionHeaderLabel.setTextColor(this.context.getResources().getColor(R.color.kbFolderNameTextColor));
 
         String title = (String) getGroup(groupPosition);
         sectionHeaderLabel.setText(title);

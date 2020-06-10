@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Support SDK</string>
     <string name="action_done">Done</string>
+    <string name="action_home">Home</string>
     <string name="action_search">Search</string>
     <string name="action_resolve">End Chat</string>
     <string name="action_end_call">End Call</string>
