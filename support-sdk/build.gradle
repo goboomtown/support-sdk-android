@@ -128,7 +128,7 @@ task sourcesJar(type: Jar) {
 
 task classesJar(type: Jar) {
 //    from "$buildDir/intermediates/classes/release"
-    from "$buildDir/intermediates/aar_main_jar/release"
+    from "$buildDir/intermediates/javac/release"
 }
 
 artifacts {
