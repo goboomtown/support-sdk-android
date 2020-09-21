@@ -162,8 +162,8 @@ dependencies {
 //    implementation project(path: ':boomtown-boomtownchat-android', configuration: 'default')
 //    implementation project(path: ':boomtown-video-android', configuration: 'default')
 
-    implementation project(':boomtown-boomtownchat-android')
-    implementation project(':boomtown-video-android')
+//    implementation project(':boomtown-boomtownchat-android')
+//    implementation project(':boomtown-video-android')
 
     implementation 'com.google.android.material:material:1.1.0'
 
