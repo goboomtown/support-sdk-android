@@ -37,6 +37,7 @@ public class BTConnectIssue
     private static final String k_arrival_time              = "arrival_time";
     private static final String k_category 				    = "category";
     private static final String k_created 				    = "created";
+    private static final String k_resolved 				    = "resolved";
     private static final String k_departure_time 		    = "departure_time";
     private static final String k_details 				    = "details";
     private static final String k_enroute_time			    = "enroute_time";
@@ -54,7 +55,9 @@ public class BTConnectIssue
     private static final String k_remote_id 				= "remote_id";
     private static final String k_resolution 			    = "resolution";
     private static final String k_scheduled_time			= "scheduled_time";
+    private static final String k_owner_user_avatar			= "owner_user_avatar";
     private static final String k_status 				    = "status";
+    private static final String k_rating 				    = "rating";
     private static final String k_is_rated 				    = "isRated";
     private static final String k_type 					    = "type";
     private static final String k_updated 				    = "updated";
@@ -64,6 +67,7 @@ public class BTConnectIssue
     public String   arrival_time;
     public String   category;
     public String   created;
+    public String   resolved;
     public String   departure_time;
     public String   details;
     public String   enroute_time;
@@ -81,11 +85,14 @@ public class BTConnectIssue
     public String   remote_id;
     public String   resolution;
     public String   scheduled_time;
+    public String   owner_user_avatar;
     public int      status;
+    public int      rating;
     public String   type;
     public String   updated;
     public String   comm_id;
     public String   xmpp_data;
+    public JSONObject   transcripts;
     public boolean  isRated;
 
 
@@ -102,6 +109,7 @@ public class BTConnectIssue
         arrival_time 			=   issueJSON.optString(k_arrival_time);
         category 				=   issueJSON.optString(k_category);
         created 				=   issueJSON.optString(k_created);
+        resolved 				=   issueJSON.optString(k_resolved);
         departure_time 		    =   issueJSON.optString(k_departure_time);
         details 				=   issueJSON.optString(k_details);
         enroute_time			=   issueJSON.optString(k_enroute_time);
@@ -119,12 +127,15 @@ public class BTConnectIssue
         remote_id 				=   issueJSON.optString(k_remote_id);
         resolution 			    =   issueJSON.optString(k_resolution);
         scheduled_time			=   issueJSON.optString(k_scheduled_time);
+        owner_user_avatar	    =   issueJSON.optString(k_owner_user_avatar);
         status 				    =   issueJSON.optInt(k_status, 0);
+        rating 				    =   issueJSON.optInt(k_rating, 0);
         isRated                 =   issueJSON.optBoolean(k_is_rated, false);
         type 					=   issueJSON.optString(k_type);
         updated 				=   issueJSON.optString(k_updated);
         comm_id 				=   issueJSON.optString(k_comm_id);
         xmpp_data				=   issueJSON.optString(k_xmpp_data);
+        transcripts             =   issueJSON.optJSONObject("transcripts");
     }
 
     private String toJSON() {
@@ -134,6 +145,7 @@ public class BTConnectIssue
             issueJSON.put(k_arrival_time,           arrival_time);
             issueJSON.put(k_category,               category);
             issueJSON.put(k_created,                created);
+            issueJSON.put(k_resolved,               resolved);
             issueJSON.put(k_departure_time,         departure_time);
             issueJSON.put(k_details,                details);
             issueJSON.put(k_enroute_time,           enroute_time);
@@ -152,6 +164,7 @@ public class BTConnectIssue
             issueJSON.put(k_resolution,             resolution);
             issueJSON.put(k_scheduled_time,         scheduled_time);
             issueJSON.put(k_status,                 status);
+            issueJSON.put(k_rating,                 rating);
             issueJSON.put(k_is_rated,               isRated);
             issueJSON.put(k_type,                   type);
             issueJSON.put(k_updated,                updated);
@@ -169,6 +182,7 @@ public class BTConnectIssue
         arrival_time 			=   null;
         category 				=   null;
         created 				=   null;
+        resolved                =   null;
         departure_time 		    =   null;
         details 				=   null;
         enroute_time			=   null;
@@ -186,7 +200,9 @@ public class BTConnectIssue
         remote_id 				=   null;
         resolution 			    =   null;
         scheduled_time			=   null;
+        owner_user_avatar       =   null;
         status 				    =   0;
+        rating                  =   0;
         isRated                 =   false;
         type 					=   null;
         updated 				=   null;
@@ -227,6 +243,21 @@ public class BTConnectIssue
         }
         return issue;
     }
+
+    public boolean isOpen() {
+        return status < RESOLVED;
+    }
+
+
+    public boolean isResolved() {
+         return status == RESOLVED;
+    }
+
+
+    public boolean isClosed() {
+        return status > RESOLVED;
+    }
+
 }
 
 

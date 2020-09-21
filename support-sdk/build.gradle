@@ -33,7 +33,7 @@ android {
         }
     }
     def versionMajor = 1
-    def versionMinor = 0
+    def versionMinor = 2
     def versionPatch = 0
 
     compileSdkVersion global_compileSdkVersion
@@ -100,7 +100,7 @@ android {
     }
 
 
-    defaultPublishConfig "debug"
+    defaultPublishConfig "release"
 
     packagingOptions {
         exclude 'META-INF/services/com.fasterxml.jackson.databind.Module'
@@ -162,8 +162,8 @@ dependencies {
 //    implementation project(path: ':boomtown-boomtownchat-android', configuration: 'default')
 //    implementation project(path: ':boomtown-video-android', configuration: 'default')
 
-//    implementation project(':boomtown-boomtownchat-android')
-//    implementation project(':boomtown-video-android')
+    implementation project(':boomtown-boomtownchat-android')
+    implementation project(':boomtown-video-android')
 
     implementation 'com.google.android.material:material:1.1.0'
 
@@ -203,3 +203,4 @@ dependencies {
 
 def siteUrl = 'https://github.com/goboomtown/support-sdk-android'      // Homepage URL of the library
 def gitUrl = 'https://github.com/goboomtown/support-sdk-android.git'   // Git repository URL
+

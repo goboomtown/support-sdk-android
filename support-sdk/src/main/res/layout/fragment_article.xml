@@ -23,6 +23,7 @@ android:orientation="vertical" >
             android:id="@+id/articleLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxLines="2"
             android:textSize="17sp" />
 
     </LinearLayout>

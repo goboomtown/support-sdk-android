@@ -50,11 +50,15 @@ public class Configuration {
 
     public boolean read(int configResourceId) throws IllegalStateException, IOException {
         String jsonString = Utils.readRawTextFile(mContext.get(), configResourceId);
+        return read(jsonString);
+    }
+
+    public boolean read(String jsonString) throws IllegalStateException, IOException {
         JSONObject result;
         try {
             result = new JSONObject(jsonString);
         } catch (JSONException e) {
-            Log.w(TAG, "resource " + configResourceId + " is not JSON (" + jsonString + ")\n" + Log.getStackTraceString(e));
+            Log.w(TAG, "string " + jsonString + " is not JSON (" + jsonString + ")\n" + Log.getStackTraceString(e));
             throw new IllegalStateException(e);
         }
         configAPIHost           = result.optString(kKeyAPIHost);

@@ -67,6 +67,8 @@
     <string name="label_web_support">Web Support</string>
     <string name="label_email_support">Email Support</string>
     <string name="label_phone_support">Phone Support</string>
+    <string name="label_forms">Forms</string>
+    <string name="label_history">History</string>
     <string name="label_share_screen">Share Screen</string>
     <string name="label_video_chat">Video Chat</string>
     <string name="label_cancel">Cancel</string>
@@ -119,6 +121,24 @@
 
     <string name="text_unavailable">Support is currently unavailable</string>
 
+    <string name="text_form">Form</string>
+    <string name="text_forms">Forms</string>
+    <string name="text_forms_unavailable">No forms available</string>
+    <string name="text_forms_ready">Forms are now ready</string>
+    <string name="text_history_unavailable">No history available</string>
+    <string name="text_history">History</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="warn_required_fields_empty">Some required fields are empty.\n</string>
+    <string name="warn_unable_to_update_form">Unable to update form.</string>
+
+    <string name="text_site_history">Site History</string>
+    <string name="text_chat_id">Chat ID</string>
+    <string name="text_status">Status</string>
+    <string name="text_rating">Rating</string>
+    <string name="text_open">Open</string>
+    <string name="text_resolved">Resolved</string>
+    <string name="text_closed">Closed</string>
+
 </resources>

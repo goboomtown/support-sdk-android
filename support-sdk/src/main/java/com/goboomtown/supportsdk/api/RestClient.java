@@ -131,6 +131,7 @@ public class RestClient {
                 SSLContext sslCtx = SSLContext.getInstance("TLS");
                 sslCtx.init(null, trustManagers, null);
                 clientBuilder.sslSocketFactory(sslCtx.getSocketFactory(), trustManager);
+//                clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
                 Log.w(TAG, "using self-signed cert trust mgr for HTTPS");
             } else {
                 try {

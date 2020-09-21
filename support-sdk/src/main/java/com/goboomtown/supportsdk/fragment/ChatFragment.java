@@ -36,6 +36,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import okhttp3.Call;
@@ -78,9 +79,13 @@ public class ChatFragment extends BaseChatFragment {
         inflater.inflate(R.menu.menu_chat, menu);
         mMenuItemActionDone = menu.findItem(R.id.action_done);
         mMenuItemActionDone.setVisible(false);
+        mMenuItemActionResolve = menu.findItem(R.id.action_resolve);
         mMenuItemEndCall = menu.findItem(R.id.action_end_call);
-        if ( supportSDK != null ) {
+        if (supportSDK != null) {
             mMenuItemEndCall.setVisible(supportSDK.isConnected());
+        }
+        if ( isReadOnly ) {
+            mMenuItemActionResolve.setVisible(false);
         }
     }
 
@@ -181,18 +186,49 @@ public class ChatFragment extends BaseChatFragment {
     @Override
     public void configureChat() {
         if ( mIssue != null ) {
-            if ( mIssue.reference_num != null ) {
+            if ( mIssue.reference_num!=null && chatTitle==null ) {
                 String title = String.format("%s", mIssue.reference_num);
-                mSupportButton.setChatTitle(title);
+                mSupportButton.setTitle(title);
             }
 
             JSONObject mXmppInfo = SupportSDK.extractXmppInformation(mIssue.xmpp_data, supportSDK.getKey());
             if ( mXmppInfo != null ) {
                 setXmppInfo(mXmppInfo);
+                if (mCommId != null) {
+                    if ( isReadOnly ) {
+                        setup();
+                        if ( chatTitle != null ) {
+                            mSupportButton.setTitle(chatTitle);
+                        }
+                        getTranscripts(mCommId);
+                    } else {
+                        commGet(mCommId);
+                    }
+                }
                 return;
             }
         }
         warn(getString(R.string.app_name), getString(R.string.warn_unable_to_obtain_chat_server_information));
+    }
+
+
+    private void getTranscripts(String comm_id) {
+        String me = "members_users:" + supportSDK.memberUserID;
+        senderId = me;
+        BoomtownChat.sharedInstance().me = me;
+        BoomtownChat.sharedInstance().ignoreParticipantStatus = true;
+        JSONObject transcripts = mIssue.transcripts.optJSONObject(comm_id);
+        if ( transcripts != null ) {
+            Iterator<String> keys = transcripts.keys();
+            while ( keys.hasNext() ) {
+                String key = keys.next();
+                BoomtownChatMessage chatMessage = new BoomtownChatMessage();
+                JSONObject transcript = transcripts.optJSONObject(key);
+                chatMessage.populateFromTranscript(transcript);
+                String fromKey = transcript.optString("from_key");
+                onReceiveMessage(chatMessage);
+            }
+        }
     }
 
 

@@ -60,16 +60,18 @@ public class SupportMenuView extends FrameLayout {
     private GridView            mGridView;
     private RecyclerView        mRecyclerView;
     private SupportButton.MenuStyle     mMenuStyle;
+    public  boolean             showLoginPrompt;
     private ArrayList<SupportMenuButton> mButtons = new ArrayList<>();
     private ArrayList<SupportMenuEntry> mEntries = new ArrayList<>();
 
 
-    public SupportMenuView(Context context, Activity activity, ArrayList<SupportMenuEntry> entries, SupportButton.MenuStyle menuStyle) {
+    public SupportMenuView(Context context, Activity activity, ArrayList<SupportMenuEntry> entries, SupportButton.MenuStyle menuStyle, boolean showLoginPrompt) {
         super(context);
         mContext = context;
         mActivity = activity;
         mEntries = entries;
         mMenuStyle = menuStyle;
+        this.showLoginPrompt = showLoginPrompt;
 
         setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -83,7 +85,7 @@ public class SupportMenuView extends FrameLayout {
 
         mEmailEditText = view.findViewById(R.id.emailEditText);
         Button submitButton = view.findViewById(R.id.submitButton);
-        submitButton.setBackgroundColor(Color.RED);
+        submitButton.setBackgroundColor(getResources().getColor(R.color.loginButtonColor));
         submitButton.setOnClickListener(v -> {
             String emailAddress = mEmailEditText.getText().toString();
             if ( !emailAddress.isEmpty() ) {
@@ -107,6 +109,14 @@ public class SupportMenuView extends FrameLayout {
 
 
     public void refresh() {
+        if ( showLoginPrompt ) {
+            mEmailEntryView.setVisibility(View.VISIBLE);
+            mMenuView.setVisibility(View.GONE);
+        } else {
+            mEmailEntryView.setVisibility(View.GONE);
+            mMenuView.setVisibility(View.VISIBLE);
+        }
+
         switch ( mMenuStyle ) {
             case ICON_LIST:
                 mGridView.setVisibility(View.GONE);

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:background="@drawable/support_menu_item_background"
+    android:orientation="horizontal"
+    android:weightSum="7">
+
+    <com.goboomtown.widget.WebImageView
+        android:id="@+id/avatarView"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:layout_gravity="top" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="6"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/refIdLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="@color/homeTextColor"
+                android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+
+            <TextView
+                android:id="@+id/dateLabel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="@color/homeTextColor"
+                android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lastMessageLabel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/homeTextColor"
+            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/statusLabel"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/homeTextColor"
+                android:layout_weight="1"
+                android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+
+            <TextView
+                android:id="@+id/ratingLabel"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/homeTextColor"
+                android:layout_weight="1"
+                android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

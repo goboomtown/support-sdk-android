@@ -3,7 +3,7 @@
     android:id="@+id/itemView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="20dp"
+    android:padding="5dp"
     android:gravity="center_vertical"
     android:background="@drawable/support_menu_item_background"
     android:orientation="horizontal" >
@@ -13,7 +13,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:tint="@color/homeIconColor" />
+        android:tint="@color/homeIconColor"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/label"

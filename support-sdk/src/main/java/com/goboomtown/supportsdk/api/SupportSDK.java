@@ -22,13 +22,18 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.BuildConfig;
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.model.BTConnectIssue;
 import com.goboomtown.supportsdk.model.BTMerchant;
 import com.goboomtown.supportsdk.model.Configuration;
+import com.goboomtown.supportsdk.model.HistoryEntryModel;
+import com.goboomtown.supportsdk.model.HistoryViewModel;
 import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.service.MediaProjectionService;
+import com.goboomtown.supportsdk.util.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -106,9 +111,14 @@ public class SupportSDK
     public  Boolean isExtStorageWriteable = false;
     public  Boolean isSystemOverlayPermitted = false;
 
-    public int      kbSubscreensOnStack;
-    public boolean isKBRequested = false;
-    public SupportSDKKBListener mKBListener;
+    public int                          kbSubscreensOnStack;
+    public boolean                      isKBRequested = false;
+    public SupportSDKKBListener         mKBListener;
+    public SupportSDKFormsListener      mFormsListener;
+    public SupportSDKHistoryListener    mHistoryListener;
+    public boolean                      isRetrievingKB = false;
+    public boolean                      isRetrievingForms = false;
+    public ArrayList<BTConnectIssue> historyEntries = new ArrayList<>();
 
     public  Locale   locale;
 
@@ -157,12 +167,15 @@ public class SupportSDK
     public boolean showSupportPhone;
     public boolean showSupportWebsite;
     public boolean showSupportCallMe;
+    public boolean showSupportForms;
+    public boolean showSupportHistory;
     public String  callMeButtonText;
     public String  callMeButtonConfirmation;
     public boolean supportUnavailable;
     public String  supportUnavailableSummary;
 
-    private KBViewModel  kbViewModel;
+    private KBViewModel             kbViewModel;
+    public  ArrayList<FormModel>    forms = new ArrayList<>();
 
     /**
      * Default member values - from app/get
@@ -215,16 +228,32 @@ public class SupportSDK
      * @param customerInfo list of possible customer identification keys and values
      */
     public void loadConfiguration(int configResourceId, HashMap<String, String> customerInfo) {
+        try {
+            String jsonString = Utils.readRawTextFile(mContext.get(), configResourceId);
+            loadConfiguration(jsonString, customerInfo);
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+    }
+
+    /**
+     * Load SupportSDK configuration.
+     *
+     * @param jsonString   JSON string
+     * @param customerInfo list of possible customer identification keys and values
+     */
+    public void loadConfiguration(String jsonString, HashMap<String, String> customerInfo) {
         if ( cloudConfigComplete ) {
             return;
         }
         cloudConfigComplete = false;
+
         try {
-            boolean loaded = configuration.read(configResourceId);
+            boolean loaded = configuration.read(jsonString);
             if (loaded) {
                 InputStream customCAFile = null;
                 if (configuration.configAPIHost.contains(".integ.")) {
-                    customCAFile = mContext.get().getAssets().open("api_integ_thinkrelay_com.crt");
+                    customCAFile = mContext.get().getAssets().open("api_integ_goboomtown_com.crt");
                 } else if (configuration.configAPIHost.contains(".uat.")) {
                     customCAFile = mContext.get().getAssets().open("api_uat_thinkrelay_com.crt");
                 } else if (configuration.configAPIHost.contains(".boom.loc") || configuration.configAPIHost.contains(".local-env.")) {
@@ -236,13 +265,14 @@ public class SupportSDK
                 restGetSettings();
             } else {
                 if (mListener != null) {
-                    mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_load_configuration), mContext.get().getString(R.string.error_could_not_load_file_with_resource_id) + configResourceId);
+                    mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_load_configuration), mContext.get().getString(R.string.error_could_not_load_file_with_resource_id));
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
     }
+
 
     public void requestScreenCapturePermission(Activity activity) {
         int version = Build.VERSION.SDK_INT;
@@ -658,6 +688,7 @@ public class SupportSDK
                             showSupportEmail = jsonObject.optBoolean("supportEmailEnabled");
                             showSupportPhone = jsonObject.optBoolean("supportPhoneEnabled");
                             showSupportCallMe = jsonObject.optBoolean("supportCallmeEnabled");
+                            showSupportCallMe = jsonObject.optBoolean("supportCallmeEnabled");
                             callMeButtonText = jsonObject.optString("callmeButtonText", mContext.get().getString(R.string.label_call_me));
                             if (callMeButtonText.isEmpty()) {
                                 callMeButtonText = mContext.get().getString(R.string.label_call_me);
@@ -666,7 +697,11 @@ public class SupportSDK
                             if (callMeButtonConfirmation.isEmpty()) {
                                 callMeButtonConfirmation = mContext.get().getString(R.string.label_call_me_confirmation);
                             }
-
+                            JSONArray supportFormsIdsJSON = jsonObject.optJSONArray("supportForms");
+                            if ( supportFormsIdsJSON!= null && supportFormsIdsJSON.length() > 0 ) {
+                                showSupportForms = true;
+                                getSupportForms(supportFormsIdsJSON);
+                            }
                             supportWebsiteURL = Uri.parse(jsonObject.optString("supportWebsite", "http://example.com"));
                             supportUnavailable = jsonObject.optBoolean("unavailable", false);
                             supportUnavailableSummary = jsonObject.optString("unavailableSummary");
@@ -676,6 +711,11 @@ public class SupportSDK
                                 defaultMemberUserID = defaultMember.optString("memberUserId");
                                 defaultMemberLocationID = defaultMember.optString("memberLocationId");
                                 defaultMemberDeviceID = defaultMember.optString("memberDeviceId");
+                            }
+                            showSupportHistory = jsonObject.optBoolean("supportHistoryEnabled");
+//                            showSupportHistory = true;
+                            if ( showSupportHistory ) {
+                                getHistory();
                             }
                         } else {
                             message = jsonObject.optString("message", "");
@@ -696,6 +736,7 @@ public class SupportSDK
                         isKBRequested = true;
                         getKB(null);
                     }
+                    getForms(null);
                     if ( mCustomerInfo != null ) {
                         restGetCustomerInformationWithInfo(mCustomerInfo, null);
                     }
@@ -705,19 +746,215 @@ public class SupportSDK
     }
 
 
-    public void getKB(final SupportSDKKBListener kbListener) {
-        mKBListener = kbListener;
-        String url = SupportSDK.kSDKV1Endpoint + "/kb/get";
-
+    public void getHistory() {
+        String url = SupportSDK.kSDKV1Endpoint + "/issues/history/?members_locations_id=" + defaultMemberLocationID;
         get(url, new Callback() {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                boolean success = false;
+
+                JSONObject jsonObject = SupportSDK.successJSONObject(response);
+                if ( jsonObject != null ) {
+                    if ( jsonObject.has("results") ) {
+                        try {
+                            JSONArray resultsJSON = jsonObject.getJSONArray("results");
+                            historyEntries.clear();
+                            for ( int n=0; n<resultsJSON.length(); n++ ) {
+                                try {
+                                    JSONObject issueJSON = resultsJSON.getJSONObject(n);
+                                    BTConnectIssue issue = new BTConnectIssue(issueJSON);
+                                    historyEntries.add(issue);
+
+                                    if ( mHistoryListener != null ) {
+                                        mHistoryListener.supportSDKDidRetrieveHistory();
+                                    }
+
+                                    success = true;
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                            success = true;
+
+                        } catch (JSONException e) {
+//                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                    }
+                }
+                if ( !success ) {
+//                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                }
+            }
+        });
+    }
+
+
+    private void getSupportForms(JSONArray jsonArray) {
+        forms.clear();
+        for ( int n=0; n<jsonArray.length(); n++ ) {
+            String id;
+            try {
+                 id = jsonArray.getString(n);
+                 getForm(null, id);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public void getForm(final SupportSDKFormsListener formsListener,  String id) {
+        mFormsListener = formsListener;
+        String url = SupportSDK.kSDKV1Endpoint + "/forms/get/";
+        if ( id != null ) {
+            url = url + "?id=" + id;
+        }
+        get(url, new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                isRetrievingForms = false;
 //                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
+                isRetrievingForms = false;
+                boolean success = false;
+
+                JSONObject jsonObject = SupportSDK.successJSONObject(response);
+                if ( jsonObject != null ) {
+                    if ( jsonObject.has("results") ) {
+                        try {
+                            JSONArray resultsJSON = jsonObject.getJSONArray("results");
+//                            forms.clear();
+                            for ( int n=0; n<resultsJSON.length(); n++ ) {
+                                FormModel formModel = new FormModel();
+                                formModel.populateWithDictionary(resultsJSON.getJSONObject(n));
+                                forms.add(formModel);
+                            }
+                            if ( mFormsListener != null ) {
+                                mFormsListener.supportSDKDidRetrieveForms();;
+                            }
+                            success = true;
+
+                        } catch (JSONException e) {
+//                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                    }
+                }
+                if ( !success ) {
+//                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                }
+            }
+        });
+    }
+
+
+    public void putForm(final SupportSDKFormsListener formsListener,  String id, JSONObject formJSON) {
+        mFormsListener = formsListener;
+        String url = SupportSDK.kSDKV1Endpoint + "/forms/logs_put/?form_id=" + id;
+
+        JSONObject params = new JSONObject();
+        try {
+             params.put("checklists_log", formJSON);
+        } catch (JSONException e) {
+            Log.e(TAG, "error when forming payload to get customer info");
+            handleUnknownCustomer(e.getLocalizedMessage());
+            return;
+        }
+
+        this.post(url, params, new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                if ( formsListener != null ) {
+                    formsListener.supportSDKFailedToUpdateForm();
+                }
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                boolean success = false;
+
+                JSONObject jsonObject = SupportSDK.successJSONObject(response);
+                if ( jsonObject != null ) {
+                    success = true;
+                    if ( jsonObject.has("results") ) {
+                    }
+                }
+                if ( success ) {
+                    if ( formsListener != null ) {
+                        formsListener.supportSDKDidUpdateForm();
+                    }
+                } else {
+                    if ( formsListener != null ) {
+                        formsListener.supportSDKFailedToUpdateForm();
+                    }
+                }
+            }
+        });
+    }
+
+
+    public void getForms(final SupportSDKFormsListener formsListener) {
+//        if ( !showSupportForms ) {
+//            return;
+//        }
+//        mFormsListener = formsListener;
+//        if ( forms.size() > 0 ) {
+//            if ( mFormsListener != null ) {
+//                mFormsListener.supportSDKDidRetrieveForms();;
+//            }
+//        } else {
+//            if ( isRetrievingForms ) {
+//                return;
+//            }
+//            isRetrievingForms = true;
+//            getForm(formsListener, null);
+//        }
+    }
+
+
+    public FormModel currentForm() {
+        if ( forms.size() > 1 ) {
+            return forms.get(1);
+        }
+        return new FormModel();
+    }
+
+
+
+    public void getKB(final SupportSDKKBListener kbListener) {
+        mKBListener = kbListener;
+        if ( kbViewModel != null ) {
+             if ( mKBListener != null ) {
+                mKBListener.supportSDKDidRetrieveKB(kbViewModel);
+            }
+        }
+        String url = SupportSDK.kSDKV1Endpoint + "/kb/get";
+        if ( isRetrievingKB ) {
+            return;
+        }
+        isRetrievingKB = true;
+        get(url, new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                isRetrievingKB = false;
+//                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                isRetrievingKB = false;
                 boolean success = false;
 
                 JSONObject jsonObject = SupportSDK.successJSONObject(response);
@@ -809,6 +1046,16 @@ public class SupportSDK
         void supportSDKDidFailToSearchKB();
     }
 
+    public interface SupportSDKFormsListener {
+        void supportSDKDidRetrieveForms();
+        void supportSDKDidRetrieveForm(FormModel form);
+        void supportSDKDidUpdateForm();
+        void supportSDKFailedToUpdateForm();
+    }
+
+    public interface SupportSDKHistoryListener {
+        void supportSDKDidRetrieveHistory();
+    }
 
 
     public static JSONObject extractXmppInformation(String xmppData, String key) {
