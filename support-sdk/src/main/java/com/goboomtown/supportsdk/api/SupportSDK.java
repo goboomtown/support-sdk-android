@@ -198,8 +198,8 @@ public class SupportSDK
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
         setAPIInfo();
 
-        POSConnector posConnector = new POSConnector(mContext.get(), this);
-        posConnector.getAccount();
+//        POSConnector posConnector = new POSConnector(mContext.get(), this);
+//        posConnector.getAccount();
     }
 
 
