@@ -62,17 +62,22 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+//        sourceSets {
+//            main.java.srcDirs += 'src/main/java'
+//            androidTest.java.srcDirs += 'src/androidTest/kotlin'
+//            androidTest.resources.srcDirs += 'src/androidTest/res'
+//        }
     }
     // Rename the aar correctly
-//    android.libraryVariants.all { variant ->
-//        variant.outputs.each { output ->
-//            def outputFile = output.outputFile
-//            if (outputFile != null && outputFile.name.endsWith('.aar')) {
-//                def fileName = "support-sdk-${variant.baseName}-${versionMajor}.${versionMinor}.${versionPatch}.aar"
-////                 output.outputFile = new File(outputFile.parent, fileName)
-//            }
-//        }
-//    }
+    android.libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = "support-sdk-${variant.baseName}-${versionMajor}.${versionMinor}.${versionPatch}.aar"
+//                 output.outputFile = new File(outputFile.parent, fileName)
+            }
+        }
+    }
 
 //    flavorDimensions "androidplatform", "cloudapi"
 //
@@ -128,7 +133,7 @@ task sourcesJar(type: Jar) {
 
 task classesJar(type: Jar) {
 //    from "$buildDir/intermediates/classes/release"
-    from "$buildDir/intermediates/javac/release"
+    from "$buildDir/intermediates/javac/release/classes"
 }
 
 artifacts {

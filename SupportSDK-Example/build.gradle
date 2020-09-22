@@ -23,30 +23,30 @@ android {
         targetCompatibility 1.8
     }
 
-    flavorDimensions "androidplatform", "cloudapi"
-
-    productFlavors {
-        production {
-            dimension = "cloudapi"
-        }
-        stage {
-            dimension = "cloudapi"
-        }
-        gplay {
-            dimension = "androidplatform"
-        }
-        pax {
-            minSdkVersion 19
-            ext.global_minSdkVersion = 19
-            dimension = "androidplatform"
-        }
-        clover {
-            dimension = "androidplatform"
-            minSdkVersion 17
-            ext.global_minSdkVersion = 17
-            targetSdkVersion(25)
-        }
-    }
+//    flavorDimensions "androidplatform", "cloudapi"
+//
+//    productFlavors {
+//        production {
+//            dimension = "cloudapi"
+//        }
+//        stage {
+//            dimension = "cloudapi"
+//        }
+//        gplay {
+//            dimension = "androidplatform"
+//        }
+//        pax {
+//            minSdkVersion 19
+//            ext.global_minSdkVersion = 19
+//            dimension = "androidplatform"
+//        }
+//        clover {
+//            dimension = "androidplatform"
+//            minSdkVersion 17
+//            ext.global_minSdkVersion = 17
+//            targetSdkVersion(25)
+//        }
+//    }
 
 }
 
