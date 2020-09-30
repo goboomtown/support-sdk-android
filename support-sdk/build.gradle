@@ -169,8 +169,8 @@ artifacts {
     archives classesJar
     archives javadocJar
     archives sourcesJar
-    archives boomtownChat
-    archives boomtownVideo
+//    archives boomtownChat
+//    archives boomtownVideo
 }
 
 configurations {
