@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="red">#FF0000</color>
+
+    <color name="green">#00FF00</color>
+
     <color name="loginBackgroundColor">#F7F7F7</color>
     <color name="loginFieldBorderColor">#E0E0E0</color>
     <color name="loginFieldBackgroundColor">#F3F8F8</color>

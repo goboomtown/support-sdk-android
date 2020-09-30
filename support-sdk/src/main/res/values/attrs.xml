@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!--    <attr name="overlaySurface" format="boolean" />-->
+    <attr name="overlaySurface" format="boolean" />
 
     <declare-styleable name="Panel">
         <!-- Defines panel animation duration in ms. -->
