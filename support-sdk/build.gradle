@@ -79,30 +79,30 @@ android {
         }
     }
 
-//    flavorDimensions "androidplatform", "cloudapi"
-//
-//    productFlavors {
-//        production {
-//            dimension = "cloudapi"
-//        }
-//        stage {
-//            dimension = "cloudapi"
-//        }
-//        gplay {
-//            dimension = "androidplatform"
-//        }
-//        pax {
-//            minSdkVersion 19
-//            ext.global_minSdkVersion = 19
-//            dimension = "androidplatform"
-//        }
-//        clover {
-//            dimension = "androidplatform"
-//            minSdkVersion 17
-//            ext.global_minSdkVersion = 17
-//            targetSdkVersion(25)
-//        }
-//    }
+    flavorDimensions "androidplatform", "cloudapi"
+
+    productFlavors {
+        production {
+            dimension = "cloudapi"
+        }
+        stage {
+            dimension = "cloudapi"
+        }
+        gplay {
+            dimension = "androidplatform"
+        }
+        pax {
+            minSdkVersion 19
+            ext.global_minSdkVersion = 19
+            dimension = "androidplatform"
+        }
+        clover {
+            dimension = "androidplatform"
+            minSdkVersion 17
+            ext.global_minSdkVersion = 17
+            targetSdkVersion(25)
+        }
+    }
 
 
     defaultPublishConfig "release"
@@ -137,7 +137,7 @@ task classesJar(type: Jar) {
 }
 
 artifacts {
-    archives classesJar
+//    archives classesJar
 //    archives javadocJar
     archives sourcesJar
 }
@@ -155,36 +155,14 @@ dependencies {
         exclude module: 'support-v4'
     }
 
-//    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.1.1'
-//
-//    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
+    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.1.1'
+
+    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
 
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
 
-//    embed project(path: ':boomtown-boomtownchat-android', configuration: 'default')
-//    embed project(path: ':boomtown-video-android', configuration: 'default')
-
-//    implementation project(path: ':boomtown-boomtownchat-android', configuration: 'default')
-//    implementation project(path: ':boomtown-video-android', configuration: 'default')
-
-//    implementation project(':boomtown-boomtownchat-android')
-//    implementation project(':boomtown-video-android')
-
     implementation 'com.google.android.material:material:1.1.0'
-
-// Start old Support SDK dependencies
-//    embed "com.wefika:flowlayout:0.4.1"
-//    embed "com.squareup.okhttp3:okhttp:3.12.1"
-//    embed "org.igniterealtime.smack:smack-android-extensions:$smack_lib_version"
-//    embed "org.igniterealtime.smack:smack-tcp:$smack_lib_version"
-//    embed "joda-time:joda-time:$jodatime_version"
-//    embed 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
-//    embed "org.apache.commons:commons-compress:$commons_compress_version"
-//    embed('com.twilio:video-android:5.1.0') {
-//        exclude group: 'com.android.support', module: 'support-annotations'
-//    }
-// End old Support SDK dependencies
 
 //  Start Support SDK dependencies
     implementation "com.wefika:flowlayout:0.4.1"
@@ -198,7 +176,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
     implementation 'org.conscrypt:conscrypt-android:2.4.0'
-
 //  End Support SDK dependencies
 
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {

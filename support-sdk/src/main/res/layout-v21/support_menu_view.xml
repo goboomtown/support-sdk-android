@@ -12,26 +12,41 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <com.google.android.material.textfield.TextInputLayout
+<!--        <com.google.android.material.textfield.TextInputLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:boxBackgroundMode="outline"-->
+<!--            app:boxBackgroundColor="@color/loginFieldBackgroundColor">-->
+
+<!--            <android.widget.EditText-->
+<!--                android:id="@+id/emailEditText"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:enabled="true"-->
+<!--                android:hint="@string/placeholder_enter_email_address"-->
+<!--                android:inputType="textEmailAddress"-->
+<!--                android:textColor="@color/loginFieldTextColor"-->
+<!--                android:lines="1"-->
+<!--                android:padding="5dp"-->
+<!--                android:singleLine="true" />-->
+
+<!--        </com.google.android.material.textfield.TextInputLayout>-->
+
+        <android.widget.EditText
+            android:id="@+id/emailEditText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:boxBackgroundMode="outline"
-            app:boxBackgroundColor="@color/loginFieldBackgroundColor">
-
-            <android.widget.EditText
-                android:id="@+id/emailEditText"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:enabled="true"
-                android:hint="@string/placeholder_enter_email_address"
-                android:inputType="textEmailAddress"
-                android:textColor="@color/loginFieldTextColor"
-                android:lines="1"
-                android:padding="5dp"
-                android:singleLine="true" />
-
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:background="@drawable/login_border_rounded"
+            android:enabled="true"
+            android:hint="@string/placeholder_enter_email_address"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/loginFieldTextColor"
+            android:lines="1"
+            android:layout_margin="5dp"
+            android:padding="10dp"
+            android:singleLine="true" />
 
         <Button
             android:id="@+id/submitButton"

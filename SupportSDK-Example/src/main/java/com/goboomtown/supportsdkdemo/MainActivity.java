@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity
         mFragmentContainer = findViewById(R.id.fragment_container);
 
         mSupportButton = findViewById(R.id.supportButton);
+        mSupportButton.setVisibility(View.GONE);
         mSupportButton.setListener(this);
 
         int configResource = R.raw.support_sdk_preprod; // R.raw.support_sdk;
@@ -105,6 +106,8 @@ public class MainActivity extends AppCompatActivity
     public void supportButtonDidGetSettings() {
         Log.d(TAG, "#helpButtonDidGetSettings");
 //        mSupportButton.menuStyle = SupportButton.MenuStyle.BUTTON;
+        mSupportButton.menuStyle = SupportButton.MenuStyle.ICON_LIST;
+        mSupportButton.click();
     }
 
     @Override

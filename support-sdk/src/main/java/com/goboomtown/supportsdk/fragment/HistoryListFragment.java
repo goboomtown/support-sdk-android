@@ -128,6 +128,20 @@ public class HistoryListFragment extends Fragment
 
 
     private void displayChat(BTConnectIssue issue) {
+        if ( (issue.xmpp_data==null && issue.comm_id==null) || issue.transcripts==null ) {
+            Activity activity = getActivity();
+            if ( activity != null ) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext, mContext.getResources().getString(R.string.warn_no_chat_history), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            return;
+        }
+
+
         ChatFragment chatFragment = new ChatFragment();
         chatFragment.mContext = getContext();
         chatFragment.supportSDK = supportSDK;

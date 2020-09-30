@@ -23,7 +23,8 @@
             android:inputType="textEmailAddress"
             android:textColor="@color/loginFieldTextColor"
             android:lines="1"
-            android:padding="5dp"
+            android:layout_margin="5dp"
+            android:padding="10dp"
             android:singleLine="true" />
 
         <Button
