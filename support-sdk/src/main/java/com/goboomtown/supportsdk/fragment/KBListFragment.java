@@ -135,6 +135,7 @@ public class KBListFragment extends Fragment
                 expandableListAdapter = new KBExpandableListAdapter(mActivity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
                 if ( expandableListView!=null && expandableListAdapter!=null ) {
                     expandableListAdapter.mListener = listener;
+                    expandableListAdapter.supportSDK = supportSDK;
                     expandableListAdapter.expandableListView = expandableListView;
                     expandableListView.setAdapter(expandableListAdapter);
                     expandableListAdapter.notifyDataSetChanged();

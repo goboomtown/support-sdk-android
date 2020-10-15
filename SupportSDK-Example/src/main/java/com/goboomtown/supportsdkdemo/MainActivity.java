@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity
 
     public static final String TAG = "MainActivity";
 
-    private FrameLayout mFragmentContainer;
+    private FrameLayout     mFragmentContainer;
+    private LinearLayout    mSupportMenuContainer;
     private View mView;
     private SupportButton mSupportButton;
 
@@ -50,15 +53,19 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(R.string.app_name);
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//        toolbar.setTitle(R.string.app_name);
 
         mFragmentContainer = findViewById(R.id.fragment_container);
+        mSupportMenuContainer = findViewById(R.id.supportMenuContainer);
 
         mSupportButton = findViewById(R.id.supportButton);
         mSupportButton.setVisibility(View.GONE);
         mSupportButton.setListener(this);
+
+        mSupportButton.appearance.setIconColor(Color.RED);
+        mSupportButton.appearance.setTextColor(Color.BLACK);
 
         int configResource = R.raw.support_sdk_preprod; // R.raw.support_sdk;
         mSupportButton.loadConfiguration(configResource, null);
@@ -81,6 +88,24 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
     }
 
+
+    @Override
+    public void onBackPressed() {
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+
+        if ( count > 0 ) {
+            getSupportFragmentManager().popBackStack();
+            if ( count == 1 ) {
+                mFragmentContainer.setVisibility(View.GONE);
+                setTitle(getString(R.string.app_name));
+            }
+            count = getSupportFragmentManager().getBackStackEntryCount();
+        } else {
+            mFragmentContainer.setVisibility(View.GONE);
+            setTitle(getString(R.string.app_name));
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public void supportButtonDidFailWithError(final String description, final String reason) {
@@ -120,21 +145,7 @@ public class MainActivity extends AppCompatActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                PopupWindow popupWindow = new PopupWindow();
-                popupWindow.setWindowLayoutMode(
-                        WindowManager.LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.WRAP_CONTENT);
-                popupWindow.setHeight(250);
-                popupWindow.setWidth(350);
-                popupWindow.setContentView(view);
-
-                //set content and background
-
-                popupWindow.setTouchable(true);
-                popupWindow.setFocusable(true);
-
-                mFragmentContainer.setVisibility(View.VISIBLE);
-                popupWindow.showAtLocation(mFragmentContainer, Gravity.CENTER, 0, 0);
+                mSupportMenuContainer.addView(view);
             }
         });
 

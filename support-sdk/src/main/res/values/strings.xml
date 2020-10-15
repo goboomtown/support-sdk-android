@@ -133,6 +133,7 @@
     <string name="warn_required_fields_empty">Some required fields are empty.\n</string>
     <string name="warn_unable_to_update_form">Unable to update form.</string>
     <string name="warn_no_chat_history">This issue has no chat history.</string>
+    <string name="warn_unable_to_visit_website">Unable to visit the website.</string>
 
     <string name="text_site_history">Site History</string>
     <string name="text_chat_id">Chat ID</string>

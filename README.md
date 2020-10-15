@@ -1,4 +1,4 @@
-# Boomtown Product Support Platform SDK for Android
+# Boomtown Support SDK for Android (v.1.2.2)
 
 #### Minimum Requirements
 - Android 4.4 (API Level 19)
@@ -22,6 +22,18 @@
 1. Choose Import .JAR/.AAR Package, click Next
 1. Enter the filename with full path - use "..." to browse to the file location where you downloaded supportsdk-release-1.0.0.aar
 1. The "Subproject name" should be auto-filled to "supportsdk-release-1.0.0" once you choose this AAR file path.
+1. Include the following dependencies in your application:
+```    implementation "com.wefika:flowlayout:0.4.1"
+    implementation "com.squareup.okhttp3:okhttp:3.12.1"
+    implementation "org.igniterealtime.smack:smack-android-extensions:4.3.1"
+    implementation "org.igniterealtime.smack:smack-tcp:4.3.1"
+    implementation "joda-time:joda-time:2.3"
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
+    implementation "org.apache.commons:commons-compress:1.18"
+    implementation('com.twilio:video-android:5.11.1') {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+```
 1. Click Finish
 
 ## Support SDK
@@ -77,12 +89,26 @@ _Note:_ An example Android application that uses this library may be found in th
 
 ```
 
+#### Branding
+
+The Support Button provides an "appearance" parameter which exposes two methods to control the look of the Support SDK. The usage is shown in the sample code below.
+
+```
+setIconColor(int color);
+setTextColor(int color);
+```
+
+
 #### Sample Java code
 
 ```
 SupportButton supportButton = (SupportButton) findViewById(R.id.supportButton);
 supportButton.setListener(this);
-supportButton.loadConfigurationFile(R.raw.support_sdk, customerInfo: null);
+supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
+
+supportButton.appearance.setIconColor(Color.BLUE);
+supportButton.appearance.setTextColor(Color.BLACK);
+
 
 ```
 

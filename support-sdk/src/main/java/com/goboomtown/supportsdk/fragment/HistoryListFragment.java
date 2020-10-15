@@ -333,6 +333,21 @@ public class HistoryListFragment extends Fragment
                 lastMessageLabel = view.findViewById(R.id.lastMessageLabel);
                 statusLabel = view.findViewById(R.id.statusLabel);
                 ratingLabel = view.findViewById(R.id.ratingLabel);
+                if ( refIdLabel != null ) {
+                    refIdLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                }
+                if ( dateLabel != null ) {
+                    dateLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                }
+                if ( lastMessageLabel != null ) {
+                    lastMessageLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                }
+                if ( statusLabel != null ) {
+                    statusLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                }
+                if ( ratingLabel != null ) {
+                    ratingLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                }
             }
 
 

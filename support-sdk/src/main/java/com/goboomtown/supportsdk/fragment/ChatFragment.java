@@ -61,12 +61,19 @@ public class ChatFragment extends BaseChatFragment {
     public void configureAppearance()
     {
 //        super.configureAppearance();
-        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = colorFromValue(R.color.chatSendButtonDisabledColor);
-        BoomtownChat.sharedInstance().chatSendButtonColor           = colorFromValue(R.color.chatSendButtonEnabledColor);
-        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
-        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
-        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = colorFromValue(R.color.chatActionButtonBorderColor);
-        chatUploadButton.setColorFilter(R.color.chatIconColor);
+//        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = colorFromValue(R.color.chatSendButtonDisabledColor);
+//        BoomtownChat.sharedInstance().chatSendButtonColor           = colorFromValue(R.color.chatSendButtonEnabledColor);
+//        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
+//        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
+//        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = colorFromValue(R.color.chatActionButtonBorderColor);
+//        chatUploadButton.setColorFilter(R.color.chatIconColor);
+
+        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = supportSDK.appearance.chatSendButtonDisabledColor;
+        BoomtownChat.sharedInstance().chatSendButtonColor           = supportSDK.appearance.chatSendButtonEnabledColor;
+        BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor;
+        BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor;
+        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = supportSDK.appearance.chatActionButtonBorderColor;
+        chatUploadButton.setColorFilter(supportSDK.appearance.chatIconColor);
     }
 
     private int colorFromValue(int value) {

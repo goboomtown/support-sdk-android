@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.goboomtown.supportsdk.R;
@@ -46,6 +47,9 @@ public class CallMeView {
     public  PopupWindow mPopupWindow;
 
     private String      mCallbackNumber;
+    private TextView    callbackNumberLabel;
+    private TextView callbackDescriptionLabel;
+
     private EditText    mCallbackNumberEditText;
     private EditText    mCallbackDescriptionEditText;
     private Button      mOkButton;
@@ -69,31 +73,46 @@ public class CallMeView {
         final View dialogView = inflater.inflate(R.layout.call_me_dialog, null);
         dialogBuilder.setView(dialogView);
 
-        mCallbackNumberEditText = dialogView.findViewById(R.id.callbackNumber);
-        mCallbackDescriptionEditText = dialogView.findViewById(R.id.callbackDescription);
-        if ( mCallbackNumber!=null && !mCallbackNumber.equalsIgnoreCase("null") ) {
-            mCallbackNumberEditText.setText(mCallbackNumber);
+       callbackNumberLabel      = dialogView.findViewById(R.id.callbackNumberLabel);
+       if ( callbackNumberLabel != null ) {
+           callbackNumberLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+       }
+       callbackDescriptionLabel =dialogView.findViewById(R.id.callbackDescriptionLabel);
+        if ( callbackDescriptionLabel != null ) {
+            callbackDescriptionLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor);
         }
-        mCallbackNumberEditText.setEnabled(true);
-        mCallbackDescriptionEditText.setEnabled(true);
-        mCallbackDescriptionEditText.setSingleLine(false);
 
-        mCallbackNumberEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        mCallbackNumberEditText = dialogView.findViewById(R.id.callbackNumber);
+        if ( mCallbackNumberEditText != null ) {
+            mCallbackNumberEditText.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+            mCallbackNumberEditText.setEnabled(true);
+            mCallbackNumberEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    enableOkButton(s.toString());
+                }
+            });
+            if ( mCallbackNumber!=null && !mCallbackNumber.equalsIgnoreCase("null") ) {
+                mCallbackNumberEditText.setText(mCallbackNumber);
             }
+        }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                enableOkButton(s.toString());
-            }
-        });
+        mCallbackDescriptionEditText = dialogView.findViewById(R.id.callbackDescription);
+        if ( mCallbackDescriptionEditText != null ) {
+            mCallbackDescriptionEditText.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+            mCallbackDescriptionEditText.setEnabled(true);
+            mCallbackDescriptionEditText.setSingleLine(false);
+        }
 
         dialogBuilder.setTitle(mContext.getResources().getString(R.string.label_call_me));
 //        dialogBuilder.setMessage("please send me to your feedback.");
@@ -113,8 +132,8 @@ public class CallMeView {
             public void onShow(DialogInterface dialogInterface) {
                 Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
                 Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(mContext.getResources().getColor(R.color.callMeButtonBackgroundColor));
-                negativeButton.setTextColor(mContext.getResources().getColor(R.color.callMeButtonTextColor));
+                positiveButton.setTextColor(supportSDK.appearance.callMeButtonTextColor);
+                negativeButton.setTextColor(supportSDK.appearance.callMeLabelTextColor);
                 positiveButton.setOnClickListener(new View.OnClickListener() {
 
                     @Override

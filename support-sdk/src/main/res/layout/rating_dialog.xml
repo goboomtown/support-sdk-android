@@ -8,7 +8,7 @@
 <!--    android:backgroundTint="?android:attr/colorBackground">-->
 
     <TextView
-        android:id="@+id/callbackNumberLabel"
+        android:id="@+id/ratingLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="true"
@@ -86,7 +86,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/callbackDescriptionLabel"
+        android:id="@+id/ratingDescriptionLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -94,7 +94,7 @@
         android:text="@string/text_anything_to_add" />
 
     <EditText
-        android:id="@+id/callbackDescription"
+        android:id="@+id/ratingDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="true"

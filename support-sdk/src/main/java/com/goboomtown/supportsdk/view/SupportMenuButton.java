@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.api.Appearance;
 
 import java.lang.ref.WeakReference;
 
@@ -17,9 +18,10 @@ import java.lang.ref.WeakReference;
 public class SupportMenuButton extends LinearLayout {
 
 //    public EditText         mLabelView;
-    private Context mContext;
-    public TextView mLabelView;
-    public ImageButton      mImageButton;
+    private Context     mContext;
+    public TextView     mLabelView;
+    public ImageButton  mImageButton;
+    public Appearance   appearance;
 //    public com.google.android.material.button.MaterialButton mImageButton;
 
     public OnClickListener  onClickListener;
@@ -42,6 +44,10 @@ public class SupportMenuButton extends LinearLayout {
 
         }
         mImageButton.setContentDescription(label);
+
+        mImageButton.setColorFilter(appearance.homeIconColor);
+        mLabelView.setTextColor(appearance.homeTextColor);
+
     }
 
 
@@ -50,12 +56,12 @@ public class SupportMenuButton extends LinearLayout {
 
         mImageButton = view.findViewById(R.id.imageButton);
         mLabelView = view.findViewById(R.id.labelView);
-
     }
 
 
     @Override
     public void setOnClickListener(OnClickListener onClickListener) {
         mImageButton.setOnClickListener(onClickListener);
+        mLabelView.setOnClickListener(onClickListener);
     }
 }

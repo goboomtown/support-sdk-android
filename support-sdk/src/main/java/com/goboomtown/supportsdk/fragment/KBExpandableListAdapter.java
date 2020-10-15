@@ -80,6 +80,9 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         }
         ImageView iconView = convertView.findViewById(R.id.iconView);
         TextView articleLabel = convertView.findViewById(R.id.articleLabel);
+        if ( articleLabel != null ) {
+            articleLabel.setTextColor(supportSDK.appearance.kbTextColor);
+        }
 
         if ( expanded && expandableListView!=null ) {
             expandableListView.expandGroup(groupPosition);

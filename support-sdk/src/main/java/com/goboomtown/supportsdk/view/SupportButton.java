@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.activity.ScreenCaptureActivity;
+import com.goboomtown.supportsdk.api.Appearance;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.dnssd.BTConnectPresenceService;
 import com.goboomtown.supportsdk.fragment.ChatFragment;
@@ -92,7 +93,8 @@ public class SupportButton extends View
         NO_MENU,
         MENU,
         BUTTON,
-        ICON_LIST
+        ICON_LIST,
+        ICON_GRID
     };
 
 
@@ -116,6 +118,7 @@ public class SupportButton extends View
     public  MenuStyle   menuStyle;
     public  boolean     showLoginPrompt;
 
+    public  Appearance          appearance;
     private SupportSDK          supportSDK;
     private ChatFragment        chatFragment;
     private SupportFormFragment formFragment;
@@ -191,7 +194,11 @@ public class SupportButton extends View
                 Utils.doesObjectContainField(mActivity.get(), "supportSDK") ) {
             ((ScreenCaptureActivity) mActivity.get()).supportSDK = supportSDK;
         }
+
         supportSDK = new SupportSDK(getContext(),this);
+
+        appearance = new Appearance(getContext());
+        supportSDK.appearance = appearance;
 //        supportSDK.getPermissions(mActivity.get());
         setOnClickListener(v -> clicked());
 
@@ -243,6 +250,7 @@ public class SupportButton extends View
     public void click() {
         switch(menuStyle) {
             case ICON_LIST:
+            case ICON_GRID:
             case BUTTON:
                 mActivity.get().runOnUiThread(new Runnable() {
                     @Override
@@ -490,16 +498,21 @@ public class SupportButton extends View
             mEntries.add(entry);
         }
         if ( supportSDK.supportWebsiteURL!=null && supportSDK.showSupportWebsite ) {
-            SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = getResources().getString(R.string.label_web_support);
-            entry.resourceId = R.drawable.globe;
-            entry.onClickListener = new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    visitWebsite();
-                }
-            };
-            mEntries.add(entry);
+            Intent webIntent = new Intent(Intent.ACTION_VIEW, supportSDK.supportWebsiteURL);
+            PackageManager packageManager = mContext.get().getPackageManager();
+            List<ResolveInfo> list = packageManager.queryIntentActivities(webIntent, 0);
+            if ( list.size() > 0 ) {
+                SupportMenuEntry entry = new SupportMenuEntry();
+                entry.label = getResources().getString(R.string.label_web_support);
+                entry.resourceId = R.drawable.globe;
+                entry.onClickListener = new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        visitWebsite();
+                    }
+                };
+                mEntries.add(entry);
+            }
         }
         if ( supportSDK.supportEmailAddress!=null && supportSDK.showSupportEmail ) {
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
@@ -687,7 +700,11 @@ public class SupportButton extends View
 
     private void visitWebsite() {
         Intent intent = new Intent(Intent.ACTION_VIEW, supportSDK.supportWebsiteURL);
-        getContext().startActivity(intent);
+        try {
+            getContext().startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(mContext.get(), getResources().getString(R.string.warn_unable_to_visit_website), Toast.LENGTH_SHORT).show();
+        }
     }
 
 

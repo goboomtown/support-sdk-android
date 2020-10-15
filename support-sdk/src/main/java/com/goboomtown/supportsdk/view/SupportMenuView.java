@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.DynamicDrawableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +26,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.goboomtown.chat.BoomtownChat;
+import com.goboomtown.chat.BoomtownChatMessage;
+import com.goboomtown.fragment.ChatAdapter;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
+import com.wefika.flowlayout.FlowLayout;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
@@ -58,10 +67,11 @@ public class SupportMenuView extends FrameLayout {
     private LinearLayout        mMenuView;
     private EditText            mEmailEditText;
     private GridView            mGridView;
+    private FlowLayout          mFlowView;
     private RecyclerView        mRecyclerView;
     private SupportButton.MenuStyle     mMenuStyle;
     public  boolean             showLoginPrompt;
-    private ArrayList<SupportMenuButton> mButtons = new ArrayList<>();
+    private ArrayList<View> mButtons = new ArrayList<>();
     private ArrayList<SupportMenuEntry> mEntries = new ArrayList<>();
 
 
@@ -76,7 +86,6 @@ public class SupportMenuView extends FrameLayout {
         setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-
 
         View view = inflate(mContext, R.layout.support_menu_view, this);
 
@@ -96,9 +105,11 @@ public class SupportMenuView extends FrameLayout {
         });
 
         mGridView = view.findViewById(R.id.gridView);
-        mGridView.setOnItemClickListener((parent, view1, position, id) -> {
-            SupportMenuButton button = mButtons.get(position);
-        });
+//        mGridView.setOnItemClickListener((parent, view1, position, id) -> {
+////            SupportMenuButton button = mButtons.get(position);
+//        });
+
+        mFlowView = view.findViewById(R.id.flowView);
 
         mRecyclerView = view.findViewById(R.id.recyclerView);
 
@@ -124,13 +135,23 @@ public class SupportMenuView extends FrameLayout {
                 setupRecyclerView(mRecyclerView);
                 break;
             case BUTTON:
+            case ICON_GRID:
             default:
                 mButtons.clear();
                 for ( SupportMenuEntry entry : mEntries ) {
-                    SupportMenuButton menuButton = new SupportMenuButton(mContext,
-                            entry.label, entry.resourceId);
-                    menuButton.setOnClickListener(entry.onClickListener);
-                    mButtons.add(menuButton);
+                    if ( mMenuStyle == SupportButton.MenuStyle.BUTTON ) {
+                        SupportMenuButton menuButton = new SupportMenuButton(mContext,
+                                entry.label, entry.resourceId);
+                        menuButton.appearance = supportSDK.appearance;
+                        menuButton.setOnClickListener(entry.onClickListener);
+                        mButtons.add(menuButton);
+                    } else {
+                        SupportMenuItem menuButton = new SupportMenuItem(mContext,
+                                entry.label, entry.resourceId);
+                        menuButton.appearance = supportSDK.appearance;
+                        menuButton.setOnClickListener(entry.onClickListener);
+                        mButtons.add(menuButton);
+                    }
                 }
                 mGridView.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
@@ -178,6 +199,43 @@ public class SupportMenuView extends FrameLayout {
             }
         });
     }
+
+
+//    protected void createFlowMenu() {
+//        // set container visibility
+//        if ( mFlowView == null ) {
+//            return;
+//        }
+//        mFlowView.setVisibility(View.VISIBLE);
+//        // add new buttons
+//        for (int i = 0; i < mEntries.size(); i++) {
+//            try {
+//                JSONObject action = actions.getJSONObject(i);
+//                Spannable btnLabel = new SpannableString(action.optString(BoomtownChatMessage.JSON_KEY_LBL));
+//                final String btnUri = action.optString(BoomtownChatMessage.JSON_KEY_URI);
+//                if (btnLabel != null && btnUri != null) {
+//                    final Button btn = new Button(context.get());
+//                    FlowLayout.LayoutParams llp = new FlowLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//                    llp.setMargins(5, 5, 5, 5);
+//                    btn.setLayoutParams(llp);
+//                    btn.setAllCaps(false);  // override default styling else lose spannable data via #AllCapsTransformationMethod
+//                    btnLabel = BoomtownChatMessage.processTxtWithEmoticons(btnLabel, emoticonMap, new BoomtownChatMessage.EmoticonSpannableBuilderStrategy() {
+//                        @Override
+//                        public DynamicDrawableSpan buildDynamicDrawableSpan(BoomtownChatMessage.Emoticon emot) {
+//                            return BoomtownChatMessage.buildDynamicDrawableSpan(context.get(), btn, emot, btn.getLineHeight() * 2, btn.getLineHeight() * 2);
+//                        }
+//                    });
+//                    btn.setPadding(30, 0, 30, 0);
+//                    btn.setText(btnLabel);
+//                    btn.setBackground(this.context.get().getResources().getDrawable(com.goboomtown.boomtownchat.R.drawable.rounded_button_selector));
+//                    mFlowView.addView(btn);
+//                }
+//            } catch (JSONException e) {
+//                Log.e(TAG, Log.getStackTraceString(e));
+//            }
+//        }
+//    }
+
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
@@ -296,7 +354,9 @@ public class SupportMenuView extends FrameLayout {
                 });
 //                mItemView.setOnClickListener(entry.onClickListener);
                 mIconView.setImageDrawable(getResources().getDrawable(entry.resourceId));
+                mIconView.setColorFilter(supportSDK.appearance.homeIconColor);
                 mTextView.setText(entry.label);
+                mTextView.setTextColor(supportSDK.appearance.homeTextColor);
             }
         }
     }

@@ -10,9 +10,9 @@ import java.util.ArrayList;
  * Created by larry on 2016-04-17.
  */
 public class CustomGridAdapter extends BaseAdapter {
-    private ArrayList<SupportMenuButton> mButtons;
+    private ArrayList<View> mButtons;
 
-    public CustomGridAdapter(Context context, ArrayList<SupportMenuButton> buttons) {
+    public CustomGridAdapter(Context context, ArrayList<View> buttons) {
         mButtons = buttons;
     }
 

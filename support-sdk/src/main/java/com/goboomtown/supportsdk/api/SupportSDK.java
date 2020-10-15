@@ -76,6 +76,8 @@ public class SupportSDK
     private static final String TAG = SupportSDK.class.getSimpleName();
     private static final String SupportSDKHelpName = "SupportSDK";
 
+    public static final String HTTP_HEADER_DOWNLOAD_TOKEN = "X-Boomtown-DownloadSessionToken";
+
     /* Customer information keys */
     private static final String kCustomerId                   = "members_id";
     private static final String kCustomerExternalId           = "members_external_id";
@@ -96,6 +98,8 @@ public class SupportSDK
     private WeakReference<Context> mContext;
 
     private SupportSDKListener mListener;
+
+    public  Appearance      appearance;
 
     private Configuration   configuration;
     public  SessionManager  sessionManager;
@@ -190,6 +194,8 @@ public class SupportSDK
 
     public boolean cloudConfigComplete;
 
+    public String   downloadSessionToken = null;
+
     public SupportSDK(Context context, SupportSDKListener listener) {
         mContext = new WeakReference<>(context);
         mListener = listener;
@@ -198,8 +204,8 @@ public class SupportSDK
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
         setAPIInfo();
 
-//        POSConnector posConnector = new POSConnector(mContext.get(), this);
-//        posConnector.getAccount();
+        POSConnector posConnector = new POSConnector(mContext.get(), this);
+        posConnector.getAccount();
     }
 
 
@@ -434,9 +440,9 @@ public class SupportSDK
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
-        headerMap.put("X-Boomtown-Date",        iso8601Date);
+//        headerMap.put("X-Boomtown-Date",        iso8601Date);
         headerMap.put("X-Boomtown-Token",       configuration.configPartnerToken);
-        headerMap.put("X-Boomtown-Signature",   signature);
+//        headerMap.put("X-Boomtown-Signature",   signature);
         headerMap.put("X-Boomtown-Integration", configuration.configAPIIntegrationId);
         headerMap.put("X-Boomtown-Key",         configuration.configAPIKey);
         if (!cloudConfigComplete || supportProactiveEnabled) {
@@ -446,6 +452,9 @@ public class SupportSDK
             headerMap.put("X-Boomtown-DeviceIP",         configuration.configDeviceIP);
         }
         headerMap.put("X-Boomtown-User-Agent", clientAppIdentifier());
+        if ( downloadSessionToken != null ) {
+            headerMap.put(HTTP_HEADER_DOWNLOAD_TOKEN, downloadSessionToken);
+        }
         return headerMap;
     }
 
@@ -581,6 +590,14 @@ public class SupportSDK
     }
 
 
+    public void processHeadersForResonse(Response response) {
+        String token = response.header(HTTP_HEADER_DOWNLOAD_TOKEN);
+        if ( token != null ) {
+            downloadSessionToken = token;
+        }
+    }
+
+
     /*
     {
              members_id : 'D23ATA',
@@ -675,6 +692,7 @@ public class SupportSDK
                 String message = "";
                 if (response.code() > 199 && response.code() < 300) {
                     JSONObject jsonObject = SupportSDK.jsonObject(response);
+
                     if ( jsonObject != null ) {
                         success = jsonObject.optBoolean("success", false);
                         if ( success ) {

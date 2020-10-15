@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.goboomtown.supportsdk.R;
@@ -44,7 +45,9 @@ public class RatingView {
     private Context     mContext;
     public  PopupWindow mPopupWindow;
 
-    private EditText    mCallbackDescriptionEditText;
+    private TextView    mRatingLabel;
+    private TextView    mRatingDescriptionLabel;
+    private EditText    mRatingDescriptionEditText;
     private Button      mOkButton;
 
     private ImageView rate1;
@@ -75,16 +78,25 @@ public class RatingView {
         rate5 = dialogView.findViewById(R.id.rate5);
         setUpRatingsButtons();
 
-        mCallbackDescriptionEditText = dialogView.findViewById(R.id.callbackDescription);
-
-        mCallbackDescriptionEditText.setEnabled(true);
-        mCallbackDescriptionEditText.setSingleLine(false);
+        mRatingLabel      = dialogView.findViewById(R.id.ratingLabel);
+        if ( mRatingLabel != null ) {
+            mRatingLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor);
+        }
+        mRatingDescriptionLabel =dialogView.findViewById(R.id.ratingDescriptionLabel);
+        if ( mRatingDescriptionLabel != null ) {
+            mRatingDescriptionLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor);
+        }
+        mRatingDescriptionEditText = dialogView.findViewById(R.id.ratingDescription);
+        if ( mRatingDescriptionEditText != null ) {
+            mRatingDescriptionEditText.setTextColor(supportSDK.appearance.ratingLabelTextColor);
+            mRatingDescriptionEditText.setEnabled(true);
+            mRatingDescriptionEditText.setSingleLine(false);
+        }
 
         dialogBuilder.setTitle(mContext.getResources().getString(R.string.label_rate));
-//        dialogBuilder.setMessage("please send me to your feedback.");
         dialogBuilder.setPositiveButton(mContext.getResources().getString(R.string.text_submit), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                String desc = mCallbackDescriptionEditText.getText().toString();
+                String desc = mRatingDescriptionEditText.getText().toString();
                 rateIssue(supportSDK.rateableIssueId, rating, desc);
             }
         });
@@ -100,16 +112,8 @@ public class RatingView {
             public void onShow(DialogInterface dialogInterface) {
                 Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
                 Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(mContext.getResources().getColor(R.color.ratingButtonBackgroundColor));
-                negativeButton.setTextColor(mContext.getResources().getColor(R.color.ratingButtonTextColor));
-//                positiveButton.setOnClickListener(new View.OnClickListener() {
-//
-//                    @Override
-//                    public void onClick(View view) {
-//                        String desc = mCallbackDescriptionEditText.getText().toString();
-//                        rateIssue(supportSDK.rateableIssueId, rating, desc);
-//                    }
-//                });
+                positiveButton.setTextColor(supportButton.appearance.ratingButtonTextColor);
+                negativeButton.setTextColor(supportButton.appearance.ratingLabelTextColor);
             }
         });
         dialog.show();
@@ -118,6 +122,14 @@ public class RatingView {
 
     private void setUpRatingsButtons() {
 
+        if ( rate1==null || rate2==null || rate3==null || rate4==null || rate5==null ) {
+            return;
+        }
+        rate1.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
+        rate2.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
+        rate3.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
+        rate4.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
+        rate5.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
         rate1.setOnClickListener(v -> {
             makeSelection(rate1);
             clearOthers(rate2, rate3, rate4, rate5);
@@ -137,28 +149,6 @@ public class RatingView {
         rate5.setOnClickListener(v -> makeSelection(rate1, rate2, rate3, rate4, rate5));
     }
 
-//    private void setOnClickListenersForRatings(final Button... buttons) {
-//
-//        for (final Button button : buttons) {
-//            button.setOnClickListener(new OnClickListener() {
-//
-//                @Override
-//                public void onClick(View v) {
-//                    button.setSelected(true);
-//                    clearSelection(button.getId(), buttons);
-//                    enableSubmitButtonIfPossible();
-//                }
-//            });
-//        }
-//    }
-
-//    private void clearSelection(int id, Button... buttons) {
-//        for (Button button : buttons) {
-//            if (button.getId() != id) {
-//                button.setSelected(false);
-//            }
-//        }
-//    }
 
     private void clearOthers(ImageView... imageViews) {
         for (ImageView imageView : imageViews) {
