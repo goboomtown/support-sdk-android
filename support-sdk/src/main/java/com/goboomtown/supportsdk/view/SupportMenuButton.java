@@ -1,6 +1,7 @@
 package com.goboomtown.supportsdk.view;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -32,14 +33,14 @@ public class SupportMenuButton extends LinearLayout {
     }
 
 
-    public SupportMenuButton(Context context, String label, int drawableId) {
+    public SupportMenuButton(Context context, String label, Drawable drawable) {
         super(context);
         setup(context);
         mLabelView.setText(label);
         Object button = mImageButton;
         if ( button instanceof ImageButton ) {
             ImageButton imageButton = (ImageButton) button;
-            imageButton.setImageDrawable(getResources().getDrawable(drawableId));
+            imageButton.setImageDrawable(drawable);
         } else {
 
         }

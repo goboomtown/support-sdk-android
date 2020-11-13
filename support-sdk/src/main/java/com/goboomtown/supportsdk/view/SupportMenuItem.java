@@ -1,6 +1,7 @@
 package com.goboomtown.supportsdk.view;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -27,11 +28,11 @@ public class SupportMenuItem extends LinearLayout {
     }
 
 
-    public SupportMenuItem(Context context, String label, int drawableId) {
+    public SupportMenuItem(Context context, String label, Drawable drawable) {
         super(context);
         setup(context);
         mLabelView.setText(label);
-        mImageView.setImageDrawable(getResources().getDrawable(drawableId));
+        mImageView.setImageDrawable(drawable);
 
         mImageView.setColorFilter(appearance.homeIconColor);
         mLabelView.setTextColor(appearance.homeTextColor);

@@ -5,12 +5,40 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
+import com.goboomtown.supportsdk.R;
+
+import java.util.Hashtable;
+
 public class Appearance {
+
+    public final static String kMenuTextChat       = "com.goboomtown.supportsdk.menu.text.chat";
+    public final static String kMenuIconChat       = "com.goboomtown.supportsdk.menu.icon.chat";
+    public final static String kMenuTextCallMe     = "com.goboomtown.supportsdk.menu.text.callme";
+    public final static String kMenuIconCallMe     = "com.goboomtown.supportsdk.menu.icon.callme";
+    public final static String kMenuTextKnowledge  = "com.goboomtown.supportsdk.menu.text.knowledge";
+    public final static String kMenuIconKnowledge  = "com.goboomtown.supportsdk.menu.icon.knowledge";
+    public final static String kMenuTextWeb        = "com.goboomtown.supportsdk.menu.text.web";
+    public final static String kMenuIconWeb        = "com.goboomtown.supportsdk.menu.icon.web";
+    public final static String kMenuTextEmail      = "com.goboomtown.supportsdk.menu.text.email";
+    public final static String kMenuIconEmail      = "com.goboomtown.supportsdk.menu.icon.email";
+    public final static String kMenuTextPhone      = "com.goboomtown.supportsdk.menu.text.phone";
+    public final static String kMenuIconPhone      = "com.goboomtown.supportsdk.menu.icon.phone";
+    public final static String kMenuTextForms      = "com.goboomtown.supportsdk.menu.text.forms";
+    public final static String kMenuIconForms      = "com.goboomtown.supportsdk.menu.icon.forms";
+    public final static String kMenuTextHistory    = "com.goboomtown.supportsdk.menu.text.history";
+    public final static String kMenuIconHistory    = "com.goboomtown.supportsdk.menu.icon.history";
+    public final static String kMenuBorderColor    = "com.goboomtown.supportsdk.menu.border.color";
+
     public  Context     mContext;
     private Resources   mResources;
     private String      mPackageName;
 
+    public Hashtable<String, Object>    menuConfiguration;
+    public int    menuBorderColor;
+
     public Drawable logo;
+    public Drawable chatAttachmentButtonImage;
+    public Drawable chatSendButtonImage;
     public int    loginBackgroundColor;
     public int    loginFieldBorderColor;
     public int    loginFieldBackgroundColor;
@@ -43,10 +71,19 @@ public class Appearance {
     public int    chatActionButtonSelectedTextColor;
     public int    chatActionButtonBorderColor;
     public int    chatIconColor;
+    public int    chatLocalTextColor;
+    public int    chatLocalBackgroundColor;
+    public int    chatLocalBorderColor;
+    public int    chatRemoteTextColor;
+    public int    chatRemoteBackgroundColor;
+    public int    chatRemoteBorderColor;
 
-    public int    kbFolderNameTextColor;
-    public int    kbFolderL0BackgroundColor;
-    public int    kbTextColor;
+    public int      kbFolderNameTextColor;
+    public int      kbFolderL0BackgroundColor;
+    public int      kbTextColor;
+    public Drawable kbFolderIcon = null;
+
+    public int      borderColor;
 
     public Appearance(Context context) {
         mContext = context;
@@ -63,6 +100,8 @@ public class Appearance {
         homeLineColor       = getColor("homeLineColor");
         homeTextColor       = getColor("homeTextColor");
         homeSelectedColor   = getColor("homeSelectedColor");
+
+        borderColor = homeTextColor;
 
         callMeHeaderTextColor   = getColor("callMeHeaderTextColor");
         callMeLabelTextColor   = getColor("callMeLabelTextColor");
@@ -85,10 +124,17 @@ public class Appearance {
         chatActionButtonSelectedTextColor   = getColor("chatActionButtonSelectedTextColor");
         chatActionButtonBorderColor   = getColor("chatActionButtonBorderColor");
         chatIconColor   = getColor("chatIconColor");
+        chatLocalTextColor = getColor("chatLocalTextColor");
+        chatLocalBackgroundColor = getColor("chatLocalBackgroundColor");
+        chatLocalBorderColor = getColor("chatLocalBorderColor");
+        chatRemoteTextColor = getColor("chatRemoteTextColor");
+        chatRemoteBackgroundColor = getColor("chatRemoteBackgroundColor");
+        chatRemoteBorderColor = getColor("chatRemoteBorderColor");
 
         kbFolderNameTextColor   = getColor("kbFolderNameTextColor");
         kbFolderL0BackgroundColor   = getColor("kbFolderL0BackgroundColor");
         kbTextColor   = getColor("kbTextColor");
+        kbFolderIcon = null; // mContext.getResources().getDrawable(R.drawable.book_bookmark);
     }
 
 
@@ -138,6 +184,7 @@ public class Appearance {
         chatTimeStampColor   = color;
         chatActionButtonTextColor   = color;
         kbTextColor = color;
+        borderColor = color;
     }
 
     public void setDisabledColor(int color) {
@@ -153,7 +200,14 @@ public class Appearance {
     }
 
     public void setBorderColor(int color) {
+        borderColor = color;
     }
 
+    public int menuBorderColor() {
+        return menuConfiguration.containsKey(kMenuBorderColor ) ? (int) menuConfiguration.get(kMenuBorderColor) : null;
+    }
 
+    public void setMenuConfiguration(Hashtable<String, Object>configuration) {
+        menuConfiguration = configuration;
+    }
 }

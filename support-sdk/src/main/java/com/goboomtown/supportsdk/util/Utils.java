@@ -181,7 +181,11 @@ public class Utils {
      * @return address or empty string
      */
     public static String getIPAddress(final String iFaceName, final boolean useIPv4) {
+
         try {
+            if ( NetworkInterface.getNetworkInterfaces() == null ) {
+                return null;
+            }
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface iFace : interfaces) {
                 List<InetAddress> addrs = Collections.list(iFace.getInetAddresses());

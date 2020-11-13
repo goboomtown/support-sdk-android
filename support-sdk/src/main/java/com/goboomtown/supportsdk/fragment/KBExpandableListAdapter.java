@@ -101,8 +101,10 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         if ( child instanceof KBEntryModel ) {
             final KBEntryModel entry = (KBEntryModel) child;
             if ( entry.isFolder() ) {
-                iconView.setImageDrawable(this.context.getResources().getDrawable(R.drawable.book_bookmark));
-                iconView.setVisibility(View.VISIBLE);
+                if ( supportSDK.appearance.kbFolderIcon != null ) {
+                    iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon);
+                    iconView.setVisibility(View.VISIBLE);
+                }
             }
             String childText = entry.title();
             articleLabel.setText(childText);
@@ -119,30 +121,6 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         return convertView;
     }
 
-//    private void showFolder(KBEntryModel entry) {
-//        KBListFragment kbListFragment = new KBListFragment();
-//        kbListFragment.mContext = context;
-//        kbListFragment.supportSDK = supportSDK;
-//        kbListFragment.mSupportButton = mSupportButton;
-//        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        ViewGroup viewGroup = (ViewGroup) mView.getParent();
-//        int viewId = viewGroup.getId();
-//        fragmentTransaction.replace(viewId,kbListFragment, KBLISTFRAGMENT_TAG);
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.commit();
-//    }
-
-//    private void showArticle(KBEntryModel article) {
-//        String title = article.title();
-//        String body = article.body();
-//        String html = "<html><body>" + body + "</body></html>";
-//        Intent intent = new Intent(context, KBActivity.class);
-//        intent.putExtra(KBActivity.ARG_URL, "");
-//        intent.putExtra(KBActivity.ARG_HTML, html);
-//        intent.putExtra(KBActivity.ARG_TITLE, title);
-//        context.startActivity(intent);
-//    }
 
     @Override
     public int getChildrenCount(int groupPosition) {
@@ -175,7 +153,12 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(this.context.getResources().getColor(R.color.kbFolderL0BackgroundColor));
 
         ImageView iconView = convertView.findViewById(R.id.sectionHeaderIcon);
-        iconView.setImageDrawable(this.context.getResources().getDrawable(R.drawable.book_bookmark));
+        if ( supportSDK.appearance.kbFolderIcon != null ) {
+            iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon);
+            iconView.setVisibility(View.VISIBLE);
+        } else {
+            iconView.setVisibility(View.GONE);
+        }
         TextView sectionHeaderLabel = convertView.findViewById(R.id.sectionHeaderLabel);
         sectionHeaderLabel.setTextColor(this.context.getResources().getColor(R.color.kbFolderNameTextColor));
 

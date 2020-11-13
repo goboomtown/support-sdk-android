@@ -36,9 +36,15 @@
     <color name="chatActionButtonSelectedTextColor">#ffffff</color>
     <color name="chatActionButtonBorderColor">#E0E0E0</color>
     <color name="chatIconColor">#838383</color>
+    <color name="chatLocalTextColor">#303030</color>
+    <color name="chatLocalBackgroundColor">#e5e4e9</color>
+    <color name="chatLocalBorderColor">#e5e4e9</color>
+    <color name="chatRemoteTextColor">#ffffff</color>
+    <color name="chatRemoteBackgroundColor">#107ffa</color>
+    <color name="chatRemoteBorderColor">#107ffa</color>
 
-    <color name="kbFolderNameTextColor">#4F4F4F</color>
+    <color name="kbFolderNameTextColor">#303030</color>
     <color name="kbFolderL0BackgroundColor">#ACACAC</color>
-    <color name="kbTextColor">#4F4F4F</color>
+    <color name="kbTextColor">#303030</color>
 </resources>
 

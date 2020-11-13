@@ -58,16 +58,28 @@ public class ChatFragment extends BaseChatFragment {
     private MenuItem        mMenuItemEndCall;
     private boolean         isScreenShare = false;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
+    }
+
+
     public void configureAppearance()
     {
-//        super.configureAppearance();
-//        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = colorFromValue(R.color.chatSendButtonDisabledColor);
-//        BoomtownChat.sharedInstance().chatSendButtonColor           = colorFromValue(R.color.chatSendButtonEnabledColor);
-//        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
-//        BoomtownChat.sharedInstance().chatActionButtonTextColor     = colorFromValue(R.color.chatActionButtonTextColor);
-//        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = colorFromValue(R.color.chatActionButtonBorderColor);
-//        chatUploadButton.setColorFilter(R.color.chatIconColor);
-
+        if ( supportSDK.appearance.chatAttachmentButtonImage != null ) {
+            BoomtownChat.sharedInstance().chatAttachmentButtonImage = supportSDK.appearance.chatAttachmentButtonImage;
+        }
+        if ( supportSDK.appearance.chatSendButtonImage != null ) {
+            BoomtownChat.sharedInstance().chatSendButtonImage = supportSDK.appearance.chatSendButtonImage;
+        }
+        BoomtownChat.sharedInstance().chatLocalTextColor = supportSDK.appearance.chatLocalTextColor;
+        BoomtownChat.sharedInstance().chatLocalBackgroundColor = supportSDK.appearance.chatLocalBackgroundColor;
+        BoomtownChat.sharedInstance().chatLocalBorderColor = supportSDK.appearance.chatLocalBorderColor;
+        BoomtownChat.sharedInstance().chatRemoteTextColor = supportSDK.appearance.chatRemoteTextColor;
+        BoomtownChat.sharedInstance().chatRemoteBackgroundColor = supportSDK.appearance.chatRemoteBackgroundColor;
+        BoomtownChat.sharedInstance().chatRemoteBorderColor = supportSDK.appearance.chatRemoteBorderColor;
         BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = supportSDK.appearance.chatSendButtonDisabledColor;
         BoomtownChat.sharedInstance().chatSendButtonColor           = supportSDK.appearance.chatSendButtonEnabledColor;
         BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor;

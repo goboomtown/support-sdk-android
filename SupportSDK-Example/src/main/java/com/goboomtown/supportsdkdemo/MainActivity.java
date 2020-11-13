@@ -145,6 +145,10 @@ public class MainActivity extends AppCompatActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.gravity = Gravity.CENTER_VERTICAL;
+                view.setLayoutParams(params);
                 mSupportMenuContainer.addView(view);
             }
         });

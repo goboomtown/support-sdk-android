@@ -399,7 +399,7 @@ public class SupportSDK
      */
     public void post(String uri, JSONObject jsonParams, Callback callback) {
         String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
-        client.headers = addHeaders(uri);
+        client.headers = addHeaders();
         client.post(mContext.get(), requestUrl, jsonParams, callback);
         Log.v(TAG, "request to " + requestUrl + " sent with body " + jsonParams.toString());
     }
@@ -414,7 +414,7 @@ public class SupportSDK
      */
     public void post(String uri, JSONObject jsonParams, Bitmap image, String name, Callback callback) {
         String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
-        client.headers = addHeaders(uri);
+        client.headers = addHeaders();
         client.post(mContext.get(),requestUrl, jsonParams, image, name, callback);
     }
 
@@ -425,24 +425,14 @@ public class SupportSDK
      */
     public void get(String uri, Callback callback) {
         String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
-        client.headers = addHeaders(uri);
+        client.headers = addHeaders();
         client.get(mContext.get(), requestUrl, callback);
     }
 
-    private HashMap<String, String> addHeaders(String uri) {
+    private HashMap<String, String> addHeaders() {
         HashMap<String, String> headerMap = new HashMap<>();
 
-        String iso8601Date 			= iso8601Date();
-        String canonicalizedResource = String.format("%s:%s", uri, iso8601Date);
-        String signature 			= null;
-        try {
-            signature = encode(canonicalizedResource);
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
-//        headerMap.put("X-Boomtown-Date",        iso8601Date);
         headerMap.put("X-Boomtown-Token",       configuration.configPartnerToken);
-//        headerMap.put("X-Boomtown-Signature",   signature);
         headerMap.put("X-Boomtown-Integration", configuration.configAPIIntegrationId);
         headerMap.put("X-Boomtown-Key",         configuration.configAPIKey);
         if (!cloudConfigComplete || supportProactiveEnabled) {
@@ -456,16 +446,6 @@ public class SupportSDK
             headerMap.put(HTTP_HEADER_DOWNLOAD_TOKEN, downloadSessionToken);
         }
         return headerMap;
-    }
-
-    private String iso8601Date() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ", Locale.getDefault());
-
-        // Use UTC as the default time zone.
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        Calendar c = Calendar.getInstance();
-        return dateFormat.format(c.getTime());
     }
 
     public boolean isProactiveEnabled() {

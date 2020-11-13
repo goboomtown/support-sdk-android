@@ -41,10 +41,12 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
     public  SupportButton   mSupportButton = null;
     public  SupportSDK      supportSDK = null;
     public  boolean         isFromList = false;
+    private SupportSDK.SupportSDKFormsListener  formsListener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        formsListener = supportSDK.mFormsListener;
         supportSDK.mFormsListener = this;
         if ( supportSDK != null ) {
             refresh();
@@ -62,41 +64,42 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
     @Override
     public void onDetach() {
         super.onDetach();
+        supportSDK.mFormsListener = formsListener;
         mListener = null;
     }
 
 
-    public void handleFocusChangeOnField(com.goboomtown.forms.fragment.FormFragment.SimpleItemRecyclerViewAdapter.ViewHolder holder, boolean hasFocus, View view) {
-        if (!hasFocus && holder.mField.isValueUpdated()) {
-            if (mParent != null) {
-                mParent.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if ( mFormModel.refresh() ) {
-                            refreshViewAdapter();
-                        }
-                    }
-                });
-            }
-        }
-    }
+//    public void handleFocusChangeOnField(com.goboomtown.forms.fragment.FormFragment.SimpleItemRecyclerViewAdapter.ViewHolder holder, boolean hasFocus, View view) {
+//        if (!hasFocus && holder.mField.isValueUpdated()) {
+//            if (mParent != null) {
+//                mParent.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if ( mFormModel.refresh() ) {
+//                            refreshViewAdapter();
+//                        }
+//                    }
+//                });
+//            }
+//        }
+//    }
 
-    public void handleUpdatedField(BoomtownField field) {
-        if ( !field.isValueUpdated() ) {
-            return;
-        }
-        Activity activity = getActivity();
-        if ( activity != null ) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if ( mFormModel.refresh() ) {
-                        refreshViewAdapter();
-                    }
-                }
-            });
-        }
-    }
+//    public void handleUpdatedField(BoomtownField field) {
+//        if ( !field.isValueUpdated() ) {
+//            return;
+//        }
+//        Activity activity = getActivity();
+//        if ( activity != null ) {
+//            activity.runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if ( mFormModel.refresh() ) {
+//                        refreshViewAdapter();
+//                    }
+//                }
+//            });
+//        }
+//    }
 
 
     @Override
@@ -140,8 +143,9 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
         }
         mFormModel.sortFields();
         mFormModel.refresh();
-        refreshViewAdapter();
+        refreshForm();
     }
+
 
     @Override
     public void supportSDKDidRetrieveForms() {
@@ -154,12 +158,13 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
     }
 
     @Override
-    public     void supportSDKDidUpdateForm() {
+    public void supportSDKDidUpdateForm() {
         FragmentActivity activity = getActivity();
         if ( activity != null ) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Toast.makeText(getContext(), getResources().getString(R.string.warn_submission_successful), Toast.LENGTH_LONG).show();
                     if ( isFromList ) {
                         FragmentManager fragmentManager = activity.getSupportFragmentManager();
                         fragmentManager.popBackStackImmediate();
@@ -172,7 +177,7 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
     }
 
     @Override
-    public     void supportSDKFailedToUpdateForm() {
+    public void supportSDKFailedToUpdateForm() {
         Activity activity = getActivity();
         if ( activity != null ) {
             final String message = getResources().getString(R.string.warn_unable_to_update_form);

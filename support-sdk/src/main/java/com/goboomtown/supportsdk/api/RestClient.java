@@ -278,10 +278,12 @@ public class RestClient {
         headerMap.put("longitude", lon);
         String ua = Utils.buildBoomtownUserAgent(context);
         headerMap.put("Boomtown-Agent", ua);
-        Iterator<String> iter = headers.keySet().iterator();
-        while ( iter.hasNext() ) {
-            String key = iter.next();
-            headerMap.put(key, headerMap.get(key));
+        if ( headers != null ) {
+            Iterator<String> iter = headers.keySet().iterator();
+            while (iter.hasNext()) {
+                String key = iter.next();
+                headerMap.put(key, headerMap.get(key));
+            }
         }
         return headerMap;
     }

@@ -10,6 +10,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.InsetDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -30,6 +34,7 @@ import com.goboomtown.chat.BoomtownChat;
 import com.goboomtown.chat.BoomtownChatMessage;
 import com.goboomtown.fragment.ChatAdapter;
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.api.Appearance;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.wefika.flowlayout.FlowLayout;
 
@@ -141,13 +146,13 @@ public class SupportMenuView extends FrameLayout {
                 for ( SupportMenuEntry entry : mEntries ) {
                     if ( mMenuStyle == SupportButton.MenuStyle.BUTTON ) {
                         SupportMenuButton menuButton = new SupportMenuButton(mContext,
-                                entry.label, entry.resourceId);
+                                entry.label, entry.drawable);
                         menuButton.appearance = supportSDK.appearance;
                         menuButton.setOnClickListener(entry.onClickListener);
                         mButtons.add(menuButton);
                     } else {
                         SupportMenuItem menuButton = new SupportMenuItem(mContext,
-                                entry.label, entry.resourceId);
+                                entry.label, entry.drawable);
                         menuButton.appearance = supportSDK.appearance;
                         menuButton.setOnClickListener(entry.onClickListener);
                         mButtons.add(menuButton);
@@ -201,45 +206,10 @@ public class SupportMenuView extends FrameLayout {
     }
 
 
-//    protected void createFlowMenu() {
-//        // set container visibility
-//        if ( mFlowView == null ) {
-//            return;
-//        }
-//        mFlowView.setVisibility(View.VISIBLE);
-//        // add new buttons
-//        for (int i = 0; i < mEntries.size(); i++) {
-//            try {
-//                JSONObject action = actions.getJSONObject(i);
-//                Spannable btnLabel = new SpannableString(action.optString(BoomtownChatMessage.JSON_KEY_LBL));
-//                final String btnUri = action.optString(BoomtownChatMessage.JSON_KEY_URI);
-//                if (btnLabel != null && btnUri != null) {
-//                    final Button btn = new Button(context.get());
-//                    FlowLayout.LayoutParams llp = new FlowLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//                    llp.setMargins(5, 5, 5, 5);
-//                    btn.setLayoutParams(llp);
-//                    btn.setAllCaps(false);  // override default styling else lose spannable data via #AllCapsTransformationMethod
-//                    btnLabel = BoomtownChatMessage.processTxtWithEmoticons(btnLabel, emoticonMap, new BoomtownChatMessage.EmoticonSpannableBuilderStrategy() {
-//                        @Override
-//                        public DynamicDrawableSpan buildDynamicDrawableSpan(BoomtownChatMessage.Emoticon emot) {
-//                            return BoomtownChatMessage.buildDynamicDrawableSpan(context.get(), btn, emot, btn.getLineHeight() * 2, btn.getLineHeight() * 2);
-//                        }
-//                    });
-//                    btn.setPadding(30, 0, 30, 0);
-//                    btn.setText(btnLabel);
-//                    btn.setBackground(this.context.get().getResources().getDrawable(com.goboomtown.boomtownchat.R.drawable.rounded_button_selector));
-//                    mFlowView.addView(btn);
-//                }
-//            } catch (JSONException e) {
-//                Log.e(TAG, Log.getStackTraceString(e));
-//            }
-//        }
-//    }
-
-
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        recyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+//        recyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+//        recyclerView.addItemDecoration(new DividerItemDecoration(mContext, 0));
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(mEntries));
     }
 
@@ -293,18 +263,6 @@ public class SupportMenuView extends FrameLayout {
             holder.bind(entry);
         }
 
-//        @Override
-//        public void onBindViewHolder(final ViewHolder holder, int position) {
-//            // super.onBindViewHolder(holder, position);
-//            if (mSelectedPosition == position) {
-//                holder.itemView.setBackgroundColor(Color.parseColor("#993ED4CA"));
-//            } else {
-//                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
-//            }
-//            SupportMenuEntry entry = mEntries.get(position);
-//            holder.bind(entry);
-//        }
-
         @Override
         public int getItemCount() {
             return mEntries.size();
@@ -329,11 +287,13 @@ public class SupportMenuView extends FrameLayout {
         }
 
         public class ViewHolder extends TrackSelectionAdapter.ViewHolder {
+            public final View           mView;
             public final ImageView      mIconView;
             public final TextView       mTextView;
 
             public ViewHolder(View view) {
                 super(view);
+                mView     = view;
                 mIconView = view.findViewById(R.id.iconView);
                 mTextView = view.findViewById(R.id.label);
             }
@@ -342,9 +302,15 @@ public class SupportMenuView extends FrameLayout {
                 if (entry == null) {
                     return;
                 }
+
+                if ( supportSDK.appearance.menuConfiguration.containsKey(Appearance.kMenuBorderColor) ) {
+                    addBorder(itemView, (int)supportSDK.appearance.menuConfiguration.get(Appearance.kMenuBorderColor));
+                }
+
                 itemView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        addBorder(itemView, supportSDK.appearance.homeIconColor);
                         notifyItemChanged(mSelectedPosition);
                         mSelectedPosition = getLayoutPosition();
                         notifyItemChanged(mSelectedPosition);
@@ -353,10 +319,17 @@ public class SupportMenuView extends FrameLayout {
                     }
                 });
 //                mItemView.setOnClickListener(entry.onClickListener);
-                mIconView.setImageDrawable(getResources().getDrawable(entry.resourceId));
+                mIconView.setImageDrawable(entry.drawable);
                 mIconView.setColorFilter(supportSDK.appearance.homeIconColor);
                 mTextView.setText(entry.label);
                 mTextView.setTextColor(supportSDK.appearance.homeTextColor);
+            }
+
+            private void addBorder(View view, int borderColor) {
+                GradientDrawable border = new GradientDrawable();
+                border.setCornerRadius(8);
+                border.setStroke(2, borderColor);
+                view.setBackground(border);
             }
         }
     }
