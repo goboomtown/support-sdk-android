@@ -89,15 +89,6 @@ _Note:_ An example Android application that uses this library may be found in th
 
 ```
 
-#### Branding
-
-The Support Button provides an "appearance" parameter which exposes two methods to control the look of the Support SDK. The usage is shown in the sample code below.
-
-```
-setIconColor(int color);
-setTextColor(int color);
-```
-
 
 #### Sample Java code
 
@@ -108,8 +99,65 @@ supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
 
 supportButton.appearance.setIconColor(Color.BLUE);
 supportButton.appearance.setTextColor(Color.BLACK);
+```
 
 
+#### Branding
+
+The Support Button provides an "appearance" parameter which exposes two methods to control the look of the Support SDK. The usage is shown in the sample code below.
+
+```
+setIconColor(int color);
+setTextColor(int color);
+```
+
+The Support Button "appearance" parameter also allows you to configure the support menu, the knowledge base folder icon, or the chat colors and button images using code similar to the example below.
+
+```
+private void setDefaultAppearance() {
+    Hashtable<String, Object> configuration = mSupportButton.appearance.menuConfiguration;
+
+    configuration.put(Appearance.kMenuTextChat, getResources().getString(R.string.menu_text_chat));
+    configuration.put(Appearance.kMenuIconChat, getResources().getDrawable(R.drawable.chat));
+
+    configuration.put(Appearance.kMenuTextCallMe, supportSDK.callMeButtonText);
+    configuration.put(Appearance.kMenuIconCallMe, getResources().getDrawable(R.drawable.phone_call));
+
+    configuration.put(Appearance.kMenuTextKnowledge, getResources().getString(R.string.menu_text_kb));
+    configuration.put(Appearance.kMenuIconKnowledge, getResources().getDrawable(R.drawable.knowledge));
+
+    configuration.put(Appearance.kMenuTextWeb, getResources().getString(R.string.menu_text_web));
+    configuration.put(Appearance.kMenuIconWeb, getResources().getDrawable(R.drawable.url));
+
+    configuration.put(Appearance.kMenuTextEmail, getResources().getString(R.string.menu_text_email));
+    configuration.put(Appearance.kMenuIconEmail, getResources().getDrawable(R.drawable.email));
+
+    configuration.put(Appearance.kMenuTextPhone, getResources().getString(R.string.menu_text_phone));
+    configuration.put(Appearance.kMenuIconPhone, getResources().getDrawable(R.drawable.phone));
+
+    configuration.put(Appearance.kMenuTextForms, getResources().getString(R.string.menu_text_forms));
+    configuration.put(Appearance.kMenuIconForms, getResources().getDrawable(R.drawable.form));
+
+    configuration.put(Appearance.kMenuTextHistory, getResources().getString(R.string.label_history));
+    configuration.put(Appearance.kMenuIconHistory, getResources().getDrawable(R.drawable.customer_alt));
+
+    configuration.put(Appearance.kMenuBorderColor, getResources().getColor(R.color.colorKeybankMenuBorder));
+
+    mSupportButton.appearance.setMenuConfiguration(configuration);
+
+    mSupportButton.appearance.kbFolderIcon = getResources().getDrawable(R.drawable.folderIcon);
+
+    mSupportButton.appearance.chatAttachmentButtonImage = getResources().getDrawable(R.drawable.file_attachment);
+    mSupportButton.appearance.chatSendButtonImage = getResources().getDrawable(R.drawable.send_message);
+
+    mSupportButton.appearance.chatLocalTextColor        = getResources().getColor(R.color.chatKeybankLocalTextColor);
+    mSupportButton.appearance.chatLocalBackgroundColor  = getResources().getColor(R.color.chatKeybankLocalBackgroundColor);
+    mSupportButton.appearance.chatLocalBorderColor      = getResources().getColor(R.color.chatKeybankLocalBorderColor);
+    mSupportButton.appearance.chatRemoteTextColor       = getResources().getColor(R.color.chatKeybankRemoteTextColor);
+    mSupportButton.appearance.chatRemoteBackgroundColor = getResources().getColor(R.color.chatKeybankRemoteBackgroundColor);
+    mSupportButton.appearance.chatRemoteBorderColor     = getResources().getColor(R.color.chatKeybankRemoteBorderColor);
+
+}
 ```
 
 ### Connect Intelligent Agent (mDNS) Broadcasts Using SupportButton
