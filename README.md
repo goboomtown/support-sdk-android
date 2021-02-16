@@ -17,11 +17,10 @@
 1. Click Finish.
 
  or -
-1. Download the AAR file from [github](https://github.com/goboomtown/supportsdk-android/raw/master/dist/aar/supportsdk-release-1.0.0.aar).
+1. Download the AAR file from [github](https://github.com/goboomtown/support-sdk-android/tree/master/AARs).
 1. From within Android Studio, open File -> New -> New Module
 1. Choose Import .JAR/.AAR Package, click Next
-1. Enter the filename with full path - use "..." to browse to the file location where you downloaded supportsdk-release-1.0.0.aar
-1. The "Subproject name" should be auto-filled to "supportsdk-release-1.0.0" once you choose this AAR file path.
+1. Enter the filename with full path - use "..." to browse to the file location where you downloaded the AARs
 1. Include the following dependencies in your application:
 ```    
     implementation "com.wefika:flowlayout:0.4.1"
