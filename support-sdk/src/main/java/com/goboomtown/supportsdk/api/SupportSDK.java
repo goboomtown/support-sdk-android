@@ -70,8 +70,7 @@ import okhttp3.ResponseBody;
 /**
  * Created by Larry Borsato on 2016-07-12.
  */
-public class SupportSDK
-    implements POSConnectorBase.POSConnectorListener {
+public class SupportSDK {
 
     private static final String TAG = SupportSDK.class.getSimpleName();
     private static final String SupportSDKHelpName = "SupportSDK";
@@ -204,32 +203,32 @@ public class SupportSDK
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
         setAPIInfo();
 
-        POSConnector posConnector = new POSConnector(mContext.get(), this);
-        posConnector.getAccount();
+//        POSConnector posConnector = new POSConnector(mContext.get(), this);
+//        posConnector.getAccount();
     }
 
 
-    @Override
-    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
-        if ( merchant != null ) {
-            Log.d(TAG, merchant.name);
-            HashMap<String, String> customerInfo = new HashMap<>();
-            customerInfo.put(kCustomerExternalId, merchant.mid);
-            customerInfo.put(kCustomerLocationMid, merchant.mid);
-            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
-            restGetCustomerInformationWithInfo(customerInfo, null);
-            if (mListener != null) {
-                mListener.supportSDKDidRetrieveAccount(customerInfo);
-            }
-        }
-    }
-
-    @Override
-    public void posConnectorDidToFailRetrieveAccount(String message) {
-        if (mListener != null) {
-            mListener.supportSDKDidFailToRetrieveAccount(message);
-        }
-    }
+//    @Override
+//    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
+//        if ( merchant != null ) {
+//            Log.d(TAG, merchant.name);
+//            HashMap<String, String> customerInfo = new HashMap<>();
+//            customerInfo.put(kCustomerExternalId, merchant.mid);
+//            customerInfo.put(kCustomerLocationMid, merchant.mid);
+//            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
+//            restGetCustomerInformationWithInfo(customerInfo, null);
+//            if (mListener != null) {
+//                mListener.supportSDKDidRetrieveAccount(customerInfo);
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void posConnectorDidToFailRetrieveAccount(String message) {
+//        if (mListener != null) {
+//            mListener.supportSDKDidFailToRetrieveAccount(message);
+//        }
+//    }
 
 
     /**

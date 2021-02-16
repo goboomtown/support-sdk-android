@@ -81,28 +81,28 @@ android {
 
     flavorDimensions "androidplatform", "cloudapi"
 
-    productFlavors {
-        production {
-            dimension = "cloudapi"
-        }
-        stage {
-            dimension = "cloudapi"
-        }
-        gplay {
-            dimension = "androidplatform"
-        }
-        pax {
-            minSdkVersion 19
-            ext.global_minSdkVersion = 19
-            dimension = "androidplatform"
-        }
-        clover {
-            dimension = "androidplatform"
-            minSdkVersion 17
-            ext.global_minSdkVersion = 17
-            targetSdkVersion(25)
-        }
-    }
+//    productFlavors {
+//        production {
+//            dimension = "cloudapi"
+//        }
+//        stage {
+//            dimension = "cloudapi"
+//        }
+//        gplay {
+//            dimension = "androidplatform"
+//        }
+//        pax {
+//            minSdkVersion 19
+//            ext.global_minSdkVersion = 19
+//            dimension = "androidplatform"
+//        }
+//        clover {
+//            dimension = "androidplatform"
+//            minSdkVersion 17
+//            ext.global_minSdkVersion = 17
+//            targetSdkVersion(25)
+//        }
+//    }
 
 
     defaultPublishConfig "release"
@@ -186,9 +186,9 @@ dependencies {
         exclude module: 'support-v4'
     }
 
-    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.1.1'
-
-    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
+//    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.1.1'
+//
+//    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
 
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
