@@ -34,8 +34,14 @@ public class SupportMenuItem extends LinearLayout {
         mLabelView.setText(label);
         mImageView.setImageDrawable(drawable);
 
-        mImageView.setColorFilter(appearance.homeIconColor);
-        mLabelView.setTextColor(appearance.homeTextColor);
+//        mImageView.setColorFilter(appearance.menuIconColor());
+//        mLabelView.setTextColor(appearance.menuTextColor());
+    }
+
+
+    public void configureAppearance() {
+        mImageView.setColorFilter(appearance.menuIconColor());
+        mLabelView.setTextColor(appearance.menuTextColor());
     }
 
 

@@ -53,6 +53,7 @@ public class CallMeView {
     private EditText    mCallbackNumberEditText;
     private EditText    mCallbackDescriptionEditText;
     private Button      mOkButton;
+    private androidx.appcompat.app.AlertDialog dialog;
 
     public CallMeView(Context context, String callbackNumber) {
         mContext = context;
@@ -60,10 +61,15 @@ public class CallMeView {
     }
 
     private void enableOkButton(String phoneNumber) {
-        if ( mOkButton != null ) {
+        if ( dialog == null ) {
+            return;
+        }
+        Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if ( button != null ) {
             boolean validated = validatePhoneNumber(phoneNumber);
-            mOkButton.setEnabled(validated);
-            mOkButton.setClickable(validated);
+            button.setEnabled(validated);
+            button.setFocusable(validated);
+            button.setClickable(validated);
         }
     }
 
@@ -75,16 +81,16 @@ public class CallMeView {
 
        callbackNumberLabel      = dialogView.findViewById(R.id.callbackNumberLabel);
        if ( callbackNumberLabel != null ) {
-           callbackNumberLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+           callbackNumberLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor());
        }
        callbackDescriptionLabel =dialogView.findViewById(R.id.callbackDescriptionLabel);
         if ( callbackDescriptionLabel != null ) {
-            callbackDescriptionLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+            callbackDescriptionLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor());
         }
 
         mCallbackNumberEditText = dialogView.findViewById(R.id.callbackNumber);
         if ( mCallbackNumberEditText != null ) {
-            mCallbackNumberEditText.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+            mCallbackNumberEditText.setTextColor(supportSDK.appearance.callMeLabelTextColor());
             mCallbackNumberEditText.setEnabled(true);
             mCallbackNumberEditText.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -104,12 +110,13 @@ public class CallMeView {
             });
             if ( mCallbackNumber!=null && !mCallbackNumber.equalsIgnoreCase("null") ) {
                 mCallbackNumberEditText.setText(mCallbackNumber);
+                enableOkButton(mCallbackNumber);
             }
         }
 
         mCallbackDescriptionEditText = dialogView.findViewById(R.id.callbackDescription);
         if ( mCallbackDescriptionEditText != null ) {
-            mCallbackDescriptionEditText.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+            mCallbackDescriptionEditText.setTextColor(supportSDK.appearance.callMeLabelTextColor());
             mCallbackDescriptionEditText.setEnabled(true);
             mCallbackDescriptionEditText.setSingleLine(false);
         }
@@ -122,18 +129,21 @@ public class CallMeView {
         });
         dialogBuilder.setNegativeButton(mContext.getResources().getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
+                if ( supportButton.mListener != null ) {
+                    supportButton.mListener.supportButtonDidCompleteTask();
+                }
                 //pass
             }
         });
 
-        androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
+        dialog = dialogBuilder.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
                 Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
                 Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(supportSDK.appearance.callMeButtonTextColor);
-                negativeButton.setTextColor(supportSDK.appearance.callMeLabelTextColor);
+                positiveButton.setTextColor(supportSDK.appearance.callMeLabelTextColor());
+                negativeButton.setTextColor(supportSDK.appearance.callMeLabelTextColor());
                 positiveButton.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -164,7 +174,8 @@ public class CallMeView {
         Pattern r = Pattern.compile(pattern);
         if ( phoneNumber!=null && !phoneNumber.isEmpty() ) {
             m = r.matcher(phoneNumber.trim());
-            return m.find();
+            boolean found = m.find();
+            return found;
         }
         return false;
     }
@@ -243,6 +254,10 @@ public class CallMeView {
                         supportButton.mListener.supportButtonDidFailWithError(mContext.getString(R.string.error_unable_to_create_issue), message);
                     }
                 }
+                if ( supportButton.mListener != null ) {
+                    supportButton.mListener.supportButtonDidCompleteTask();
+                }
+
             }
         });
     }

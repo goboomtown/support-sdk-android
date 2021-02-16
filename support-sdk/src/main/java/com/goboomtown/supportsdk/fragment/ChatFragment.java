@@ -1,8 +1,11 @@
 package com.goboomtown.supportsdk.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
@@ -10,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.goboomtown.chat.BoomtownChat;
@@ -33,6 +39,7 @@ import com.goboomtown.supportsdk.view.SupportButton;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,11 +75,11 @@ public class ChatFragment extends BaseChatFragment {
 
     public void configureAppearance()
     {
-        if ( supportSDK.appearance.chatAttachmentButtonImage != null ) {
-            BoomtownChat.sharedInstance().chatAttachmentButtonImage = supportSDK.appearance.chatAttachmentButtonImage;
+        if ( supportSDK.appearance.chatAttachmentButtonImage() != null ) {
+            BoomtownChat.sharedInstance().chatAttachmentButtonImage = supportSDK.appearance.chatAttachmentButtonImage();
         }
-        if ( supportSDK.appearance.chatSendButtonImage != null ) {
-            BoomtownChat.sharedInstance().chatSendButtonImage = supportSDK.appearance.chatSendButtonImage;
+        if ( supportSDK.appearance.chatSendButtonImage() != null ) {
+            BoomtownChat.sharedInstance().chatSendButtonImage = supportSDK.appearance.chatSendButtonImage();
         }
         BoomtownChat.sharedInstance().chatLocalTextColor = supportSDK.appearance.chatLocalTextColor;
         BoomtownChat.sharedInstance().chatLocalBackgroundColor = supportSDK.appearance.chatLocalBackgroundColor;
@@ -80,12 +87,12 @@ public class ChatFragment extends BaseChatFragment {
         BoomtownChat.sharedInstance().chatRemoteTextColor = supportSDK.appearance.chatRemoteTextColor;
         BoomtownChat.sharedInstance().chatRemoteBackgroundColor = supportSDK.appearance.chatRemoteBackgroundColor;
         BoomtownChat.sharedInstance().chatRemoteBorderColor = supportSDK.appearance.chatRemoteBorderColor;
-        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = supportSDK.appearance.chatSendButtonDisabledColor;
-        BoomtownChat.sharedInstance().chatSendButtonColor           = supportSDK.appearance.chatSendButtonEnabledColor;
-        BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor;
-        BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor;
-        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = supportSDK.appearance.chatActionButtonBorderColor;
-        chatUploadButton.setColorFilter(supportSDK.appearance.chatIconColor);
+        BoomtownChat.sharedInstance().chatSendButtonDisabledColor   = supportSDK.appearance.chatSendButtonDisabledColor();
+        BoomtownChat.sharedInstance().chatSendButtonColor           = supportSDK.appearance.chatSendButtonEnabledColor();
+        BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor();
+        BoomtownChat.sharedInstance().chatActionButtonTextColor     = supportSDK.appearance.chatActionButtonTextColor();
+        BoomtownChat.sharedInstance().chatActionButtonBorderColor   = supportSDK.appearance.chatActionButtonBorderColor();
+        chatUploadButton.setColorFilter(supportSDK.appearance.chatSendButtonEnabledColor());
     }
 
     private int colorFromValue(int value) {
@@ -100,12 +107,24 @@ public class ChatFragment extends BaseChatFragment {
         mMenuItemActionDone.setVisible(false);
         mMenuItemActionResolve = menu.findItem(R.id.action_resolve);
         mMenuItemEndCall = menu.findItem(R.id.action_end_call);
+
+        styleMenuItem(mMenuItemActionDone);
+        styleMenuItem(mMenuItemActionResolve);
+        styleMenuItem(mMenuItemEndCall);
+
         if (supportSDK != null) {
             mMenuItemEndCall.setVisible(supportSDK.isConnected());
         }
         if ( isReadOnly ) {
             mMenuItemActionResolve.setVisible(false);
         }
+    }
+
+
+    private void styleMenuItem(MenuItem menuItem) {
+        SpannableString spanString = new SpannableString(menuItem.getTitle().toString());
+        spanString.setSpan(new ForegroundColorSpan(supportSDK.appearance.navigationBarIconColor()), 0,     spanString.length(), 0); //fix the color to white
+        menuItem.setTitle(spanString);
     }
 
 
@@ -137,9 +156,9 @@ public class ChatFragment extends BaseChatFragment {
 
 
     @Override
-    public void onConnectError() {
-        super.onConnectError();
-        warnJoinFailureAndReconnect(getString(R.string.warn_unable_to_connect_to_chat_server));
+    public void onConnectError(String message) {
+        super.onConnectError(message);
+        warnJoinFailureAndReconnect(message);
     }
 
 
@@ -352,8 +371,19 @@ public class ChatFragment extends BaseChatFragment {
         intent.putExtra(VideoActivity.kAccessToken, accessToken);
         intent.putExtra(VideoActivity.kUsername, "Support SDK");
         intent.putExtra(VideoActivity.kHostname, supportSDK.hostname());
-        startActivity(intent);
-//        startActivityForResult(intent, BaseToolBoxActivity.REQUEST_VIDEOCHAT);
+        if ( isCallable(intent) ) {
+            startActivity(intent);
+        }
+    }
+
+
+    private boolean isCallable(Intent intent) {
+        if ( mContext == null ) {
+            return false;
+        }
+        List<ResolveInfo> list = mContext.getPackageManager().queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
     }
 
 

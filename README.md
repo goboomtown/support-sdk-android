@@ -1,4 +1,4 @@
-# Boomtown Support SDK for Android (v.1.2.2)
+# Boomtown Support SDK for Android (v.1.2.17)
 
 #### Minimum Requirements
 - Android 4.4 (API Level 19)
@@ -23,7 +23,10 @@
 1. Enter the filename with full path - use "..." to browse to the file location where you downloaded supportsdk-release-1.0.0.aar
 1. The "Subproject name" should be auto-filled to "supportsdk-release-1.0.0" once you choose this AAR file path.
 1. Include the following dependencies in your application:
-```    implementation "com.wefika:flowlayout:0.4.1"
+```    
+    implementation "com.wefika:flowlayout:0.4.1"
+    implementation "com.google.code.gson:gson:2.8.5"
+    implementation "com.google.code.gson:gson:2.8.5"
     implementation "com.squareup.okhttp3:okhttp:3.12.1"
     implementation "org.igniterealtime.smack:smack-android-extensions:4.3.1"
     implementation "org.igniterealtime.smack:smack-tcp:4.3.1"
@@ -97,67 +100,161 @@ SupportButton supportButton = (SupportButton) findViewById(R.id.supportButton);
 supportButton.setListener(this);
 supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
 
-supportButton.appearance.setIconColor(Color.BLUE);
-supportButton.appearance.setTextColor(Color.BLACK);
 ```
 
 
-#### Branding
+### Appearance Configuration
 
-The Support Button provides an "appearance" parameter which exposes two methods to control the look of the Support SDK. The usage is shown in the sample code below.
+Much of the application (menus, icons, and colors currently) can be configured using a JSON file as follows:
 
-```
-setIconColor(int color);
-setTextColor(int color);
-```
-
-The Support Button "appearance" parameter also allows you to configure the support menu, the knowledge base folder icon, or the chat colors and button images using code similar to the example below.
+This is the default JSON.
 
 ```
-private void setDefaultAppearance() {
-    Hashtable<String, Object> configuration = mSupportButton.appearance.menuConfiguration;
-
-    configuration.put(Appearance.kMenuTextChat, getResources().getString(R.string.menu_text_chat));
-    configuration.put(Appearance.kMenuIconChat, getResources().getDrawable(R.drawable.chat));
-
-    configuration.put(Appearance.kMenuTextCallMe, supportSDK.callMeButtonText);
-    configuration.put(Appearance.kMenuIconCallMe, getResources().getDrawable(R.drawable.phone_call));
-
-    configuration.put(Appearance.kMenuTextKnowledge, getResources().getString(R.string.menu_text_kb));
-    configuration.put(Appearance.kMenuIconKnowledge, getResources().getDrawable(R.drawable.knowledge));
-
-    configuration.put(Appearance.kMenuTextWeb, getResources().getString(R.string.menu_text_web));
-    configuration.put(Appearance.kMenuIconWeb, getResources().getDrawable(R.drawable.url));
-
-    configuration.put(Appearance.kMenuTextEmail, getResources().getString(R.string.menu_text_email));
-    configuration.put(Appearance.kMenuIconEmail, getResources().getDrawable(R.drawable.email));
-
-    configuration.put(Appearance.kMenuTextPhone, getResources().getString(R.string.menu_text_phone));
-    configuration.put(Appearance.kMenuIconPhone, getResources().getDrawable(R.drawable.phone));
-
-    configuration.put(Appearance.kMenuTextForms, getResources().getString(R.string.menu_text_forms));
-    configuration.put(Appearance.kMenuIconForms, getResources().getDrawable(R.drawable.form));
-
-    configuration.put(Appearance.kMenuTextHistory, getResources().getString(R.string.label_history));
-    configuration.put(Appearance.kMenuIconHistory, getResources().getDrawable(R.drawable.customer_alt));
-
-    configuration.put(Appearance.kMenuBorderColor, getResources().getColor(R.color.colorKeybankMenuBorder));
-
-    mSupportButton.appearance.setMenuConfiguration(configuration);
-
-    mSupportButton.appearance.kbFolderIcon = getResources().getDrawable(R.drawable.folderIcon);
-
-    mSupportButton.appearance.chatAttachmentButtonImage = getResources().getDrawable(R.drawable.file_attachment);
-    mSupportButton.appearance.chatSendButtonImage = getResources().getDrawable(R.drawable.send_message);
-
-    mSupportButton.appearance.chatLocalTextColor        = getResources().getColor(R.color.chatKeybankLocalTextColor);
-    mSupportButton.appearance.chatLocalBackgroundColor  = getResources().getColor(R.color.chatKeybankLocalBackgroundColor);
-    mSupportButton.appearance.chatLocalBorderColor      = getResources().getColor(R.color.chatKeybankLocalBorderColor);
-    mSupportButton.appearance.chatRemoteTextColor       = getResources().getColor(R.color.chatKeybankRemoteTextColor);
-    mSupportButton.appearance.chatRemoteBackgroundColor = getResources().getColor(R.color.chatKeybankRemoteBackgroundColor);
-    mSupportButton.appearance.chatRemoteBorderColor     = getResources().getColor(R.color.chatKeybankRemoteBorderColor);
-
+{
+  "navigationBarAppearance":
+  {
+    "textColor": "#000000",
+    "backgroundColor": "#ffffff",
+    "iconColor": "#000000"
+  },
+  "menuAppearance":
+  {
+    "heading": "Support",
+    "textSize": "20",
+    "textStyle": "bold",
+    "borderWidth": "1",
+    "padding": "10",
+    "spacing": "20",
+    "textColor": "#000000",
+    "iconColor": "#EF5E0D",
+    "borderColor": "#E0E0E0",
+    "textColorDark": "#ffffff",
+    "iconColorDark": "#EF5E0D",
+    "borderColorDark": "#E0E0E0"
+  },
+  "menu":
+  {
+    "chat": {
+      "text": "Chat with Us",
+      "icon": "a_chat"
+    },
+    "callme":
+    {
+      "text": "Call Me",
+      "icon": "phone_call"
+    },
+    "knowledge":
+    {
+      "text": "Search Knowledge",
+      "icon": "book_bookmark"
+    },
+    "web":
+    {
+      "text": "Web Support",
+      "icon": "globe"
+    },
+    "email":
+    {
+      "text": "Email Support",
+      "icon": "letter"
+    },
+    "phone":
+    {
+      "text": "Phone Support",
+      "icon": "phone"
+    },
+    "forms":
+    {
+      "text": "Forms",
+      "icon": "form"
+    },
+    "history":
+    {
+      "text": "History",
+      "icon": "customer_alt"
+    },
+    "exit":
+    {
+      "text": "Exit"
+    }
+  },
+  "icons":
+  {
+    "kbFolderIcon": "book-bookmark",
+    "chatAttachmentButtonImage": "paperclip.png",
+    "chatSendButtonImage": "send.png"
+  },
+  "colors":
+  {
+    "navigationBarColor": "#f2f2f2",
+    "iconColor": "#EF5E0D",
+    "buttonColor": "#EF5E0D",
+    "lineColor": "#E0E0E0",
+    "textColor": "#4F4F4F",
+    "homeIconColor": "#EF5E0D",
+    "homeLineColor": "#E0E0E0",
+    "homeTextColor": "#007AFF",
+    "homeSelectedColor": "#EBEBEB",
+    "callMeHeaderTextColor": "#4F4F4F",
+    "callMeLabelTextColor": "#626363",
+    "callMeHintTextColor": "#ACACAC",
+    "callMeButtonTextColor": "#ACACAC",
+    "callMeButtonBackgroundColor": "#1AA8A8",
+    "ratingHeaderTextColor": "#4F4F4F",
+    "ratingLabelTextColor": "#626363",
+    "ratingHintTextColor": "#ACACAC",
+    "ratingButtonTextColor": "#ACACAC",
+    "ratingButtonBackgroundColor": "#1AA8A8",
+    "chatRefidTextColor": "#4f4f4f",
+    "chatNavBarColor": "#f2f2f2",
+    "chatSendButtonEnabledColor": "#626363",
+    "chatSendButtonDisabledColor": "#ACACAC",
+    "chatTimeStampColor": "#ACACAC",
+    "chatActionButtonTextColor": "#838383",
+    "chatActionButtonSelectedTextColor": "#ffffff",
+    "chatActionButtonBorderColor": "#E0E0E0",
+    "chatIconColor": "#838383",
+    "kbFolderNameTextColor": "#303030",
+    "kbFolderL0BackgroundColor": "#F3F8F8",
+    "kbTextColor": "#303030",
+    "menuBorderColor": "#E0E0E0"
+  },
+  "formAppearance":
+  {
+    "cancelButtonText": "Cancel",
+    "saveButtonText": "Save",
+    "label":
+    {
+      "textStyle": "bold",
+      "textSize": "20",
+      "textColor": "#000000",
+      "textColorDark": "#ffffff",
+      "requiredTextColor": "#000000",
+      "requiredTextColorDark": "#ffffff",
+      "requiredIndicatorColor": "#cc0000",
+      "requiredIndicatorColorDark": "#cc0000"
+    },
+    "entry":
+    {
+      "textStyle": "bold",
+      "textSize": "20",
+      "textColor": "#000000",
+      "textColorDark": "#ffffff",
+      "borderColor": "#000000",
+      "borderColorDark": "#ffffff",
+      "borderWidth": "1"
+    }
+  }
 }
+```
+
+If you only want to configure a general color scheme you need only set the following colors:
+
+```
+iconColor
+buttonColor
+lineColor
+textColor
 ```
 
 ### Connect Intelligent Agent (mDNS) Broadcasts Using SupportButton

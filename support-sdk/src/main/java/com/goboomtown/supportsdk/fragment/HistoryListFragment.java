@@ -110,19 +110,7 @@ public class HistoryListFragment extends Fragment
         if ( issue.isResolved() && !issue.isRated ) {
             displayRatingScreen(issue);
         } else {
-            if ( issue.xmpp_data == null ) {
-                Activity activity = getActivity();
-                if ( activity != null ) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(mContext, mContext.getResources().getString(R.string.warn_unable_to_obtain_chat_server_information), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            } else {
-                displayChat(issue);
-            }
+            displayChat(issue);
         }
     }
 
@@ -140,7 +128,6 @@ public class HistoryListFragment extends Fragment
             }
             return;
         }
-
 
         ChatFragment chatFragment = new ChatFragment();
         chatFragment.mContext = getContext();
@@ -334,19 +321,19 @@ public class HistoryListFragment extends Fragment
                 statusLabel = view.findViewById(R.id.statusLabel);
                 ratingLabel = view.findViewById(R.id.ratingLabel);
                 if ( refIdLabel != null ) {
-                    refIdLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                    refIdLabel.setTextColor(supportSDK.appearance.textColor());
                 }
                 if ( dateLabel != null ) {
-                    dateLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                    dateLabel.setTextColor(supportSDK.appearance.textColor());
                 }
                 if ( lastMessageLabel != null ) {
-                    lastMessageLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                    lastMessageLabel.setTextColor(supportSDK.appearance.textColor());
                 }
                 if ( statusLabel != null ) {
-                    statusLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                    statusLabel.setTextColor(supportSDK.appearance.textColor());
                 }
                 if ( ratingLabel != null ) {
-                    ratingLabel.setTextColor(supportSDK.appearance.homeTextColor);
+                    ratingLabel.setTextColor(supportSDK.appearance.textColor());
                 }
             }
 
@@ -383,10 +370,23 @@ public class HistoryListFragment extends Fragment
                     Iterator<String> keys = entry.transcripts.keys();
                     String key = keys.next();
                     JSONObject transcripts = entry.transcripts.optJSONObject(key);
+                    String highKey = null;
+                    Date highDate = null;
                     if ( transcripts != null ) {
                         keys = transcripts.keys();
-                        key = keys.next();
-                        JSONObject transcript = transcripts.optJSONObject(key);
+                        while ( keys.hasNext() ) {
+                            key = keys.next();
+                            if ( highKey == null ) {
+                                highKey = key;
+                                highDate = dateFromString(highKey);
+                            }
+                            Date thisDate = dateFromString(key);
+                            if (thisDate.after(highDate)) {
+                                highKey = key;
+                                highDate = thisDate;
+                            }
+                        }
+                        JSONObject transcript = transcripts.optJSONObject(highKey);
                         if ( transcript != null ) {
                             String from = transcript.optString("from");
                             String message = transcript.optString("message");
@@ -417,6 +417,18 @@ public class HistoryListFragment extends Fragment
             }
         }
     }
+
+
+    private Date dateFromString(String dateString) {
+        Date date = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        try {
+            date = sdf.parse(dateString);
+        } catch (ParseException ex) {
+        }
+        return date;
+    }
+
 
     public interface ListItemClickListener {
         ListItemClickListener NULL_LISTENER = item -> {

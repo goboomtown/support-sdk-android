@@ -78,6 +78,15 @@ public final class SupportSDKProactive implements SupportSDK.SupportSDKListener 
 
     }
 
+    @Override
+    public void supportSDKDidRetrieveAccount(HashMap<String, String> accountInfo) {
+    }
+
+    @Override
+    public void supportSDKDidFailToRetrieveAccount(String message) {
+    }
+
+
     /**
      * POST a new {@link CheckAppHealth} with given name, status, and description.
      *

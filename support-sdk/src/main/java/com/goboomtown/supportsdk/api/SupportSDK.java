@@ -218,12 +218,17 @@ public class SupportSDK
             customerInfo.put(kCustomerLocationMid, merchant.mid);
             customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
             restGetCustomerInformationWithInfo(customerInfo, null);
+            if (mListener != null) {
+                mListener.supportSDKDidRetrieveAccount(customerInfo);
+            }
         }
     }
 
     @Override
     public void posConnectorDidToFailRetrieveAccount(String message) {
-
+        if (mListener != null) {
+            mListener.supportSDKDidFailToRetrieveAccount(message);
+        }
     }
 
 
@@ -1036,6 +1041,8 @@ public class SupportSDK
         void supportSDKDidFailWithError(String description, String reason);
         void supportSDKDidGetSettings();
         void supportSDKDidFailToGetSettings();
+        void supportSDKDidRetrieveAccount(HashMap<String, String> accountInfo);
+        void supportSDKDidFailToRetrieveAccount(String message);
     }
 
     public interface SupportSDKKBListener {

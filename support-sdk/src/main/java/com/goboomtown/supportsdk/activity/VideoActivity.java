@@ -7,7 +7,6 @@ import android.util.Log;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.video.AVChatSessionFragment;
 import com.goboomtown.video.BTParticipant;
-import com.twilio.video.TwilioException;
 
 
 /**
@@ -73,7 +72,7 @@ public class VideoActivity extends com.goboomtown.video.VideoActivity {
     }
 
     @Override
-    public void didFailToConnect(TwilioException e) {
+    public void didFailToConnect(int code, String explanation) {
 
     }
 

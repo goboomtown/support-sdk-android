@@ -80,15 +80,15 @@ public class RatingView {
 
         mRatingLabel      = dialogView.findViewById(R.id.ratingLabel);
         if ( mRatingLabel != null ) {
-            mRatingLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor);
+            mRatingLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor());
         }
         mRatingDescriptionLabel =dialogView.findViewById(R.id.ratingDescriptionLabel);
         if ( mRatingDescriptionLabel != null ) {
-            mRatingDescriptionLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor);
+            mRatingDescriptionLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor());
         }
         mRatingDescriptionEditText = dialogView.findViewById(R.id.ratingDescription);
         if ( mRatingDescriptionEditText != null ) {
-            mRatingDescriptionEditText.setTextColor(supportSDK.appearance.ratingLabelTextColor);
+            mRatingDescriptionEditText.setTextColor(supportSDK.appearance.ratingLabelTextColor());
             mRatingDescriptionEditText.setEnabled(true);
             mRatingDescriptionEditText.setSingleLine(false);
         }
@@ -103,6 +103,10 @@ public class RatingView {
         dialogBuilder.setNegativeButton(mContext.getResources().getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 //pass
+                if ( supportButton.mListener != null ) {
+                    supportButton.mListener.supportButtonDidCompleteTask();
+                }
+
             }
         });
 
@@ -112,8 +116,8 @@ public class RatingView {
             public void onShow(DialogInterface dialogInterface) {
                 Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
                 Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(supportButton.appearance.ratingButtonTextColor);
-                negativeButton.setTextColor(supportButton.appearance.ratingLabelTextColor);
+                positiveButton.setTextColor(supportButton.appearance.ratingButtonTextColor());
+                negativeButton.setTextColor(supportButton.appearance.ratingLabelTextColor());
             }
         });
         dialog.show();
@@ -125,11 +129,11 @@ public class RatingView {
         if ( rate1==null || rate2==null || rate3==null || rate4==null || rate5==null ) {
             return;
         }
-        rate1.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
-        rate2.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
-        rate3.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
-        rate4.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
-        rate5.setColorFilter(supportSDK.appearance.ratingLabelTextColor);
+        rate1.setColorFilter(supportSDK.appearance.ratingLabelTextColor());
+        rate2.setColorFilter(supportSDK.appearance.ratingLabelTextColor());
+        rate3.setColorFilter(supportSDK.appearance.ratingLabelTextColor());
+        rate4.setColorFilter(supportSDK.appearance.ratingLabelTextColor());
+        rate5.setColorFilter(supportSDK.appearance.ratingLabelTextColor());
         rate1.setOnClickListener(v -> {
             makeSelection(rate1);
             clearOthers(rate2, rate3, rate4, rate5);
@@ -218,6 +222,10 @@ public class RatingView {
                         supportButton.mListener.supportButtonDidFailWithError(mContext.getString(R.string.error_unable_to_rate_issue), message);
                     }
                 }
+                if ( supportButton.mListener != null ) {
+                    supportButton.mListener.supportButtonDidCompleteTask();
+                }
+
             }
         });
     }

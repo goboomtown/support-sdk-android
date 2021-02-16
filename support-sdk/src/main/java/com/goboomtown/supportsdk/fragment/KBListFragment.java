@@ -73,6 +73,7 @@ public class KBListFragment extends Fragment
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
+
         mActivity = getActivity();
         if ( kbViewModel == null ) {
             if ( supportSDK.kbViewModel() != null ) {
@@ -201,10 +202,15 @@ public class KBListFragment extends Fragment
         String body = article.body();
         String html = "<html><body>" + body + "</body></html>";
         Intent intent = new Intent(mContext, KBActivity.class);
-        intent.putExtra(KBActivity.ARG_URL, "");
-        intent.putExtra(KBActivity.ARG_HTML, html);
+        if ( !article.url().isEmpty() ) {
+            intent.putExtra(KBActivity.ARG_URL, article.url());
+            intent.putExtra(KBActivity.ARG_HTML, "");
+        } else {
+            intent.putExtra(KBActivity.ARG_URL, "");
+            intent.putExtra(KBActivity.ARG_HTML, html);
+        }
         intent.putExtra(KBActivity.ARG_TITLE, title);
-        mContext.startActivity(intent);
+        startActivity(intent);
     }
 
 

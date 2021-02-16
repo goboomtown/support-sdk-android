@@ -17,6 +17,7 @@ import com.goboomtown.supportsdk.view.SupportButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -33,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.Collection;
@@ -46,16 +48,14 @@ public class MainActivity extends AppCompatActivity
 
     private FrameLayout     mFragmentContainer;
     private LinearLayout    mSupportMenuContainer;
-    private View mView;
-    private SupportButton mSupportButton;
+    private View            mView;
+    private SupportButton   mSupportButton;
+    private View            displayView;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        Toolbar toolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//        toolbar.setTitle(R.string.app_name);
 
         mFragmentContainer = findViewById(R.id.fragment_container);
         mSupportMenuContainer = findViewById(R.id.supportMenuContainer);
@@ -63,9 +63,6 @@ public class MainActivity extends AppCompatActivity
         mSupportButton = findViewById(R.id.supportButton);
         mSupportButton.setVisibility(View.GONE);
         mSupportButton.setListener(this);
-
-        mSupportButton.appearance.setIconColor(Color.RED);
-        mSupportButton.appearance.setTextColor(Color.BLACK);
 
         int configResource = R.raw.support_sdk_preprod; // R.raw.support_sdk;
         mSupportButton.loadConfiguration(configResource, null);
@@ -96,15 +93,44 @@ public class MainActivity extends AppCompatActivity
         if ( count > 0 ) {
             getSupportFragmentManager().popBackStack();
             if ( count == 1 ) {
+//                hideActionBar();
                 mFragmentContainer.setVisibility(View.GONE);
-                setTitle(getString(R.string.app_name));
+                setActionBarTitle(getString(R.string.app_name));
+
+                mSupportButton.click();
             }
             count = getSupportFragmentManager().getBackStackEntryCount();
         } else {
+//            mFragmentContainer.setVisibility(View.GONE);
+//            hideActionBar();
             mFragmentContainer.setVisibility(View.GONE);
-            setTitle(getString(R.string.app_name));
+            setActionBarTitle(getString(R.string.app_name));
+
+            mSupportButton.click();
             super.onBackPressed();
         }
+    }
+
+    private void showActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        if ( actionBar != null ) {
+            actionBar.show();
+        }
+    }
+
+    private void hideActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        if ( actionBar != null ) {
+            actionBar.hide();
+        }
+    }
+
+    private void setActionBarTitle(String title) {
+        ActionBar actionBar = getSupportActionBar();
+        if ( actionBar == null ) {
+            return;
+        }
+        mSupportButton.appearance.configureActionBarTitle(actionBar, title);
     }
 
     @Override
@@ -137,22 +163,41 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void supportButtonDidFailToGetSettings() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), getString(R.string.warn_settings), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void supportButtonDidRetrieveAccount(HashMap<String, String> accountInfo) {
 
     }
 
     @Override
+    public void supportButtonDidFailToRetrieveAccount(String message) {
+        Log.v(TAG, message);
+    }
+
+    @Override
     public void supportButtonDisplayView(final View view) {
+        if ( view == null ) {
+            return;
+        }
+        displayView = view;
+        mSupportButton.showLoginPrompt = false;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                 params.gravity = Gravity.CENTER_VERTICAL;
-                view.setLayoutParams(params);
-                mSupportMenuContainer.addView(view);
+                displayView.setLayoutParams(params);
+                mSupportMenuContainer.addView(displayView);
             }
         });
-
     }
 
 
@@ -167,6 +212,10 @@ public class MainActivity extends AppCompatActivity
                         .commit();
                 if ( title != null ) {
                     setTitle(title);
+                }
+                if ( displayView != null ) {
+                    mSupportMenuContainer.removeView(displayView);
+                    displayView = null;
                 }
                 mFragmentContainer.setVisibility(View.VISIBLE);
             }
@@ -191,6 +240,25 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+
+    @Override
+    public void supportButtonDidCompleteTask() {
+        if ( displayView != null ) {
+            mSupportMenuContainer.removeView(displayView);
+            displayView = null;
+        }
+        mSupportButton.click();
+    }
+
+    @Override
+    public void supportButtonDidRequestExit() {
+        if ( displayView != null ) {
+            mSupportMenuContainer.removeView(displayView);
+            displayView = null;
+        }
+    }
+
 
     @Override
     public void supportButtonDidAdvertiseService() {

@@ -81,7 +81,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         ImageView iconView = convertView.findViewById(R.id.iconView);
         TextView articleLabel = convertView.findViewById(R.id.articleLabel);
         if ( articleLabel != null ) {
-            articleLabel.setTextColor(supportSDK.appearance.kbTextColor);
+            articleLabel.setTextColor(supportSDK.appearance.kbTextColor());
         }
 
         if ( expanded && expandableListView!=null ) {
@@ -102,7 +102,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             final KBEntryModel entry = (KBEntryModel) child;
             if ( entry.isFolder() ) {
                 if ( supportSDK.appearance.kbFolderIcon != null ) {
-                    iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon);
+                    iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon());
                     iconView.setVisibility(View.VISIBLE);
                 }
             }
@@ -153,8 +153,8 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         convertView.setBackgroundColor(this.context.getResources().getColor(R.color.kbFolderL0BackgroundColor));
 
         ImageView iconView = convertView.findViewById(R.id.sectionHeaderIcon);
-        if ( supportSDK.appearance.kbFolderIcon != null ) {
-            iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon);
+        if ( supportSDK!=null && supportSDK.appearance!=null && supportSDK.appearance.kbFolderIcon != null ) {
+            iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon());
             iconView.setVisibility(View.VISIBLE);
         } else {
             iconView.setVisibility(View.GONE);

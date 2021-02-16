@@ -27,9 +27,11 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
+import com.goboomtown.chat.BoomtownChat;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.activity.ScreenCaptureActivity;
+import com.goboomtown.supportsdk.activity.VideoActivity;
 import com.goboomtown.supportsdk.api.Appearance;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.dnssd.BTConnectPresenceService;
@@ -51,6 +53,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,6 +70,17 @@ public class SupportButton extends View
         implements SupportSDK.SupportSDKListener, SupportSDK.SupportSDKFormsListener {
 
     private static final String TAG = SupportButton.class.getSimpleName();
+
+    public final static String chatMenuText                = "chatMenuText";
+    public final static String callMeMenuText              = "callmeMenuText";
+    public final static String knowledgeMenuText           = "knowledgeMenuText";
+    public final static String webMenuText                 = "webMenuText";
+    public final static String emailMenuText               = "emailMenuText";
+    public final static String phoneMenuText               = "phoneMenuText";
+    public final static String formsMenuText               = "formsMenuText";
+    public final static String historyMenuText             = "historyMenuText";
+    public final static String exitMenuText                = "exitMenuText";
+
 
     @Override
     public void supportSDKDidRetrieveForms() {
@@ -97,8 +111,11 @@ public class SupportButton extends View
         MENU,
         BUTTON,
         ICON_LIST,
+        ICON_LIST_EXIT,
         ICON_GRID
     };
+
+
 
 
     // TODO: remove unused constants and/or rename with all-caps per Java convention for constants
@@ -119,6 +136,7 @@ public class SupportButton extends View
 
     public  boolean     useSupportView;
     public  MenuStyle   menuStyle;
+    public  boolean     dismissMenuOnClick = false;
     public  boolean     showLoginPrompt;
 
     public  Appearance          appearance;
@@ -158,6 +176,10 @@ public class SupportButton extends View
 
         void supportButtonDidFailToGetSettings();
 
+        void supportButtonDidRetrieveAccount(HashMap<String, String> accountInfo);
+
+        void supportButtonDidFailToRetrieveAccount(String message);
+
         void supportButtonDisplayView(View view);
 
         void supportButtonDisplayFragment(Fragment fragment, String title);
@@ -169,6 +191,10 @@ public class SupportButton extends View
         void supportButtonDidAdvertiseService();
 
         void supportButtonDidFailToAdvertiseService();
+
+        void supportButtonDidRequestExit();
+
+        void supportButtonDidCompleteTask();
     }
 
     public SupportButtonListener mListener;
@@ -193,6 +219,9 @@ public class SupportButton extends View
 
     private void init(AttributeSet attrs, int defStyle) {
         mActivity = new WeakReference<>(Utils.getActivity(getContext()));
+
+        BoomtownChat.sharedInstance().context = mActivity.get();
+
         if ( ScreenCaptureActivity.class.isAssignableFrom(mActivity.getClass()) &&
                 Utils.doesObjectContainField(mActivity.get(), "supportSDK") ) {
             ((ScreenCaptureActivity) mActivity.get()).supportSDK = supportSDK;
@@ -250,9 +279,17 @@ public class SupportButton extends View
         mListener = listener;
     }
 
+
+    public void reset()
+    {
+        supportSDK.cloudConfigComplete = false;
+    }
+
+
     public void click() {
         switch(menuStyle) {
             case ICON_LIST:
+            case ICON_LIST_EXIT:
             case ICON_GRID:
             case BUTTON:
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -303,6 +340,25 @@ public class SupportButton extends View
         supportSDK.loadConfiguration(jsonString, customerInfo);
     }
 
+    public void loadConfiguration(String jsonString, String customerInfoJsonString) {
+        if ( customerInfoJsonString != null ) {
+            HashMap<String, String> customerInfo = new HashMap<>();
+            try {
+                JSONObject customerInfoJson = new JSONObject(customerInfoJsonString);
+                Iterator<String> iter = customerInfoJson.keys();
+                while (iter.hasNext()) {
+                    String key = iter.next();
+                    customerInfo.put(key, customerInfoJson.getString(key));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            supportSDK.loadConfiguration(jsonString, customerInfo);
+        } else {
+            supportSDK.loadConfiguration(jsonString, null);
+        }
+    }
+
     private void displayChat(BTConnectIssue issue) {
         chatFragment = new ChatFragment();
         chatFragment.mContext = getContext();
@@ -322,7 +378,7 @@ public class SupportButton extends View
         kbListFragment.supportSDK = supportSDK;
         kbListFragment.mSupportButton = this;
         if (mListener != null) {
-            String title = (String) appearance.menuConfiguration.get(Appearance.kMenuTextKnowledge);
+            String title = (String) appearance.knowledgeMenuText();
             mListener.supportButtonDisplayFragment(kbListFragment, title);
         }
     }
@@ -431,7 +487,6 @@ public class SupportButton extends View
     }
 
     public void supportSDKDidGetSettings() {
-        setDefaultMenuConfiguration();
         if (this.supportSDK.memberID == null) {
             this.supportSDK.memberID = this.supportSDK.defaultMemberID;
         }
@@ -446,8 +501,14 @@ public class SupportButton extends View
         if (mListener != null) {
             mListener.supportButtonDidGetSettings();
         }
-//        createSupportEntries();
     }
+
+    private boolean isCallable(Intent intent) {
+        List<ResolveInfo> list = mContext.get().getPackageManager().queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        return list.size() > 0;
+    }
+
 
     public void supportSDKDidFailToGetSettings() {
         if (mListener != null) {
@@ -455,44 +516,27 @@ public class SupportButton extends View
         }
     }
 
-    private void setDefaultMenuConfiguration() {
-        Hashtable<String, Object> configuration = new Hashtable<>();
-        configuration.put(Appearance.kMenuTextChat, getResources().getString(R.string.label_chat_with_us));
-        configuration.put(Appearance.kMenuIconChat, getResources().getDrawable(R.drawable.a_chat));
 
-        configuration.put(Appearance.kMenuTextCallMe, supportSDK.callMeButtonText);
-        configuration.put(Appearance.kMenuIconCallMe, getResources().getDrawable(R.drawable.phone_call));
-
-        configuration.put(Appearance.kMenuTextKnowledge, getResources().getString(R.string.label_search_knowledge));
-        configuration.put(Appearance.kMenuIconKnowledge, getResources().getDrawable(R.drawable.book_bookmark));
-
-        configuration.put(Appearance.kMenuTextWeb, getResources().getString(R.string.label_web_support));
-        configuration.put(Appearance.kMenuIconWeb, getResources().getDrawable(R.drawable.globe));
-
-        configuration.put(Appearance.kMenuTextEmail, getResources().getString(R.string.label_email_support));
-        configuration.put(Appearance.kMenuIconEmail, getResources().getDrawable(R.drawable.letter));
-
-        configuration.put(Appearance.kMenuTextPhone, getResources().getString(R.string.label_phone_support));
-        configuration.put(Appearance.kMenuIconPhone, getResources().getDrawable(R.drawable.phone));
-
-        configuration.put(Appearance.kMenuTextForms, getResources().getString(R.string.label_forms));
-        configuration.put(Appearance.kMenuIconForms, getResources().getDrawable(R.drawable.form));
-
-        configuration.put(Appearance.kMenuTextHistory, getResources().getString(R.string.label_history));
-        configuration.put(Appearance.kMenuIconHistory, getResources().getDrawable(R.drawable.customer_alt));
-
-        configuration.put(Appearance.kMenuBorderColor, getResources().getColor(android.R.color.black));
-
-        appearance.setMenuConfiguration(configuration);
+    @Override
+    public void supportSDKDidRetrieveAccount(HashMap<String, String> accountInfo) {
+        if (mListener != null) {
+            mListener.supportButtonDidRetrieveAccount(accountInfo);
+        }
     }
 
+    @Override
+    public void supportSDKDidFailToRetrieveAccount(String message) {
+        if (mListener != null) {
+            mListener.supportButtonDidFailToRetrieveAccount(message);
+        }
+    }
 
     private void createSupportEntries() {
         mEntries.clear();
         if ( supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextChat);
-            entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconChat);
+            entry.label = appearance.chatMenuText();
+            entry.drawable = appearance.chatMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -512,8 +556,8 @@ public class SupportButton extends View
         }
         if ( supportSDK.showSupportCallMe ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextCallMe);
-            entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconCallMe);
+            entry.label = appearance.callMeMenuText();
+            entry.drawable = appearance.callMeMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -524,8 +568,8 @@ public class SupportButton extends View
         }
         if ( supportSDK.showKnowledgeBase ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextKnowledge);
-            entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconKnowledge);
+            entry.label = (String) appearance.knowledgeMenuText();
+            entry.drawable = (Drawable) appearance.knowledgeMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -540,8 +584,8 @@ public class SupportButton extends View
             List<ResolveInfo> list = packageManager.queryIntentActivities(webIntent, 0);
             if ( list.size() > 0 ) {
                 SupportMenuEntry entry = new SupportMenuEntry();
-                entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextWeb);
-                entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconWeb);
+                entry.label = (String) appearance.webMenuText();
+                entry.drawable = (Drawable) appearance.webMenuIcon();
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -558,8 +602,8 @@ public class SupportButton extends View
             List<ResolveInfo> list = packageManager.queryIntentActivities(emailIntent, 0);
             if ( list.size() > 0 ) {
                 SupportMenuEntry entry = new SupportMenuEntry();
-                entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextEmail);
-                entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconEmail);
+                entry.label = (String) appearance.emailMenuText();
+                entry.drawable = (Drawable) appearance.emailMenuIcon();
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -573,8 +617,8 @@ public class SupportButton extends View
             PackageManager packageManager = mContext.get().getPackageManager();
             if ( packageManager!=null && packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) ) {
                 SupportMenuEntry entry = new SupportMenuEntry();
-                entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextPhone);
-                entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconPhone);
+                entry.label = (String) appearance.phoneMenuText();
+                entry.drawable = (Drawable) appearance.phoneMenuIcon();
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -586,8 +630,8 @@ public class SupportButton extends View
         }
         if ( supportSDK.showSupportForms ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextForms);
-            entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconForms);
+            entry.label = (String) appearance.formsMenuText();
+            entry.drawable = (Drawable) appearance.formsMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -598,8 +642,8 @@ public class SupportButton extends View
         }
         if ( supportSDK.showSupportHistory ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.menuConfiguration.get(Appearance.kMenuTextHistory);
-            entry.drawable = (Drawable) appearance.menuConfiguration.get(Appearance.kMenuIconHistory);
+            entry.label = (String) appearance.historyMenuText();
+            entry.drawable = (Drawable) appearance.historyMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -608,10 +652,22 @@ public class SupportButton extends View
             };
             mEntries.add(entry);
         }
+        if ( menuStyle == MenuStyle.ICON_LIST_EXIT ) {
+            SupportMenuEntry entry = new SupportMenuEntry();
+            entry.label = (String) appearance.exitMenuText();
+            entry.drawable = (Drawable) appearance.exitMenuIcon();
+            entry.onClickListener = new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    requestExit();
+                }
+            };
+            mEntries.add(entry);
+        }
     }
 
 
-    private void showSupportDialog() {
+    public void showSupportDialog() {
         createSupportEntries();
         List<String> availableItems = new ArrayList<>();
         for ( SupportMenuEntry entry : mEntries ) {
@@ -625,7 +681,7 @@ public class SupportButton extends View
         }
         final CharSequence[] items = theItems;
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Select");
+        builder.setTitle(supportSDK.appearance.menuHeading());
         builder.setItems(items, (dialog, item) -> {
             dialog.dismiss();
             String label = (String) items[item];
@@ -636,6 +692,9 @@ public class SupportButton extends View
                     v.performClick();
                     break;
                 }
+            }
+            if ( label.equalsIgnoreCase(getResources().getString(R.string.label_cancel)) ) {
+                requestExit();
             }
         });
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -653,8 +712,10 @@ public class SupportButton extends View
         SupportMenuView supportMenuView = new SupportMenuView(mContext.get(), mActivity.get(),  mEntries, menuStyle, showLoginPrompt);
         supportMenuView.mActivity = mActivity.get();
         supportMenuView.supportSDK = supportSDK;
+        supportMenuView.refresh();
         supportMenuView.supportButton = this;
         supportMenuView.showLoginPrompt = showLoginPrompt;
+        supportMenuView.dismissOnClick = dismissMenuOnClick;
 
         if (mListener != null) {
             supportMenuView.refresh();
@@ -827,6 +888,13 @@ public class SupportButton extends View
 //        } else {
 //            Toast.makeText(mContext.get(), getResources().getString(R.string.text_history_unavailable), Toast.LENGTH_SHORT).show();
 //        }
+    }
+
+
+    private void requestExit() {
+        if (mListener != null) {
+            mListener.supportButtonDidRequestExit();
+        }
     }
 
 

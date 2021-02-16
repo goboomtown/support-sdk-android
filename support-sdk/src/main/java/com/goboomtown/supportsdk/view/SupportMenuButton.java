@@ -45,9 +45,12 @@ public class SupportMenuButton extends LinearLayout {
 
         }
         mImageButton.setContentDescription(label);
+    }
 
-        mImageButton.setColorFilter(appearance.homeIconColor);
-        mLabelView.setTextColor(appearance.homeTextColor);
+
+    public void configureAppearance() {
+        mImageButton.setColorFilter(appearance.menuIconColor());
+        mLabelView.setTextColor(appearance.menuTextColor());
 
     }
 

@@ -273,7 +273,7 @@ public class FormListFragment extends Fragment {
                 mIconView = view.findViewById(R.id.iconView);
                 mTextView = view.findViewById(R.id.label);
                 if ( mTextView != null ) {
-                    mTextView.setTextColor(supportSDK.appearance.homeTextColor);
+                    mTextView.setTextColor(supportSDK.appearance.textColor());
                 }
             }
 

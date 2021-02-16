@@ -127,6 +127,7 @@
     <string name="text_forms_ready">Forms are now ready</string>
     <string name="text_history_unavailable">No history available</string>
     <string name="text_history">History</string>
+    <string name="text_exit">Exit</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

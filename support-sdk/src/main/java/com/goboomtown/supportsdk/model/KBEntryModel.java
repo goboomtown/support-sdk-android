@@ -135,6 +135,9 @@ public class KBEntryModel {
         return title;
     }
 
+    public String url() {
+        return url;
+    }
 
     public String body() {
         return body;

@@ -1,5 +1,6 @@
 package com.goboomtown.supportsdk.fragment;
 
+import com.goboomtown.activity.KBActivity;
 import com.goboomtown.forms.fragment.FormFragment;
 
 import android.app.Activity;
@@ -9,6 +10,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -31,8 +34,17 @@ import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.view.SupportButton;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragment
     implements SupportSDK.SupportSDKFormsListener {
@@ -49,6 +61,20 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
         formsListener = supportSDK.mFormsListener;
         supportSDK.mFormsListener = this;
         if ( supportSDK != null ) {
+            textColor = supportSDK.appearance.homeTextColor();
+            backgroundColor = supportSDK.appearance.loginBackgroundColor;
+
+            formEntryBorderColor            = supportSDK.appearance.formEntryBorderColor();
+            formEntryBorderWidth            = supportSDK.appearance.formEntryBorderWidth();
+            formEntryTextColor              = supportSDK.appearance.formEntryTextColor();
+            formEntryTextSize               = supportSDK.appearance.formEntryTextSize();
+            formEntryTextStyle              = supportSDK.appearance.formEntryTextStyle();
+            formLabelRequiredIndicatorColor = supportSDK.appearance.formLabelRequiredIndicatorColor();
+            formLabelRequiredTextColor      = supportSDK.appearance.formLabelRequiredTextColor();
+            formLabelTextColor              = supportSDK.appearance.formLabelTextColor();
+            formLabelTextSize               = supportSDK.appearance.formLabelTextSize();
+            formLabelTextStyle              = supportSDK.appearance.formLabelTextStyle();
+
             refresh();
         }
 
@@ -144,6 +170,57 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
         mFormModel.sortFields();
         mFormModel.refresh();
         refreshForm();
+    }
+
+
+    public void warn(final String title, final String message) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getContext(), title + ": " + message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+    public void retrieveKB(String id) {
+        String url = SupportSDK.kSDKV1Endpoint + "/kb/get?id=" + id;
+
+        supportSDK.get(url, new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                boolean success = false;
+
+                JSONObject jsonObject = SupportSDK.successJSONObject(response);
+                if ( jsonObject != null ) {
+                    if ( jsonObject.has("results") ) {
+                        try {
+                            JSONArray resultsJSON = jsonObject.getJSONArray("results");
+                            JSONObject result = resultsJSON.getJSONObject(0);
+                            success = true;
+                            String title = result.getString("title");
+                            String url = result.getString("url");
+                            Intent intent = new Intent(mContext, KBActivity.class);
+                            intent.putExtra(KBActivity.ARG_URL, url);
+                            intent.putExtra(KBActivity.ARG_HTML, "");
+                            intent.putExtra(KBActivity.ARG_TITLE, title);
+                            startActivity(intent);
+                        } catch (JSONException e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                    }
+                }
+                if ( !success ) {
+                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                }
+            }
+        });
     }
 
 
