@@ -26,7 +26,6 @@
 ```    
     implementation "com.wefika:flowlayout:0.4.1"
     implementation "com.google.code.gson:gson:2.8.5"
-    implementation "com.google.code.gson:gson:2.8.5"
     implementation "com.squareup.okhttp3:okhttp:3.12.1"
     implementation "org.igniterealtime.smack:smack-android-extensions:4.3.1"
     implementation "org.igniterealtime.smack:smack-tcp:4.3.1"
