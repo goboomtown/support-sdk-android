@@ -101,7 +101,60 @@ supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
 ```
 
 
-### Appearance Configuration
+## Server Configuration
+
+The plugin depends on a server JSON configuration file (www/config.json here) that you must obtain from your provider. The file looks like this:
+
+```
+{
+  "apiHost": "https://api.goboomtown.com",
+  "integrationId": "xxxxxx",
+  "apiKey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "buttonURL":"https://api.goboomtown.com/resources/images/sdk_button.png",
+  "partnerToken": "xxxxxxxx",
+  "privateKey": "xxxxxxxxxxxxxxxxxxxxx"
+}
+```
+
+This file enables communication with the server and configures the available features.
+
+## Menu Types
+
+The second parameter of loadConfigurationFromJSON() is the desired menu type as per the following list:
+
+```
+NoMenu: 0,
+Menu: 1,
+Button: 2,
+IconList: 3,
+IconListExit: 4,
+```
+
+## Customer Configuration
+
+If desired, the customer may be identified by providing values for any of the following keys"
+
+```
+CustomerId : "members_id",
+CustomerExternalId: "members_external_id",
+CustomerLocationId: "members_locations_id",
+CustomerLocationExternalId: "members_locations_external_id",
+CustomerLocationMid: "members_locations_mid",
+UserId: "members_users_id",
+UserExternalId: "members_users_external_id",
+UserEmail: "members_users_email",
+UserPhone: "members_users_phone",
+```
+
+like this:
+
+```
+var customerJSON = {
+  "members_users_email": "email@example.com"
+};
+```
+
+## Appearance Configuration
 
 Much of the application (menus, icons, and colors currently) can be configured using a JSON file as follows:
 
@@ -189,6 +242,7 @@ This is the default JSON.
     "buttonColor": "#EF5E0D",
     "lineColor": "#E0E0E0",
     "textColor": "#4F4F4F",
+    "textColorDark": "#ffffff",
     "homeIconColor": "#EF5E0D",
     "homeLineColor": "#E0E0E0",
     "homeTextColor": "#007AFF",
@@ -253,7 +307,9 @@ iconColor
 buttonColor
 lineColor
 textColor
+textColorDark
 ```
+
 
 ### Connect Intelligent Agent (mDNS) Broadcasts Using SupportButton
 The SupportButton provides a convenient way to connect to Boomtown onsite intelligence agents.  This provides a mechanism for broadcasting mDNS data.  This can be done with a call to SupportButton#advertiseServiceWithPublicData(Map, Map) method.
