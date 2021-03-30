@@ -68,7 +68,7 @@
   },
   "icons":
   {
-    "kbFolderIcon": "book-bookmark",
+    "kbFolderIcon": "book_bookmark",
     "chatAttachmentButtonImage": "paperclip.png",
     "chatSendButtonImage": "send.png"
   },
@@ -79,6 +79,7 @@
     "buttonColor": "#EF5E0D",
     "lineColor": "#E0E0E0",
     "textColor": "#4F4F4F",
+    "textColorDark": "#ffffff",
     "homeIconColor": "#EF5E0D",
     "homeLineColor": "#E0E0E0",
     "homeTextColor": "#007AFF",
@@ -110,14 +111,15 @@
   "formAppearance":
   {
     "cancelButtonText": "Cancel",
-    "saveButtonText": "Save",
+    "saveButtonText": "Submit",
+    "spacing": "10",
     "label":
     {
       "textStyle": "bold",
       "textSize": "20",
-      "textColor": "#000000",
+      "textColor": "#303030",
       "textColorDark": "#ffffff",
-      "requiredTextColor": "#000000",
+      "requiredTextColor": "#303030",
       "requiredTextColorDark": "#ffffff",
       "requiredIndicatorColor": "#cc0000",
       "requiredIndicatorColorDark": "#cc0000"
@@ -126,9 +128,9 @@
     {
       "textStyle": "bold",
       "textSize": "20",
-      "textColor": "#000000",
+      "textColor": "#303030",
       "textColorDark": "#ffffff",
-      "borderColor": "#000000",
+      "borderColor": "#acacac",
       "borderColorDark": "#ffffff",
       "borderWidth": "1"
     }

@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
+import com.goboomtown.chat.BoomtownChat;
+
 import org.conscrypt.Conscrypt;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -258,6 +260,7 @@ public class RestClient {
      */
     protected HashMap<String, String> addBoomtownHeaders(Context context) {
         if ( headers != null ) {
+            BoomtownChat.sharedInstance().httpHeaders = headers;
             return headers;
         }
 
@@ -285,6 +288,7 @@ public class RestClient {
                 headerMap.put(key, headerMap.get(key));
             }
         }
+        BoomtownChat.sharedInstance().httpHeaders = headerMap;
         return headerMap;
     }
 

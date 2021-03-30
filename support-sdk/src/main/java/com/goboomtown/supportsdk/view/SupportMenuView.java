@@ -219,6 +219,10 @@ public class SupportMenuView extends FrameLayout {
                         supportSDK.memberUserID = jsonObject.optString("members_users_id");
                         supportSDK.memberLocationID = jsonObject.optString("members_locations_id");
                         supportSDK.memberDeviceID = jsonObject.optString("members_devices_id");
+                        supportSDK.historyEntries.clear();
+                        if ( supportSDK.showSupportHistory ) {
+                            supportSDK.getHistory();
+                        }
                     } catch (JSONException e) {
                         Log.w(TAG, Log.getStackTraceString(e));
                     } catch (Exception e) {

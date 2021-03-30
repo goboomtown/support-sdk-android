@@ -2,6 +2,7 @@ package com.goboomtown.supportsdk.fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,6 +11,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
@@ -31,6 +34,7 @@ import com.goboomtown.chat.ChatRecord;
 import com.goboomtown.fragment.BaseChatFragment;
 import com.goboomtown.activity.KBActivity;
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.model.BTConnectIssue;
 import com.goboomtown.supportsdk.activity.VideoActivity;
@@ -43,6 +47,7 @@ import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,7 +59,8 @@ import okhttp3.ResponseBody;
 /**
  * Created by Larry Borsato on 2016-07-12.
  */
-public class ChatFragment extends BaseChatFragment {
+public class ChatFragment extends BaseChatFragment
+    implements EventManager.EventManagerListener {
 
     private static final String TAG = ChatFragment.class.getSimpleName();
 
@@ -70,6 +76,40 @@ public class ChatFragment extends BaseChatFragment {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+//        EventManager.addObserver(this);
+        EventManager.addObserver(mEventReceiver);
+        EventManager.notify(EventManager.kEventChatStarted, null);
+    }
+
+    @Override
+    public void onDetach() {
+        EventManager.notify(EventManager.kEventChatEnded, null);
+//        EventManager.removeObserver(this);
+        EventManager.removeObserver(mEventReceiver);
+        super.onDetach();
+    }
+
+    @Override
+    public void event(String name, String type, HashMap<String, String> userInfo) {
+        if ( type.equals(EventManager.kRequestChatExit) ) {
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
+            if ( activity != null ) {
+//                List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
+//                Fragment lastFragment = fragments.get(fragments.size()-1);
+//                if ( lastFragment instanceof ChatFragment ) {
+//
+//                }
+                activity.onBackPressed();
+            }
+        }
+        else if ( type.equals(EventManager.kRequestChatExitResolveIssue) ) {
+            resolveIssueIfPossible();
+        }
     }
 
 
@@ -537,6 +577,7 @@ public class ChatFragment extends BaseChatFragment {
 
     private void exitIssue() {
 //        mSupportButton.refreshIssue(mIssue.id);
+        EventManager.notify(EventManager.kEventChatIssueResolved, null);
         BTConnectIssue.clearCurrentIssue(mContext);
         mIssue = null;
         FragmentActivity activity = getActivity();
@@ -818,5 +859,25 @@ public class ChatFragment extends BaseChatFragment {
     public void warn(final String title, final String message) {
         this.mParent.runOnUiThread(() -> Toast.makeText(getContext(), title + ": " + message, Toast.LENGTH_LONG).show());
     }
+
+    private BroadcastReceiver mEventReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            String intentAction = null;
+            if (intent != null) {
+                intentAction = intent.getAction();
+            }
+            Log.d(TAG, "msg received with intent: " + intentAction);
+
+            if (EventManager.kSupportSDKEvent.equals(intentAction)) {
+
+                String type = intent.getStringExtra(EventManager.kSupportSDKEventType);
+                Log.d(TAG, "msg received with type: " + type );
+                event(intentAction, type, null);
+
+            }
+        }
+    };
+
 
 }

@@ -18,6 +18,12 @@
     android:background="?android:attr/colorBackground"
     android:orientation="vertical" >
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
+
     <ExpandableListView
         android:id="@+id/expandableListView"
         android:layout_height="match_parent"

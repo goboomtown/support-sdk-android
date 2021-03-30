@@ -70,14 +70,16 @@ public class Appearance {
     public final static String chatSendButtonImage         = "chatSendButtonImage";
 
     public final static String navigationBarColor          = "navigationBarColor";
+    public final static String navigationBarColorDark      = "navigationBarColorDark";
     public final static String buttonColor                 = "buttonColor";
     public final static String backgroundColor             = "backgroundColor";
     public final static String lineColor                   = "lineColor";
+    public final static String lineColorDark               = "lineColorDark";
     public final static String textColor                   = "textColor";
-    public final static String iconColor                   = "iconColor";
-    public final static String borderColor                 = "borderColor";
     public final static String textColorDark               = "textColorDark";
+    public final static String iconColor                   = "iconColor";
     public final static String iconColorDark               = "iconColorDark";
+    public final static String borderColor                 = "borderColor";
     public final static String borderColorDark             = "borderColorDark";
     public final static String heading                     = "heading";
     public final static String textSize                    = "textSize";
@@ -89,8 +91,8 @@ public class Appearance {
     public final static String requiredTextColorDark       = "requiredTextColorDark";
     public final static String requiredIndicatorColor      = "requiredIndicatorColor";
     public final static String requiredIndicatorColorDark  = "requiredIndicatorColorDark";
-    public final static String cancelButtonText            = "cancelButtonText";
-    public final static String saveButtonText              = "saveButtonText";
+    public final static String cancelButtonText            = "cancelbuttontext";
+    public final static String saveButtonText              = "savebuttontext";
     public final static String label                       = "label";
     public final static String entry                       = "entry";
 
@@ -119,8 +121,10 @@ public class Appearance {
     public final static String chatActionButtonBorderColor = "chatActionButtonBorderColor";
     public final static String chatIconColor               = "chatIconColor";
     public final static String kbFolderNameTextColor       = "kbFolderNameTextColor";
+    public final static String kbFolderNameTextColorDark   = "kbFolderNameTextColorDark";
     public final static String kbFolderL0BackgroundColor   = "kbFolderL0BackgroundColor";
     public final static String kbTextColor                 = "kbTextColor";
+    public final static String kbTextColorDark             = "kbTextColorDark";
 //    public final static String menuBorderColor             = "menuBorderColor";
 
     public final static int defaultIconColor    = 0xEF5E0D;
@@ -347,7 +351,12 @@ public class Appearance {
                         }
                     }
                 } else {
-                    formConfiguration.put(key.toLowerCase(), formAppearanceJSON.getString(key));
+                    if ( key.toLowerCase().contains("text") ) {
+                         formConfiguration.put(key.toLowerCase(), formAppearanceJSON.getString(key));
+                    } else {
+                        int value = formAppearanceJSON.getInt(key);
+                        formConfiguration.put(key, value);
+                    }
                 }
             }
         } catch ( JSONException e ) {
@@ -394,11 +403,23 @@ public class Appearance {
 
 
     public int navigationBarColor() {
-        return (int) configuration.get(navigationBarColor);
+        int color;
+        if ( isDarkMode() ) {
+            color = configuration.containsKey(navigationBarColorDark) ? (int)configuration.get(navigationBarColorDark) : (int)configuration.get(navigationBarColor);
+        } else {
+            color = (int)configuration.get(navigationBarColor);
+        }
+        return color;
     }
 
     public int iconColor() {
-        return configuration.containsKey(iconColor) ? (int) configuration.get(iconColor) : defaultIconColor;
+        int color;
+        if ( isDarkMode() ) {
+            color = configuration.containsKey(iconColorDark) ? (int)configuration.get(iconColorDark) : (int)configuration.get(iconColor);
+        } else {
+            color = (int)configuration.get(iconColor);
+        }
+        return color;
     }
 
     public int buttonColor() {
@@ -406,11 +427,25 @@ public class Appearance {
     }
 
     public int lineColor() {
-        return configuration.containsKey(lineColor) ? (int) configuration.get(lineColor) : defaultLineColor;
+        int color;
+        if ( isDarkMode() ) {
+            color = configuration.containsKey(lineColorDark) ? (int)configuration.get(lineColorDark) : (int)configuration.get(lineColor);
+        } else {
+            color = (int)configuration.get(lineColor);
+        }
+        return color;
     }
 
     public int textColor() {
-        return configuration.containsKey(textColor) ? (int) configuration.get(textColor) : defaultLineColor;
+        int color;
+        if ( isDarkMode() ) {
+//            int baseTextColorReversed = 0xffffff - (int)configuration.get(textColor);
+            color = configuration.containsKey(textColorDark) ? (int)configuration.get(textColorDark) : (int)configuration.get(textColor);
+//            color = configuration.containsKey(textColorDark) ? (int)configuration.get(textColorDark) : baseTextColorReversed;
+        } else {
+            color = (int)configuration.get(textColor);
+        }
+        return color;
     }
 
 
@@ -514,7 +549,13 @@ public class Appearance {
 
 
     public int kbFolderNameTextColor() {
-        return configuration.containsKey(kbFolderNameTextColor) ? (int) configuration.get(kbFolderNameTextColor) : textColor();
+        int color;
+        if ( isDarkMode() ) {
+            color = configuration.containsKey(kbFolderNameTextColorDark) ? (int)configuration.get(kbFolderNameTextColorDark) : (int)textColor();
+        } else {
+            color = configuration.containsKey(kbFolderNameTextColor) ? (int)configuration.get(kbFolderNameTextColor) : (int)textColor();
+        }
+        return color;
     }
 
     public int kbFolderL0BackgroundColor() {
@@ -522,7 +563,13 @@ public class Appearance {
     }
 
     public int kbTextColor() {
-        return configuration.containsKey(kbTextColor) ? (int) configuration.get(kbTextColor) : textColor();
+        int color;
+        if ( isDarkMode() ) {
+            color = configuration.containsKey(kbTextColorDark) ? (int)configuration.get(kbTextColorDark) : (int)textColor();
+        } else {
+            color = configuration.containsKey(kbTextColor) ? (int)configuration.get(kbTextColor) : (int)textColor();
+        }
+        return color;
     }
 
     public Drawable kbFolderIcon() {
@@ -579,6 +626,17 @@ public class Appearance {
     }
 
 
+    public int backgroundColor() {
+        int color;
+        if ( isDarkMode() ) {
+            color = android.R.color.black;
+        } else {
+            color = android.R.color.white;
+        }
+        return color;
+    }
+
+
     /*  Form Configuration */
 
     public String formCancelButtonText() {
@@ -587,6 +645,11 @@ public class Appearance {
 
     public String formSaveButtonText() {
         return formConfiguration.get(saveButtonText)!=null ? (String)formConfiguration.get(saveButtonText) : "Save";
+    }
+
+    public int formSpacing() {
+        String key = spacing.toLowerCase();
+        return formConfiguration.get(key) != null ? (int)formConfiguration.get(key) : 10;
     }
 
 

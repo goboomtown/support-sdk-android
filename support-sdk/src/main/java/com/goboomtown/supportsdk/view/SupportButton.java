@@ -2,6 +2,7 @@ package com.goboomtown.supportsdk.view;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,13 +15,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -31,8 +31,8 @@ import com.goboomtown.chat.BoomtownChat;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.activity.ScreenCaptureActivity;
-import com.goboomtown.supportsdk.activity.VideoActivity;
 import com.goboomtown.supportsdk.api.Appearance;
+import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.dnssd.BTConnectPresenceService;
 import com.goboomtown.supportsdk.fragment.ChatFragment;
@@ -41,7 +41,6 @@ import com.goboomtown.supportsdk.fragment.HistoryListFragment;
 import com.goboomtown.supportsdk.fragment.SupportFormFragment;
 import com.goboomtown.supportsdk.fragment.KBListFragment;
 import com.goboomtown.supportsdk.model.BTConnectIssue;
-import com.goboomtown.supportsdk.model.HistoryEntryModel;
 import com.goboomtown.supportsdk.util.Utils;
 
 import org.json.JSONArray;
@@ -52,7 +51,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +65,8 @@ import okhttp3.ResponseBody;
  * TODO: document your custom view class.
  */
 public class SupportButton extends View
-        implements SupportSDK.SupportSDKListener, SupportSDK.SupportSDKFormsListener {
+        implements SupportSDK.SupportSDKListener, SupportSDK.SupportSDKFormsListener,
+        EventManager.EventManagerListener {
 
     private static final String TAG = SupportButton.class.getSimpleName();
 
@@ -87,7 +86,6 @@ public class SupportButton extends View
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(mContext.get(), mContext.get().getResources().getString(R.string.text_forms_ready), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -103,6 +101,13 @@ public class SupportButton extends View
 
     @Override
     public     void supportSDKFailedToUpdateForm() {
+    }
+
+    @Override
+    public void event(String name, String type, HashMap<String, String> userInfo) {
+        if ( type.equals(EventManager.kRequestSupportSDKExit) ) {
+
+        }
     }
 
 
@@ -234,41 +239,46 @@ public class SupportButton extends View
 //        supportSDK.getPermissions(mActivity.get());
         setOnClickListener(v -> clicked());
 
+        EventManager.setContext(getContext());
+//        EventManager.addObserver(this);
+        EventManager.addObserver(mEventReceiver);
+        EventManager.notify(EventManager.kEventSDKStarted, null);
+
         // Load attributes
-        final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.SupportButton, defStyle, 0);
-
-        mExampleString = a.getString(
-                R.styleable.SupportButton_exampleString);
-        if (mExampleString == null)
-            mExampleString = "";
-        mExampleColor = a.getColor(
-                R.styleable.SupportButton_exampleColor,
-                mExampleColor);
-        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-        // values that should fall on pixel boundaries.
-        mExampleDimension = a.getDimension(
-                R.styleable.SupportButton_exampleDimension,
-                mExampleDimension);
-
-        if (a.hasValue(R.styleable.SupportButton_exampleDrawable)) {
-            mExampleDrawable = a.getDrawable(
-                    R.styleable.SupportButton_exampleDrawable);
-            Objects.requireNonNull(mExampleDrawable).setCallback(this);
-        } else {
-            mExampleDrawable = getResources().getDrawable(R.drawable.support_sdk_icon);
-            mExampleDrawable.setCallback(this);
-        }
-
-        a.recycle();
-
-        // Set up a default TextPaint object
-        mTextPaint = new TextPaint();
-        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        mTextPaint.setTextAlign(Paint.Align.LEFT);
-
-        // Update TextPaint and text measurements from attributes
-        invalidateTextPaintAndMeasurements();
+//        final TypedArray a = getContext().obtainStyledAttributes(
+//                attrs, R.styleable.SupportButton, defStyle, 0);
+//
+//        mExampleString = a.getString(
+//                R.styleable.SupportButton_exampleString);
+//        if (mExampleString == null)
+//            mExampleString = "";
+//        mExampleColor = a.getColor(
+//                R.styleable.SupportButton_exampleColor,
+//                mExampleColor);
+//        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
+//        // values that should fall on pixel boundaries.
+//        mExampleDimension = a.getDimension(
+//                R.styleable.SupportButton_exampleDimension,
+//                mExampleDimension);
+//
+//        if (a.hasValue(R.styleable.SupportButton_exampleDrawable)) {
+//            mExampleDrawable = a.getDrawable(
+//                    R.styleable.SupportButton_exampleDrawable);
+//            Objects.requireNonNull(mExampleDrawable).setCallback(this);
+//        } else {
+//            mExampleDrawable = getResources().getDrawable(R.drawable.support_sdk_icon);
+//            mExampleDrawable.setCallback(this);
+//        }
+//
+//        a.recycle();
+//
+//        // Set up a default TextPaint object
+//        mTextPaint = new TextPaint();
+//        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+//        mTextPaint.setTextAlign(Paint.Align.LEFT);
+//
+//        // Update TextPaint and text measurements from attributes
+//        invalidateTextPaintAndMeasurements();
     }
 
     /**
@@ -357,6 +367,11 @@ public class SupportButton extends View
         } else {
             supportSDK.loadConfiguration(jsonString, null);
         }
+    }
+
+
+    public void sendRequest(String request) {
+        EventManager.notify(request, null);
     }
 
     private void displayChat(BTConnectIssue issue) {
@@ -498,6 +513,18 @@ public class SupportButton extends View
         if (this.supportSDK.memberLocationID == null) {
             this.supportSDK.memberLocationID = this.supportSDK.defaultMemberLocationID;
         }
+//        this.supportSDK.showKnowledgeBase = true;
+        if ( this.supportSDK.showKnowledgeBase && !this.supportSDK.isKBRequested ) {
+            this.supportSDK.isKBRequested = true;
+            this.supportSDK.getKB(null);
+        }
+        if ( this.supportSDK.showSupportForms && this.supportSDK.hasForms() ) {
+            this.supportSDK.getForms(this);
+        }
+        if ( this.supportSDK.showSupportHistory ) {
+            this.supportSDK.getHistory();
+        }
+
         if (mListener != null) {
             mListener.supportButtonDidGetSettings();
         }
@@ -540,6 +567,7 @@ public class SupportButton extends View
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
                     if ( supportSDK.supportUnavailable ) {
                         AlertDialog.Builder unavailableBuilder = new AlertDialog.Builder(mContext.get());
                         unavailableBuilder.setTitle(R.string.text_unavailable);
@@ -561,6 +589,7 @@ public class SupportButton extends View
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
                     getCallbackNumber();
                 }
             };
@@ -573,6 +602,7 @@ public class SupportButton extends View
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
                     displayKnowledgeBase();
                 }
             };
@@ -589,6 +619,7 @@ public class SupportButton extends View
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        EventManager.notify(EventManager.kEventMenuEnded, null);
                         visitWebsite();
                     }
                 };
@@ -607,6 +638,7 @@ public class SupportButton extends View
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        EventManager.notify(EventManager.kEventMenuEnded, null);
                         sendEmail();
                     }
                 };
@@ -622,6 +654,7 @@ public class SupportButton extends View
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        EventManager.notify(EventManager.kEventMenuEnded, null);
                         phone();
                     }
                 };
@@ -635,6 +668,7 @@ public class SupportButton extends View
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
                     form();
                 }
             };
@@ -647,6 +681,7 @@ public class SupportButton extends View
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
                     history();
                 }
             };
@@ -659,6 +694,7 @@ public class SupportButton extends View
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
                     requestExit();
                 }
             };
@@ -694,12 +730,14 @@ public class SupportButton extends View
                 }
             }
             if ( label.equalsIgnoreCase(getResources().getString(R.string.label_cancel)) ) {
+                EventManager.notify(EventManager.kEventMenuEnded, null);
                 requestExit();
             }
         });
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
+                EventManager.notify(EventManager.kEventMenuStarted, null);
                 AlertDialog dialog = builder.show();
             }
         });
@@ -719,6 +757,7 @@ public class SupportButton extends View
 
         if (mListener != null) {
             supportMenuView.refresh();
+            EventManager.notify(EventManager.kEventMenuStarted, null);
             mListener.supportButtonDisplayView(supportMenuView);
         }
     }
@@ -835,10 +874,6 @@ public class SupportButton extends View
 
 
     private void form() {
-        if ( supportSDK.forms.size() == 0 ) {
-            supportSDK.getForms(this);
-        }
-
         if ( supportSDK.forms.size() > 1 ) {
             mFormListFragment = new FormListFragment();
             mFormListFragment.mContext = getContext();
@@ -859,7 +894,8 @@ public class SupportButton extends View
                 mListener.supportButtonSetTitle(getResources().getString(R.string.text_form));
             }
         } else {
-            Toast.makeText(mContext.get(), getResources().getString(R.string.text_forms_unavailable), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext.get(), getResources().getString(R.string.text_forms_unavailable), Toast.LENGTH_SHORT).show();
+            supportSDK.getForms(this);
         }
     }
 
@@ -1166,4 +1202,24 @@ public class SupportButton extends View
         mDNSSvc.tearDown();
         mDNSSvcEnabled = false;
     }
+
+    private BroadcastReceiver mEventReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            String intentAction = null;
+            if (intent != null) {
+                intentAction = intent.getAction();
+            }
+            Log.d(TAG, "msg received with intent: " + intentAction);
+
+            if (EventManager.kSupportSDKEvent.equals(intentAction)) {
+
+                String type = intent.getStringExtra(EventManager.kSupportSDKEventType);
+                Log.d(TAG, "msg received with type: " + type );
+//                event(intentAction, type, null);
+
+            }
+        }
+    };
+
 }

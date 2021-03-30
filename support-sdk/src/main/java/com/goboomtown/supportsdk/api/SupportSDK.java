@@ -2,6 +2,7 @@ package com.goboomtown.supportsdk.api;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -18,10 +19,14 @@ import androidx.core.os.ConfigurationCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.goboomtown.chat.BoomtownChat;
+import com.goboomtown.forms.model.BoomtownField;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.BuildConfig;
 import com.goboomtown.supportsdk.R;
@@ -50,6 +55,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,7 +77,8 @@ import okhttp3.ResponseBody;
 /**
  * Created by Larry Borsato on 2016-07-12.
  */
-public class SupportSDK {
+public class SupportSDK
+    implements POSConnectorBase.POSConnectorListener {
 
     private static final String TAG = SupportSDK.class.getSimpleName();
     private static final String SupportSDKHelpName = "SupportSDK";
@@ -120,8 +128,12 @@ public class SupportSDK {
     public SupportSDKFormsListener      mFormsListener;
     public SupportSDKHistoryListener    mHistoryListener;
     public boolean                      isRetrievingKB = false;
+    public boolean                      isRetrievingHistory = false;
     public boolean                      isRetrievingForms = false;
-    public ArrayList<BTConnectIssue> historyEntries = new ArrayList<>();
+    public ArrayList<BTConnectIssue>    historyEntries = new ArrayList<>();
+    private JSONArray                   supportFormsIdsJSON;
+    private int                         nFormRetrievalAttempts;
+    private ProgressDialog              mProgress;
 
     public  Locale   locale;
 
@@ -203,32 +215,58 @@ public class SupportSDK {
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
         setAPIInfo();
 
-//        POSConnector posConnector = new POSConnector(mContext.get(), this);
-//        posConnector.getAccount();
+        POSConnector posConnector = new POSConnector(mContext.get(), this);
+        posConnector.getAccount();
     }
 
 
-//    @Override
-//    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
-//        if ( merchant != null ) {
-//            Log.d(TAG, merchant.name);
-//            HashMap<String, String> customerInfo = new HashMap<>();
-//            customerInfo.put(kCustomerExternalId, merchant.mid);
-//            customerInfo.put(kCustomerLocationMid, merchant.mid);
-//            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
-//            restGetCustomerInformationWithInfo(customerInfo, null);
-//            if (mListener != null) {
-//                mListener.supportSDKDidRetrieveAccount(customerInfo);
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void posConnectorDidToFailRetrieveAccount(String message) {
-//        if (mListener != null) {
-//            mListener.supportSDKDidFailToRetrieveAccount(message);
-//        }
-//    }
+    @Override
+    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
+        if ( merchant != null ) {
+            Log.d(TAG, merchant.name);
+            HashMap<String, String> customerInfo = new HashMap<>();
+            customerInfo.put(kCustomerExternalId, merchant.mid);
+            customerInfo.put(kCustomerLocationMid, merchant.mid);
+            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
+            restGetCustomerInformationWithInfo(customerInfo, null);
+            if (mListener != null) {
+                mListener.supportSDKDidRetrieveAccount(customerInfo);
+            }
+        }
+    }
+
+    @Override
+    public void posConnectorDidToFailRetrieveAccount(String message) {
+        if (mListener != null) {
+            mListener.supportSDKDidFailToRetrieveAccount(message);
+        }
+    }
+
+
+    public void showProgressWithMessage(final String message) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgress != null) {
+                    mProgress.dismiss();
+                    mProgress = null;
+                }
+                mProgress = ProgressDialog.show(mContext.get(), null, message, true);
+            }
+        });
+    }
+
+    public void hideProgress() {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgress != null) {
+                    mProgress.dismiss();
+                    mProgress = null;
+                }
+            }
+        });
+    }
 
 
     /**
@@ -402,9 +440,22 @@ public class SupportSDK {
      * @param callback handler to execute on HTTP response
      */
     public void post(String uri, JSONObject jsonParams, Callback callback) {
+        final Callback remoteCallback = callback;
+        Callback localCallback = new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                remoteCallback.onFailure(call, e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                processHeadersForResonse(response);
+                remoteCallback.onResponse(call, response);
+            }
+        };
         String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
         client.headers = addHeaders();
-        client.post(mContext.get(), requestUrl, jsonParams, callback);
+        client.post(mContext.get(), requestUrl, jsonParams, localCallback);
         Log.v(TAG, "request to " + requestUrl + " sent with body " + jsonParams.toString());
     }
 
@@ -417,9 +468,22 @@ public class SupportSDK {
      * @param callback handler to execute on HTTP response
      */
     public void post(String uri, JSONObject jsonParams, Bitmap image, String name, Callback callback) {
+        final Callback remoteCallback = callback;
+        Callback localCallback = new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                remoteCallback.onFailure(call, e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                processHeadersForResonse(response);
+                remoteCallback.onResponse(call, response);
+            }
+        };
         String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
         client.headers = addHeaders();
-        client.post(mContext.get(),requestUrl, jsonParams, image, name, callback);
+        client.post(mContext.get(),requestUrl, jsonParams, image, name, localCallback);
     }
 
     /**
@@ -428,9 +492,22 @@ public class SupportSDK {
      * @param callback handler to execute on HTTP response
      */
     public void get(String uri, Callback callback) {
+        final Callback remoteCallback = callback;
+        Callback localCallback = new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                remoteCallback.onFailure(call, e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                processHeadersForResonse(response);
+                remoteCallback.onResponse(call, response);
+            }
+        };
         String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
         client.headers = addHeaders();
-        client.get(mContext.get(), requestUrl, callback);
+        client.get(mContext.get(), requestUrl, localCallback);
     }
 
     private HashMap<String, String> addHeaders() {
@@ -449,6 +526,7 @@ public class SupportSDK {
         if ( downloadSessionToken != null ) {
             headerMap.put(HTTP_HEADER_DOWNLOAD_TOKEN, downloadSessionToken);
         }
+        BoomtownChat.sharedInstance().httpHeaders = headerMap;
         return headerMap;
     }
 
@@ -672,6 +750,7 @@ public class SupportSDK {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                processHeadersForResonse(response);
                 boolean success = false;
                 String message = "";
                 if (response.code() > 199 && response.code() < 300) {
@@ -680,7 +759,8 @@ public class SupportSDK {
                     if ( jsonObject != null ) {
                         success = jsonObject.optBoolean("success", false);
                         if ( success ) {
-                            showKnowledgeBase = true;
+                            showKnowledgeBase = jsonObject.optBoolean("supportKBEnabled");
+                            showSupportForms = jsonObject.optBoolean("supportFormsEnabled");
                             supportProactiveEnabled = jsonObject.optBoolean("supportProactiveEnabled", false);
                             supportScreenShareEnabled = jsonObject.optBoolean("supportScreenShareEnabled", true);
                             supportWebsite = jsonObject.optString("supportWebsite");
@@ -699,11 +779,7 @@ public class SupportSDK {
                             if (callMeButtonConfirmation.isEmpty()) {
                                 callMeButtonConfirmation = mContext.get().getString(R.string.label_call_me_confirmation);
                             }
-                            JSONArray supportFormsIdsJSON = jsonObject.optJSONArray("supportForms");
-                            if ( supportFormsIdsJSON!= null && supportFormsIdsJSON.length() > 0 ) {
-                                showSupportForms = true;
-                                getSupportForms(supportFormsIdsJSON);
-                            }
+                            supportFormsIdsJSON = jsonObject.optJSONArray("supportForms");
                             supportWebsiteURL = Uri.parse(jsonObject.optString("supportWebsite", "http://example.com"));
                             supportUnavailable = jsonObject.optBoolean("unavailable", false);
                             supportUnavailableSummary = jsonObject.optString("unavailableSummary");
@@ -715,10 +791,6 @@ public class SupportSDK {
                                 defaultMemberDeviceID = defaultMember.optString("memberDeviceId");
                             }
                             showSupportHistory = jsonObject.optBoolean("supportHistoryEnabled");
-//                            showSupportHistory = true;
-                            if ( showSupportHistory ) {
-                                getHistory();
-                            }
                         } else {
                             message = jsonObject.optString("message", "");
                         }
@@ -734,11 +806,6 @@ public class SupportSDK {
                     if (mListener != null) {
                         mListener.supportSDKDidGetSettings();
                     }
-                    if ( !isKBRequested ) {
-                        isKBRequested = true;
-                        getKB(null);
-                    }
-                    getForms(null);
                     if ( mCustomerInfo != null ) {
                         restGetCustomerInformationWithInfo(mCustomerInfo, null);
                     }
@@ -749,17 +816,26 @@ public class SupportSDK {
 
 
     public void getHistory() {
+        if ( isRetrievingHistory ) {
+            return;
+        }
+        isRetrievingHistory = true;
         String url = SupportSDK.kSDKV1Endpoint + "/issues/history/?members_locations_id=" + defaultMemberLocationID;
         get(url, new Callback() {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                isRetrievingHistory = false;
+                hideProgress();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 boolean success = false;
+                processHeadersForResonse(response);
 
+                isRetrievingHistory = false;
+                hideProgress();
                 JSONObject jsonObject = SupportSDK.successJSONObject(response);
                 if ( jsonObject != null ) {
                     if ( jsonObject.has("results") ) {
@@ -797,13 +873,25 @@ public class SupportSDK {
     }
 
 
-    private void getSupportForms(JSONArray jsonArray) {
+    public boolean hasForms() {
+        return supportFormsIdsJSON!=null && supportFormsIdsJSON.length()>0;
+    }
+
+    public void getForms(final SupportSDKFormsListener formsListener) {
+        if ( supportFormsIdsJSON.length() == 0 ) {
+            return;
+        }
+        if ( isRetrievingForms ) {
+            return;
+        }
+        mFormsListener = formsListener;
+        nFormRetrievalAttempts = 0;
         forms.clear();
-        for ( int n=0; n<jsonArray.length(); n++ ) {
+        for ( int n=0; n<supportFormsIdsJSON.length(); n++ ) {
             String id;
             try {
-                 id = jsonArray.getString(n);
-                 getForm(null, id);
+                 id = supportFormsIdsJSON.getString(n);
+                 getForm(id);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -811,8 +899,7 @@ public class SupportSDK {
     }
 
 
-    public void getForm(final SupportSDKFormsListener formsListener,  String id) {
-        mFormsListener = formsListener;
+    public void getForm(String id) {
         String url = SupportSDK.kSDKV1Endpoint + "/forms/get/";
         if ( id != null ) {
             url = url + "?id=" + id;
@@ -821,13 +908,12 @@ public class SupportSDK {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                isRetrievingForms = false;
-//                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                checkIfFormsDone();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                isRetrievingForms = false;
+                processHeadersForResonse(response);
                 boolean success = false;
 
                 JSONObject jsonObject = SupportSDK.successJSONObject(response);
@@ -841,9 +927,7 @@ public class SupportSDK {
                                 formModel.populateWithDictionary(resultsJSON.getJSONObject(n));
                                 forms.add(formModel);
                             }
-                            if ( mFormsListener != null ) {
-                                mFormsListener.supportSDKDidRetrieveForms();;
-                            }
+                            checkIfFormsDone();
                             success = true;
 
                         } catch (JSONException e) {
@@ -856,6 +940,24 @@ public class SupportSDK {
                 }
             }
         });
+    }
+
+    private void checkIfFormsDone() {
+        if ( ++nFormRetrievalAttempts == this.supportFormsIdsJSON.length() ) {
+            Collections.sort(forms, new OptionComparator());
+            isRetrievingForms = false;
+            hideProgress();
+            if ( mFormsListener != null ) {
+                mFormsListener.supportSDKDidRetrieveForms();;
+            }
+        }
+    }
+
+    public class OptionComparator implements Comparator<FormModel>
+    {
+        public int compare(FormModel left, FormModel right) {
+            return left.name.compareTo(right.name);
+        }
     }
 
 
@@ -876,7 +978,6 @@ public class SupportSDK {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
                 if ( formsListener != null ) {
                     formsListener.supportSDKFailedToUpdateForm();
                 }
@@ -906,25 +1007,6 @@ public class SupportSDK {
     }
 
 
-    public void getForms(final SupportSDKFormsListener formsListener) {
-//        if ( !showSupportForms ) {
-//            return;
-//        }
-//        mFormsListener = formsListener;
-//        if ( forms.size() > 0 ) {
-//            if ( mFormsListener != null ) {
-//                mFormsListener.supportSDKDidRetrieveForms();;
-//            }
-//        } else {
-//            if ( isRetrievingForms ) {
-//                return;
-//            }
-//            isRetrievingForms = true;
-//            getForm(formsListener, null);
-//        }
-    }
-
-
     public FormModel currentForm() {
         if ( forms.size() > 1 ) {
             return forms.get(1);
@@ -951,13 +1033,15 @@ public class SupportSDK {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 isRetrievingKB = false;
-//                warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                hideProgress();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
                 isRetrievingKB = false;
+                hideProgress();
                 boolean success = false;
+                processHeadersForResonse(response);
 
                 JSONObject jsonObject = SupportSDK.successJSONObject(response);
                 if ( jsonObject != null ) {
@@ -1024,7 +1108,6 @@ public class SupportSDK {
                     if ( kbListener != null ) {
                         kbListener.supportSDKDidFailToSearchKB();
                     }
-//                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
                 }
             }
         });

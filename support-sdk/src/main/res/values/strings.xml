@@ -144,5 +144,6 @@
     <string name="text_open">Open</string>
     <string name="text_resolved">Resolved</string>
     <string name="text_closed">Closed</string>
+    <string name="text_retrieving">Retrieving</string>
 
 </resources>

@@ -59,7 +59,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         try {
             object = this.listDataChild.get(this.listDataHeader.get(groupPosition))
                     .get(childPosititon);
-        } catch ( Exception e ) {
+        } catch( Exception e ) {
 
         }
         return object;
@@ -150,7 +150,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.fragment_article_section_header, parent, false);
         }
 
-        convertView.setBackgroundColor(this.context.getResources().getColor(R.color.kbFolderL0BackgroundColor));
+//        convertView.setBackgroundColor(this.context.getResources().getColor(R.color.kbFolderL0BackgroundColor));
 
         ImageView iconView = convertView.findViewById(R.id.sectionHeaderIcon);
         if ( supportSDK!=null && supportSDK.appearance!=null && supportSDK.appearance.kbFolderIcon != null ) {
@@ -160,7 +160,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             iconView.setVisibility(View.GONE);
         }
         TextView sectionHeaderLabel = convertView.findViewById(R.id.sectionHeaderLabel);
-        sectionHeaderLabel.setTextColor(this.context.getResources().getColor(R.color.kbFolderNameTextColor));
+        sectionHeaderLabel.setTextColor(supportSDK.appearance.kbFolderNameTextColor());
 
         String title = (String) getGroup(groupPosition);
         sectionHeaderLabel.setText(title);

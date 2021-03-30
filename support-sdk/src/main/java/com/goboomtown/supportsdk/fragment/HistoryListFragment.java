@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.model.BTConnectIssue;
 import com.goboomtown.supportsdk.view.RatingView;
@@ -174,16 +175,15 @@ public class HistoryListFragment extends Fragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnListFragmentInteractionListener) {
-//            mListener = (OnListFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnListFragmentInteractionListener");
-//        }
+        EventManager.notify(EventManager.kEventHistoryStarted, null);
+        if ( supportSDK.isRetrievingHistory ) {
+            supportSDK.showProgressWithMessage(getString(R.string.text_retrieving));
+        }
     }
 
     @Override
     public void onDetach() {
+        EventManager.notify(EventManager.kEventHistoryEnded, null);
         super.onDetach();
         mListener = null;
     }

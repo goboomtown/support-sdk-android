@@ -11,10 +11,11 @@ import java.util.List;
 public class KBViewModel {
 
     private static final int kMaxDepth = 3;
+    private static final int kIndentStep = 30;
 
     private ArrayList<KBEntryModel> folders = new ArrayList<>();
     public  ArrayList<KBEntryModel> entries = new ArrayList<>();
-    private ArrayList<KBEntryModel> visibleEntries = new ArrayList<>();
+    public  ArrayList<KBEntryModel> visibleEntries = new ArrayList<>();
     private KBEntryModel            kbRoot;
     private int                     baseLevel;
 
@@ -24,23 +25,25 @@ public class KBViewModel {
     public KBViewModel(JSONArray entriesJSON) {
         processEntries(entriesJSON);
         if ( kbRoot != null ) {
-            for (Object child : kbRoot.children()) {
+            for ( Object child : kbRoot.children() ) {
                 if (child instanceof KBEntryModel) {
                     folders.add((KBEntryModel) child);
                 }
             }
+            if ( kbRoot.children().size() == 1 ) {
+                kbRoot = (KBEntryModel) kbRoot.children().get(0);
+                baseLevel = kbRoot.level;
+            } else {
+                baseLevel = kbRoot.level+1;
+            }
         }
+        updateVisibleEntries();
     }
 
 
     public KBViewModel(KBEntryModel rootEntry) {
         kbRoot = new KBEntryModel();
         kbRoot.children().add(rootEntry);
-//        for ( Object child : rootEntry.children() ) {
-//            if ( child instanceof KBEntryModel ) {
-//                folders.add((KBEntryModel)child);
-//            }
-//        }
         rootEntry.setCollapsed(false);
         folders.clear();
         folders.add(rootEntry);
@@ -58,6 +61,7 @@ public class KBViewModel {
                 KBEntryModel entry = new KBEntryModel(entryJSON);
                 entries.add(entry);
                 if ( entry.isRoot() ) {
+                    System.out.println("Entry " + entry.title());
                     entry.level = 0;
                     kbRoot.children().add(entry);
                     parent = entry;
@@ -81,8 +85,12 @@ public class KBViewModel {
     }
 
 
-    private void updateVisibleEntries() {
-        baseLevel = kbRoot.level+1;
+    public int indentForEntry(KBEntryModel entry) {
+        return (entry.level - baseLevel + 1) * kIndentStep;
+    }
+
+
+    public void updateVisibleEntries() {
         visibleEntries = new ArrayList<>();
         for ( Object entry : kbRoot.children() ) {
             addVisibleChildrenOfEntry((KBEntryModel)entry);

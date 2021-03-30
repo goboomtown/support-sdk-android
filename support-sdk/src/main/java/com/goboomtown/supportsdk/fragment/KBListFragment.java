@@ -1,10 +1,13 @@
 package com.goboomtown.supportsdk.fragment;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,13 +24,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.goboomtown.activity.KBActivity;
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.view.SupportButton;
+
+import java.util.List;
 
 
 /**
@@ -35,7 +45,9 @@ import com.goboomtown.supportsdk.view.SupportButton;
  * interface.
  */
 public class KBListFragment extends Fragment
-    implements SupportSDK.SupportSDKKBListener, KBExpandableListAdapter.KBExpandableListAdapterListener {
+    implements SupportSDK.SupportSDKKBListener,
+        KBExpandableListAdapter.KBExpandableListAdapterListener,
+        KBListAdapter.KBListAdapterListener {
 
     public static final String KBLISTFRAGMENT_TAG   = "com.goboomtown.supportsdk.kblistfragment2";
     public static final String KBSEARCHFRAGMENT_TAG = "com.goboomtown.supportsdk.kbsearchfragment";
@@ -46,6 +58,7 @@ public class KBListFragment extends Fragment
     public  Context         mContext;
     private OnListFragmentInteractionListener mListener;
     private KBViewModel             kbViewModel = null;
+    private RecyclerView            recyclerView;
     private ExpandableListView      expandableListView;
     private KBExpandableListAdapter expandableListAdapter;
     private View                    mView;
@@ -75,6 +88,10 @@ public class KBListFragment extends Fragment
         setHasOptionsMenu(true);
 
         mActivity = getActivity();
+    }
+
+
+    private void refreshModel() {
         if ( kbViewModel == null ) {
             if ( supportSDK.kbViewModel() != null ) {
                 kbViewModel = supportSDK.kbViewModel();
@@ -95,6 +112,7 @@ public class KBListFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_article_list, container, false);
 
+        recyclerView = view.findViewById(R.id.recyclerView);
         expandableListView = view.findViewById(R.id.expandableListView);
 
         if ( kbViewModel != null ) {
@@ -131,22 +149,30 @@ public class KBListFragment extends Fragment
 
     private void setupAdapter(KBViewModel kbViewModel) {
         final KBListFragment listener = this;
-        if (mActivity != null) {
-            mActivity.runOnUiThread(() -> {
-                expandableListAdapter = new KBExpandableListAdapter(mActivity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
-                if ( expandableListView!=null && expandableListAdapter!=null ) {
-                    expandableListAdapter.mListener = listener;
-                    expandableListAdapter.supportSDK = supportSDK;
-                    expandableListAdapter.expandableListView = expandableListView;
-                    expandableListView.setAdapter(expandableListAdapter);
-                    expandableListAdapter.notifyDataSetChanged();
-                    for(int i=0; i < expandableListAdapter.getGroupCount(); i++) {
-                        expandableListView.expandGroup(i);
-                    }
-                }
-            });
-        }
-    }
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+                KBListAdapter adapter = new KBListAdapter(mContext, kbViewModel);
+                adapter.supportSDK = supportSDK;
+                adapter.mListener = listener;
+                recyclerView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+//                expandableListAdapter = new KBExpandableListAdapter(mActivity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
+//                if ( expandableListView!=null && expandableListAdapter!=null ) {
+//                    expandableListAdapter.mListener = listener;
+//                    expandableListAdapter.supportSDK = supportSDK;
+//                    expandableListAdapter.expandableListView = expandableListView;
+//                    expandableListView.setAdapter(expandableListAdapter);
+//                    expandableListAdapter.notifyDataSetChanged();
+//                    for(int i=0; i < expandableListAdapter.getGroupCount(); i++) {
+//                        expandableListView.expandGroup(i);
+//                    }
+//                }
+            }
+        });
+     }
 
     @Override
     public void adapterDidSelectEntry(int groupPosition, int childPosition, Object object) {
@@ -160,6 +186,11 @@ public class KBListFragment extends Fragment
         }
     }
 
+    @Override
+    public void adapterDidSelectEntry(KBEntryModel entry) {
+        showArticle(entry);
+    }
+
 
     private void backToHome() {
         for ( int n=0; n<supportSDK.kbSubscreensOnStack; n++ ) {
@@ -167,14 +198,8 @@ public class KBListFragment extends Fragment
             fragmentManager.popBackStackImmediate();
         }
         supportSDK.kbSubscreensOnStack = 0;
-//        if ( mActivity instanceof AppCompatActivity ) {
-//            AppCompatActivity activity = (AppCompatActivity) mActivity;
-//            ActionBar actionBar = activity.getSupportActionBar();
-//            if ( actionBar != null ) {
-//                actionBar.hide();
-//            }
-//        }
     }
+
 
     private void showFolder(KBEntryModel entry) {
         KBViewModel kbViewModel = new KBViewModel(entry);
@@ -235,17 +260,14 @@ public class KBListFragment extends Fragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnListFragmentInteractionListener) {
-//            mListener = (OnListFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnListFragmentInteractionListener");
-//        }
+        EventManager.notify(EventManager.kEventKnowledgeStarted, null);
+        refreshModel();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        EventManager.notify(EventManager.kEventKnowledgeEnded, null);
         mListener = null;
     }
 
@@ -266,7 +288,6 @@ public class KBListFragment extends Fragment
     public void supportSDKDidFailToSearchKB() {
 
     }
-
 
 
     public interface OnListFragmentInteractionListener {

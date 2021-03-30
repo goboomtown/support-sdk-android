@@ -31,6 +31,7 @@ import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.forms.view.DateCompositeView;
 import com.goboomtown.forms.view.SeekbarCompositeView;
 import com.goboomtown.supportsdk.R;
+import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.view.SupportButton;
 
@@ -62,8 +63,12 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
         supportSDK.mFormsListener = this;
         if ( supportSDK != null ) {
             textColor = supportSDK.appearance.homeTextColor();
-            backgroundColor = supportSDK.appearance.loginBackgroundColor;
+//            backgroundColor = supportSDK.appearance.loginBackgroundColor;
+            backgroundColor = supportSDK.appearance.backgroundColor();
 
+            formCancelButtonText            = supportSDK.appearance.formCancelButtonText();
+            formSaveButtonText              = supportSDK.appearance.formSaveButtonText();
+            formSpacing                     = supportSDK.appearance.formSpacing();
             formEntryBorderColor            = supportSDK.appearance.formEntryBorderColor();
             formEntryBorderWidth            = supportSDK.appearance.formEntryBorderWidth();
             formEntryTextColor              = supportSDK.appearance.formEntryTextColor();
@@ -75,57 +80,18 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
             formLabelTextSize               = supportSDK.appearance.formLabelTextSize();
             formLabelTextStyle              = supportSDK.appearance.formLabelTextStyle();
 
-            refresh();
+             refresh();
         }
-
-//        setupRecyclerView(mRecyclerView);
-//        if (context instanceof OnListFragmentInteractionListener) {
-//            mListener = (OnListFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnListFragmentInteractionListener");
-//        }
+        EventManager.notify(EventManager.kEventFormStarted, null);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        EventManager.notify(EventManager.kEventFormStarted, null);
         supportSDK.mFormsListener = formsListener;
         mListener = null;
     }
-
-
-//    public void handleFocusChangeOnField(com.goboomtown.forms.fragment.FormFragment.SimpleItemRecyclerViewAdapter.ViewHolder holder, boolean hasFocus, View view) {
-//        if (!hasFocus && holder.mField.isValueUpdated()) {
-//            if (mParent != null) {
-//                mParent.runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if ( mFormModel.refresh() ) {
-//                            refreshViewAdapter();
-//                        }
-//                    }
-//                });
-//            }
-//        }
-//    }
-
-//    public void handleUpdatedField(BoomtownField field) {
-//        if ( !field.isValueUpdated() ) {
-//            return;
-//        }
-//        Activity activity = getActivity();
-//        if ( activity != null ) {
-//            activity.runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if ( mFormModel.refresh() ) {
-//                        refreshViewAdapter();
-//                    }
-//                }
-//            });
-//        }
-//    }
 
 
     @Override

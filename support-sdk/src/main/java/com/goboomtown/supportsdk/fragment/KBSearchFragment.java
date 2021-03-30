@@ -10,7 +10,11 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -63,6 +67,8 @@ public class KBSearchFragment extends Fragment
     private OnFragmentInteractionListener mListener;
 
     private ExpandableListView      expandableListView;
+    private RecyclerView            recyclerView;
+    private KBListAdapter           listAdapter;
     private KBExpandableListAdapter expandableListAdapter;
     private SearchView              searchView;
 
@@ -127,11 +133,12 @@ public class KBSearchFragment extends Fragment
             }
         });
 
-        expandableListView  = view.findViewById(R.id.expandableListView);
-        expandableListView.setOnGroupClickListener((arg0, itemView, itemPosition, itemId) -> {
-            expandableListView.expandGroup(itemPosition);
-            return true;
-        });
+        recyclerView = view.findViewById(R.id.recyclerView);
+//        expandableListView  = view.findViewById(R.id.expandableListView);
+//        expandableListView.setOnGroupClickListener((arg0, itemView, itemPosition, itemId) -> {
+//            expandableListView.expandGroup(itemPosition);
+//            return true;
+//        });
 
         setupAdapter();
         return view;
@@ -150,8 +157,26 @@ public class KBSearchFragment extends Fragment
 
     private void setupAdapter() {
         final KBSearchFragment listener = this;
-        if ( mActivity != null ) {
-            mActivity.runOnUiThread(() -> {
+//        if ( mActivity != null ) {
+//            mActivity.runOnUiThread(() -> {
+//                expandableListAdapter = new KBExpandableListAdapter(mActivity, sectionHeadings, createEntries());
+//                ArrayList<Drawable> groupIcons = new ArrayList<>();
+//                groupIcons.add(getResources().getDrawable(R.drawable.ic_search_24px));
+//                groupIcons.add(null);
+//                expandableListAdapter.groupIcons = groupIcons;
+//                if ( expandableListView!=null ) {
+//                    expandableListAdapter.mListener = listener;
+//                    expandableListAdapter.expanded = true;
+//                    expandableListView.setAdapter(expandableListAdapter);
+//                    for ( int n=0; n<expandableListAdapter.getGroupCount(); n++ ) {
+//                        expandableListView.expandGroup(n);
+//                    }
+//                }
+//            });
+//        }
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
                 expandableListAdapter = new KBExpandableListAdapter(mActivity, sectionHeadings, createEntries());
                 ArrayList<Drawable> groupIcons = new ArrayList<>();
                 groupIcons.add(getResources().getDrawable(R.drawable.ic_search_24px));
@@ -165,9 +190,34 @@ public class KBSearchFragment extends Fragment
                         expandableListView.expandGroup(n);
                     }
                 }
-            });
-        }
-     }
+            }
+        });
+
+//        new Handler(Looper.getMainLooper()).post(new Runnable() {
+//            @Override
+//            public void run() {
+//                recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+//                KBListAdapter adapter = new KBListAdapter(mContext, kbViewModel);
+//                adapter.supportSDK = supportSDK;
+//                adapter.mListener = listener;
+//                recyclerView.setAdapter(adapter);
+//                adapter.notifyDataSetChanged();
+//
+////                expandableListAdapter = new KBExpandableListAdapter(mActivity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
+////                if ( expandableListView!=null && expandableListAdapter!=null ) {
+////                    expandableListAdapter.mListener = listener;
+////                    expandableListAdapter.supportSDK = supportSDK;
+////                    expandableListAdapter.expandableListView = expandableListView;
+////                    expandableListView.setAdapter(expandableListAdapter);
+////                    expandableListAdapter.notifyDataSetChanged();
+////                    for(int i=0; i < expandableListAdapter.getGroupCount(); i++) {
+////                        expandableListView.expandGroup(i);
+////                    }
+////                }
+//            }
+//        });
+
+    }
 
 
     @Override

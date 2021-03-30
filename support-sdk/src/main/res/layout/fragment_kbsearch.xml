@@ -33,6 +33,12 @@
     android:background="?android:attr/colorBackground"
     tools:context=".fragment.KBSearchFragment">
 
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/recyclerView"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:visibility="visible"/>-->
+
     <ExpandableListView
         android:id="@+id/expandableListView"
         android:layout_height="match_parent"
