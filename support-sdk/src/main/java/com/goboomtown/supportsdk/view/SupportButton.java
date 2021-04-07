@@ -429,43 +429,43 @@ public class SupportButton extends View
     }
 
 
-    private void invalidateTextPaintAndMeasurements() {
-        mTextPaint.setTextSize(mExampleDimension);
-        mTextPaint.setColor(mExampleColor);
-        mTextWidth = mTextPaint.measureText(mExampleString);
+//    private void invalidateTextPaintAndMeasurements() {
+//        mTextPaint.setTextSize(mExampleDimension);
+//        mTextPaint.setColor(mExampleColor);
+//        mTextWidth = mTextPaint.measureText(mExampleString);
+//
+//        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
+//        mTextHeight = fontMetrics.bottom;
+//    }
 
-        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-        mTextHeight = fontMetrics.bottom;
-    }
 
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        // TODO: consider storing these as member variables to reduce
-        // allocations per draw cycle.
-        int paddingLeft = getPaddingLeft();
-        int paddingTop = getPaddingTop();
-        int paddingRight = getPaddingRight();
-        int paddingBottom = getPaddingBottom();
-
-        int contentWidth = getWidth() - paddingLeft - paddingRight;
-        int contentHeight = getHeight() - paddingTop - paddingBottom;
-
-        // Draw the text.
-        canvas.drawText(mExampleString,
-                paddingLeft + (contentWidth - mTextWidth) / 2,
-                paddingTop + (contentHeight + mTextHeight) / 2,
-                mTextPaint);
-
-        // Draw the example drawable on top of the text.
-        if (mExampleDrawable != null) {
-            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-                    paddingLeft + contentWidth, paddingTop + contentHeight);
-            mExampleDrawable.draw(canvas);
-        }
-    }
+//    @Override
+//    protected void onDraw(Canvas canvas) {
+//        super.onDraw(canvas);
+//
+//        // TODO: consider storing these as member variables to reduce
+//        // allocations per draw cycle.
+//        int paddingLeft = getPaddingLeft();
+//        int paddingTop = getPaddingTop();
+//        int paddingRight = getPaddingRight();
+//        int paddingBottom = getPaddingBottom();
+//
+//        int contentWidth = getWidth() - paddingLeft - paddingRight;
+//        int contentHeight = getHeight() - paddingTop - paddingBottom;
+//
+//        // Draw the text.
+//        canvas.drawText(mExampleString,
+//                paddingLeft + (contentWidth - mTextWidth) / 2,
+//                paddingTop + (contentHeight + mTextHeight) / 2,
+//                mTextPaint);
+//
+//        // Draw the example drawable on top of the text.
+//        if (mExampleDrawable != null) {
+//            mExampleDrawable.setBounds(paddingLeft, paddingTop,
+//                    paddingLeft + contentWidth, paddingTop + contentHeight);
+//            mExampleDrawable.draw(canvas);
+//        }
+//    }
 
 
     @Override
