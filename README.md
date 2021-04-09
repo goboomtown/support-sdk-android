@@ -91,7 +91,9 @@ _Note:_ An example Android application that uses this library may be found in th
 ```
 
 
-#### Sample Java code
+#### Initializing the Support SDK
+
+The Support SDK can be intialized using the following code, where R.raw.support_sdk is a raw resource containing the JSON configuration.
 
 ```
 SupportButton supportButton = (SupportButton) findViewById(R.id.supportButton);
@@ -120,43 +122,66 @@ This file enables communication with the server and configures the available fea
 
 ## Menu Types
 
-The second parameter of loadConfigurationFromJSON() is the desired menu type as per the following list:
+The desired menu type is typically set after the settings are retrieved, as shown here:
 
 ```
-NoMenu: 0,
-Menu: 1,
-Button: 2,
-IconList: 3,
-IconListExit: 4,
+public void supportButtonDidGetSettings() {
+    mSupportButton.menuStyle = SupportButton.MenuStyle.ICON_LIST;
+}
+
+```
+
+The available choices are:
+
+```
+    public enum MenuStyle {
+        NO_MENU,
+        MENU,
+        BUTTON,
+        ICON_LIST,
+        ICON_LIST_EXIT,
+        ICON_GRID
+    };
 ```
 
 ## Customer Configuration
 
-If desired, the customer may be identified by providing values for any of the following keys"
+A specific customer may be selected using the getCustomerInformation() method as follows:
 
 ```
-CustomerId : "members_id",
-CustomerExternalId: "members_external_id",
-CustomerLocationId: "members_locations_id",
-CustomerLocationExternalId: "members_locations_external_id",
-CustomerLocationMid: "members_locations_mid",
-UserId: "members_users_id",
-UserExternalId: "members_users_external_id",
-UserEmail: "members_users_email",
-UserPhone: "members_users_phone",
+ HashMap<String, String> customerInfo = new HashMap<String, String>();
+ customerInfo.put(SupportButton.kUserEmail, "test@example.com");
+ mSupportButton.getCustomerInformation(customerInfo);
 ```
 
-like this:
+The customer may be identified by providing values for any combination of the following keys:
 
 ```
-var customerJSON = {
-  "members_users_email": "email@example.com"
-};
+ public static final String kCustomerId                   = "members_id";
+ public static final String kCustomerExternalId           = "members_external_id";
+ public static final String kCustomerLocationId           = "members_locations_id";
+ public static final String kCustomerLocationExternalId   = "members_locations_external_id";
+ public static final String kCustomerLocationMid          = "members_locations_mid";
+ public static final String kUserId                       = "members_users_id";
+ public static final String kUserExternalId               = "members_users_external_id";
+ public static final String kUserEmail                    = "members_users_email";
+ public static final String kUserPhone                    = "members_users_phone";
 ```
 
 ## Appearance Configuration
 
 Much of the application (menus, icons, and colors currently) can be configured using a JSON file as follows:
+
+```
+try {
+    String configJsonString = Utils.readRawTextFile(this, R.raw.ui_appearance);
+    if ( configJsonString != null ) {
+        mSupportButton.appearance.configureFromJSON(configJsonString);
+    }
+} catch (Exception e) {
+}
+
+```
 
 This is the default JSON.
 

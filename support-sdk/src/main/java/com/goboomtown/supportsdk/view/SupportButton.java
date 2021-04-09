@@ -513,6 +513,7 @@ public class SupportButton extends View
         if (this.supportSDK.memberLocationID == null) {
             this.supportSDK.memberLocationID = this.supportSDK.defaultMemberLocationID;
         }
+        this.supportSDK.saveMemberInfo();
 //        this.supportSDK.showKnowledgeBase = true;
         if ( this.supportSDK.showKnowledgeBase && !this.supportSDK.isKBRequested ) {
             this.supportSDK.isKBRequested = true;
@@ -901,6 +902,10 @@ public class SupportButton extends View
 
 
     public void removeForm() {
+        if ( mListener != null ) {
+            mListener.supportButtonDidCompleteTask();
+        }
+
         if (mListener != null) {
             mListener.supportButtonRemoveFragment(formFragment);
         }

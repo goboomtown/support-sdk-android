@@ -217,8 +217,8 @@ public class SupportSDK
 
 /**
  * TODO: Uncomment the following two lines to support POS systems
- POSConnector posConnector = new POSConnector(mContext.get(), this);
- posConnector.getAccount();
+        POSConnector posConnector = new POSConnector(mContext.get(), this);
+        posConnector.getAccount();
  */
     }
 
@@ -710,6 +710,7 @@ public class SupportSDK
                             memberUserID = jsonObject.optString("members_users_id");
                             memberLocationID = jsonObject.optString("members_locations_id");
                             memberDeviceID = jsonObject.optString("members_devices_id");
+                            saveMemberInfo();
                             success = true;
                         } catch (JSONException e) {
                             Log.e(TAG, Log.getStackTraceString(e));
@@ -734,10 +735,17 @@ public class SupportSDK
         memberID            = defaultMemberID;
         memberUserID        = defaultMemberUserID;
         memberLocationID    = defaultMemberLocationID;
+        saveMemberInfo();
     }
 
 
-     private void restGetSettings() {
+    public void saveMemberInfo() {
+        BoomtownChat.sharedInstance().formsUserKey = memberUserID;
+    }
+
+
+
+    private void restGetSettings() {
         String uri = String.format("%s/app/get", SupportSDK.kSDKV1Endpoint);
 
         JSONObject params = new JSONObject();
@@ -792,6 +800,7 @@ public class SupportSDK
                                 defaultMemberUserID = defaultMember.optString("memberUserId");
                                 defaultMemberLocationID = defaultMember.optString("memberLocationId");
                                 defaultMemberDeviceID = defaultMember.optString("memberDeviceId");
+                                handleUnknownCustomer(null);
                             }
                             showSupportHistory = jsonObject.optBoolean("supportHistoryEnabled");
                         } else {

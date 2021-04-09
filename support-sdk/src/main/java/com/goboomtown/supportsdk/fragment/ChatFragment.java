@@ -352,6 +352,12 @@ public class ChatFragment extends BaseChatFragment
         } else {
             warnNoScreenSharingAvailableIfNecessary();
         }
+//        if ( supportSDK.supportScreenShareEnabled &&
+//                Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP ) {
+//            availableItems.add(getResources().getString(R.string.label_share_screen));
+//        } else {
+//            warnNoScreenSharingAvailableIfNecessary();
+//        }
         availableItems.add(getResources().getString(R.string.label_video_chat));
         availableItems.add(getResources().getString(R.string.label_cancel));
 
