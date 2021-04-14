@@ -220,6 +220,7 @@ public class SupportMenuView extends FrameLayout {
                         supportSDK.memberLocationID = jsonObject.optString("members_locations_id");
                         supportSDK.memberDeviceID = jsonObject.optString("members_devices_id");
                         supportSDK.historyEntries.clear();
+                        supportSDK.saveMemberInfo();
                         if ( supportSDK.showSupportHistory ) {
                             supportSDK.getHistory();
                         }

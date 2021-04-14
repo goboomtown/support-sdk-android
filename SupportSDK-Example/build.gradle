@@ -24,7 +24,46 @@ android {
     }
 
     flavorDimensions "androidplatform", "cloudapi"
-    
+
+    productFlavors {
+        production {
+            manifestPlaceholders = [
+                    applicationLabel: "@string/app_name",
+                    flavor          : "production"
+            ]
+            dimension = "cloudapi"
+        }
+        stage {
+            applicationId "com.goboomtown.supportsdkdemo.stage"
+            manifestPlaceholders = [
+                    applicationLabel: "@string/app_name_stage",
+                    flavor          : "stage"
+            ]
+            dimension = "cloudapi"
+        }
+        gplay {
+            dimension = "androidplatform"
+        }
+        pax {
+            applicationId "com.goboomtown.supportsdkdemo.pax"
+//            applicationIdSuffix ".pax"
+            multiDexEnabled true
+            minSdkVersion 19
+            ext.global_minSdkVersion = 19
+            dimension = "androidplatform"
+        }
+        clover {
+            applicationId "com.goboomtown.supportsdkdemo.clover"
+            applicationIdSuffix ".keybank"
+            multiDexEnabled true
+            dimension = "androidplatform"
+            minSdkVersion 17
+            ext.global_minSdkVersion = 17
+            targetSdkVersion(25)
+        }
+
+
+    }
 }
 
 configurations {
@@ -38,6 +77,12 @@ configurations {
 
 dependencies {
     implementation 'com.android.support:multidex:1.0.3'
+
+    paxImplementation 'com.android.support:multidex:1.0.3'
+    paxImplementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.1.1'
+
+    cloverImplementation 'com.android.support:multidex:1.0.3'
+    cloverImplementation 'com.clover.sdk:clover-android-sdk:latest.release'
 
     //  Start Support SDK dependencies
     implementation "com.wefika:flowlayout:0.4.1"

@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void supportButtonDidGetSettings() {
         Log.d(TAG, "#helpButtonDidGetSettings");
-//        mSupportButton.menuStyle = SupportButton.MenuStyle.BUTTON;
+        POSConnector posConnector = new POSConnector(mSupportButton);
         mSupportButton.menuStyle = SupportButton.MenuStyle.ICON_LIST;
         mSupportButton.click();
     }

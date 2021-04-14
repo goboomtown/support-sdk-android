@@ -77,8 +77,7 @@ import okhttp3.ResponseBody;
 /**
  * Created by Larry Borsato on 2016-07-12.
  */
-public class SupportSDK
-    implements POSConnectorBase.POSConnectorListener {
+public class SupportSDK {
 
     private static final String TAG = SupportSDK.class.getSimpleName();
     private static final String SupportSDKHelpName = "SupportSDK";
@@ -214,35 +213,6 @@ public class SupportSDK
         configuration = new Configuration(mContext.get());
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
         setAPIInfo();
-
-/**
- * TODO: Uncomment the following two lines to support POS systems
-        POSConnector posConnector = new POSConnector(mContext.get(), this);
-        posConnector.getAccount();
- */
-    }
-
-
-    @Override
-    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
-        if ( merchant != null ) {
-            Log.d(TAG, merchant.name);
-            HashMap<String, String> customerInfo = new HashMap<>();
-            customerInfo.put(kCustomerExternalId, merchant.mid);
-            customerInfo.put(kCustomerLocationMid, merchant.mid);
-            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
-            restGetCustomerInformationWithInfo(customerInfo, null);
-            if (mListener != null) {
-                mListener.supportSDKDidRetrieveAccount(customerInfo);
-            }
-        }
-    }
-
-    @Override
-    public void posConnectorDidToFailRetrieveAccount(String message) {
-        if (mListener != null) {
-            mListener.supportSDKDidFailToRetrieveAccount(message);
-        }
     }
 
 
@@ -832,13 +802,13 @@ public class SupportSDK
             return;
         }
         isRetrievingHistory = true;
-        String url = SupportSDK.kSDKV1Endpoint + "/issues/history/?members_locations_id=" + defaultMemberLocationID;
+        String url = SupportSDK.kSDKV1Endpoint + "/issues/history/?members_locations_id=" + memberLocationID;
         get(url, new Callback() {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 isRetrievingHistory = false;
-                hideProgress();
+//                hideProgress();
             }
 
             @Override
@@ -847,7 +817,7 @@ public class SupportSDK
                 processHeadersForResonse(response);
 
                 isRetrievingHistory = false;
-                hideProgress();
+//                hideProgress();
                 JSONObject jsonObject = SupportSDK.successJSONObject(response);
                 if ( jsonObject != null ) {
                     if ( jsonObject.has("results") ) {
@@ -1135,8 +1105,6 @@ public class SupportSDK
         void supportSDKDidFailWithError(String description, String reason);
         void supportSDKDidGetSettings();
         void supportSDKDidFailToGetSettings();
-        void supportSDKDidRetrieveAccount(HashMap<String, String> accountInfo);
-        void supportSDKDidFailToRetrieveAccount(String message);
     }
 
     public interface SupportSDKKBListener {

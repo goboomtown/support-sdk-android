@@ -1,6 +1,0 @@
-<root>
-  <item
-      name='org.jivesoftware.smack.AbstractXMPPConnection org.jivesoftware.smack.AbstractXMPPConnection connect()'>
-    <annotation name='org.jetbrains.annotations.NotNull' />
-  </item>
-</root>

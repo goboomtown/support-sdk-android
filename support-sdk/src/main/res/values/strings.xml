@@ -24,6 +24,7 @@
     <string name="error_unable_to_resolve_issue">Unable to resolve issue</string>
     <string name="error_unable_to_retrieve_issue">Unable to retrieve issue</string>
     <string name="error_unable_to_retrieve_chat_information">Unable to retrieve chat information</string>
+    <string name="error_unable_to_retrieve_chat_information_try_transcript">Unable to retrieve chat information. Attempting to retrieve transcripts.</string>
     <string name="reason_member_info_missing">Member information is missing or incomplete.</string>
     <string name="error_unable_to_get_provider_info">Unable to retrieve provider information</string>
     <string name="error_unable_to_get_settings">Unable to retrieve settings</string>
@@ -138,6 +139,7 @@
     <string name="warn_unable_to_visit_website">Unable to visit the website.</string>
 
     <string name="text_site_history">Site History</string>
+    <string name="text_starting_chat">Starting Chat</string>
     <string name="text_chat_id">Chat ID</string>
     <string name="text_status">Status</string>
     <string name="text_rating">Rating</string>

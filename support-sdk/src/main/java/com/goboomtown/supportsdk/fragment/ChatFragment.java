@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -33,6 +35,7 @@ import com.goboomtown.chat.BoomtownChatMessage;
 import com.goboomtown.chat.ChatRecord;
 import com.goboomtown.fragment.BaseChatFragment;
 import com.goboomtown.activity.KBActivity;
+import com.goboomtown.fragment.ChatAdapter;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -46,6 +49,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -263,6 +267,7 @@ public class ChatFragment extends BaseChatFragment
 
     @Override
     public void configureChat() {
+        supportSDK.hideProgress();
         if ( mIssue != null ) {
             if ( mIssue.reference_num!=null && chatTitle==null ) {
                 String title = String.format("%s", mIssue.reference_num);
@@ -295,6 +300,9 @@ public class ChatFragment extends BaseChatFragment
         senderId = me;
         BoomtownChat.sharedInstance().me = me;
         BoomtownChat.sharedInstance().ignoreParticipantStatus = true;
+        if ( mIssue.transcripts == null ) {
+            return;
+        }
         JSONObject transcripts = mIssue.transcripts.optJSONObject(comm_id);
         if ( transcripts != null ) {
             Iterator<String> keys = transcripts.keys();
@@ -609,7 +617,8 @@ public class ChatFragment extends BaseChatFragment
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                warn(getString(R.string.error_unable_to_retrieve_chat_information), e.getLocalizedMessage());
+                warn(getString(R.string.error_unable_to_retrieve_chat_information_try_transcript), e.getLocalizedMessage());
+                showTranscripts();
             }
 
             @Override
@@ -626,10 +635,23 @@ public class ChatFragment extends BaseChatFragment
                         }
                     } else {
                         String message = SupportSDK.failureMessageFromJSONData(responseBodyString);
-                        warn(getString(R.string.error_unable_to_retrieve_chat_information), message);
+                        warn(getString(R.string.error_unable_to_retrieve_chat_information_try_transcript), "");
+                        showTranscripts();
                     }
                  }
             }
+        });
+    }
+
+
+    private void showTranscripts() {
+        isReadOnly = true;
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+             @Override
+             public void run() {
+                 setup();
+                 getTranscripts(mCommId);
+             }
         });
     }
 

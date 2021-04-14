@@ -33,6 +33,7 @@ import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.activity.ScreenCaptureActivity;
 import com.goboomtown.supportsdk.api.Appearance;
 import com.goboomtown.supportsdk.api.EventManager;
+import com.goboomtown.supportsdk.api.POSConnectorBase;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.dnssd.BTConnectPresenceService;
 import com.goboomtown.supportsdk.fragment.ChatFragment;
@@ -41,6 +42,7 @@ import com.goboomtown.supportsdk.fragment.HistoryListFragment;
 import com.goboomtown.supportsdk.fragment.SupportFormFragment;
 import com.goboomtown.supportsdk.fragment.KBListFragment;
 import com.goboomtown.supportsdk.model.BTConnectIssue;
+import com.goboomtown.supportsdk.model.BTMerchant;
 import com.goboomtown.supportsdk.util.Utils;
 
 import org.json.JSONArray;
@@ -50,6 +52,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +68,9 @@ import okhttp3.ResponseBody;
  * TODO: document your custom view class.
  */
 public class SupportButton extends View
-        implements SupportSDK.SupportSDKListener, SupportSDK.SupportSDKFormsListener,
+        implements SupportSDK.SupportSDKListener,
+        SupportSDK.SupportSDKFormsListener,
+        POSConnectorBase.POSConnectorListener,
         EventManager.EventManagerListener {
 
     private static final String TAG = SupportButton.class.getSimpleName();
@@ -112,16 +117,15 @@ public class SupportButton extends View
 
 
     public enum MenuStyle {
-        NO_MENU,
-        MENU,
-        BUTTON,
-        ICON_LIST,
-        ICON_LIST_EXIT,
-        ICON_GRID
+        NO_MENU(0),
+        MENU(1),
+        BUTTON(2),
+        ICON_LIST(3),
+        ICON_LIST_EXIT(4),
+        ICON_GRID(5);
+
+        MenuStyle(int code) {}
     };
-
-
-
 
     // TODO: remove unused constants and/or rename with all-caps per Java convention for constants
     private static final String SupportSDKErrorDomain = "com.goboomtown.supportsdk";
@@ -162,7 +166,7 @@ public class SupportButton extends View
     private float mTextWidth;
     private float mTextHeight;
 
-    private WeakReference<Context> mContext;
+    public WeakReference<Context> mContext;
 
     private BTConnectPresenceService mDNSSvc;
     private boolean mDNSSvcEnabled;
@@ -295,8 +299,18 @@ public class SupportButton extends View
         supportSDK.cloudConfigComplete = false;
     }
 
+    private void getMenuStyle() {
+        supportSDK.appearance.menuStyle();
+        List<String> menuStyleOptions = Arrays.asList("nomenu", "menu", "button", "iconlist", "iconlistexit");
+        List<MenuStyle> menuStyles = Arrays.asList(MenuStyle.NO_MENU,
+                MenuStyle.MENU, MenuStyle.BUTTON, MenuStyle.ICON_LIST, MenuStyle.ICON_LIST_EXIT);
+        int style = menuStyleOptions.indexOf(supportSDK.appearance.menuStyle());
+        menuStyle = style==-1 ? MenuStyle.ICON_LIST : menuStyles.get(style);
+    }
+
 
     public void click() {
+        getMenuStyle();
         switch(menuStyle) {
             case ICON_LIST:
             case ICON_LIST_EXIT:
@@ -546,18 +560,27 @@ public class SupportButton extends View
 
 
     @Override
-    public void supportSDKDidRetrieveAccount(HashMap<String, String> accountInfo) {
-        if (mListener != null) {
-            mListener.supportButtonDidRetrieveAccount(accountInfo);
+    public void posConnectorDidRetrieveAccount(BTMerchant merchant) {
+        if ( merchant != null ) {
+            Log.d(TAG, merchant.name);
+            HashMap<String, String> customerInfo = new HashMap<>();
+            customerInfo.put(kCustomerExternalId, merchant.mid);
+            customerInfo.put(kCustomerLocationMid, merchant.mid);
+            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
+            supportSDK.restGetCustomerInformationWithInfo(customerInfo, null);
+            if (mListener != null) {
+                mListener.supportButtonDidRetrieveAccount(customerInfo);
+            }
         }
     }
 
     @Override
-    public void supportSDKDidFailToRetrieveAccount(String message) {
+    public void posConnectorDidToFailRetrieveAccount(String message) {
         if (mListener != null) {
             mListener.supportButtonDidFailToRetrieveAccount(message);
         }
     }
+
 
     private void createSupportEntries() {
         mEntries.clear();
@@ -947,6 +970,7 @@ public class SupportButton extends View
 
 
     private void getOrCreateIssue() {
+        supportSDK.showProgressWithMessage(mContext.get().getString(R.string.text_starting_chat));
         BTConnectIssue currentIssue = BTConnectIssue.getCurrentIssue(mContext.get());
         xmppdata = null;
         if ( currentIssue != null ) {

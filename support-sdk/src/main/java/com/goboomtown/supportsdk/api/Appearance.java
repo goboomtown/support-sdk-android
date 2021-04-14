@@ -81,6 +81,7 @@ public class Appearance {
     public final static String iconColorDark               = "iconColorDark";
     public final static String borderColor                 = "borderColor";
     public final static String borderColorDark             = "borderColorDark";
+    public final static String style                       = "style";
     public final static String heading                     = "heading";
     public final static String textSize                    = "textSize";
     public final static String textStyle                   = "textStyle";
@@ -157,6 +158,8 @@ public class Appearance {
     public int    chatRemoteTextColor;
     public int    chatRemoteBackgroundColor;
     public int    chatRemoteBorderColor;
+
+    private String  menuStyle;
 
 //    public int      borderColor;
 
@@ -312,7 +315,9 @@ public class Appearance {
                     String colorString = menuAppearanceJSON.getString(key);
                     int color = Color.parseColor(colorString);
                     menuConfiguration.put(key, color);
-                } else if (key.toLowerCase().contains("heading") || key.toLowerCase().contains("style")) {
+                } else if ( key.toLowerCase().equals("style") ) {
+                    menuStyle = menuAppearanceJSON.getString(key).toLowerCase();
+                } else if ( key.toLowerCase().contains("heading") || key.toLowerCase().contains("style")) {
                     menuConfiguration.put(key, menuAppearanceJSON.getString(key));
                 } else {
                     int value = menuAppearanceJSON.getInt(key);
@@ -749,6 +754,11 @@ public class Appearance {
 
 
     /* Menu Configuration */
+
+    public String menuStyle() {
+        return menuStyle;
+    }
+
 
     public String menuHeading() {
         return menuConfiguration.get(heading)!=null ? (String)menuConfiguration.get(heading) : "Support";

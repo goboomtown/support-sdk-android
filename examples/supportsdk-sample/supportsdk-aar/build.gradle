@@ -1,4 +1,0 @@
-configurations.maybeCreate("default")
-//artifacts.add("default", file('supportsdk-release-1.0.0.aar'))
-//artifacts.add("default", file('boomtownchat.aar'))
-artifacts.add("default", file('support-sdk-gplay-stage-debug.aar'))

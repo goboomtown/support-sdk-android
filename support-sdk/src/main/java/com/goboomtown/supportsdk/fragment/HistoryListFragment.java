@@ -5,10 +5,13 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -177,7 +180,12 @@ public class HistoryListFragment extends Fragment
         super.onAttach(context);
         EventManager.notify(EventManager.kEventHistoryStarted, null);
         if ( supportSDK.isRetrievingHistory ) {
-            supportSDK.showProgressWithMessage(getString(R.string.text_retrieving));
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    supportSDK.showProgressWithMessage(getString(R.string.text_retrieving));
+                }
+            });
         }
     }
 
@@ -193,6 +201,18 @@ public class HistoryListFragment extends Fragment
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         recyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(supportSDK.historyEntries));
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
+            new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    // At this point the layout is complete and the
+                    // dimensions of recyclerView and any child views
+                    // are known.
+                    supportSDK.hideProgress();
+                    recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+            }
+        );
     }
 
     public interface OnFragmentInteractionListener {
@@ -238,18 +258,6 @@ public class HistoryListFragment extends Fragment
             view.setOnClickListener(clickListener);
             return result;
         }
-
-//        @Override
-//        public void onBindViewHolder(@NonNull SimpleItemRecyclerViewAdapter.ViewHolder holder, int position) {
-//            if (mSelectedPosition == position) {
-//                holder.itemView.setBackgroundColor(getResources().getColor(R.color.homeSelectedColor));
-//            } else {
-//                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
-//            }
-//            holder.itemView.setSelected(mSelectedPosition == position);
-//            FormModel form = mForms.get(position);
-//            holder.bind(form);
-//        }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
@@ -300,8 +308,6 @@ public class HistoryListFragment extends Fragment
             }
             return getString(R.string.text_open);
         }
-
-
 
 
         public class ViewHolder extends TrackSelectionAdapter.ViewHolder {
