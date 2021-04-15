@@ -353,19 +353,19 @@ public class ChatFragment extends BaseChatFragment
 
     public void displayVideoChoices(final String callId) {
         List<String> availableItems = new ArrayList<>();
-        if ( supportSDK.supportScreenShareEnabled &&
-             Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP &&
-                Build.VERSION.SDK_INT<ANDROID_VERSION_10_SDK ) {
-            availableItems.add(getResources().getString(R.string.label_share_screen));
-        } else {
-            warnNoScreenSharingAvailableIfNecessary();
-        }
 //        if ( supportSDK.supportScreenShareEnabled &&
-//                Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP ) {
+//             Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP &&
+//                Build.VERSION.SDK_INT<ANDROID_VERSION_10_SDK ) {
 //            availableItems.add(getResources().getString(R.string.label_share_screen));
 //        } else {
 //            warnNoScreenSharingAvailableIfNecessary();
 //        }
+        if ( supportSDK.supportScreenShareEnabled &&
+                Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP ) {
+            availableItems.add(getResources().getString(R.string.label_share_screen));
+        } else {
+            warnNoScreenSharingAvailableIfNecessary();
+        }
         availableItems.add(getResources().getString(R.string.label_video_chat));
         availableItems.add(getResources().getString(R.string.label_cancel));
 

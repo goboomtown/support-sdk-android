@@ -22,6 +22,7 @@
 1. Choose Import .JAR/.AAR Package, click Next
 1. Enter the filename with full path - use "..." to browse to the file location where you downloaded the AARs
 1. Include the following dependencies in your application:
+
 ```    
     implementation "com.wefika:flowlayout:0.4.1"
     implementation "com.google.code.gson:gson:2.8.5"
@@ -41,9 +42,9 @@
 
 ### Appearance
 
-A `SupportButton` can be added to your app using an XML layout file or programmatically, as shown in this screenshot from one of the included example apps.
+A `SupportButton` can be added to your app using an XML layout file or programmatically.
 
-Tapping the `SupportButton` will take your user to the Help view.
+Tapping the `SupportButton` will take your user to the Help view. However, the Support button need not be visible. The method `click()` can be called to simulate a click of the button.
 
 From the Support view, the user may tap the buttons for chat, web, e-mail, or phone support. If the user taps "Chat With Us," an issue will be created for him/her, and he/she will be taken to a chat room associated with that issue.
 
@@ -53,7 +54,7 @@ _Note:_ An example Android application that uses this library may be found in th
 
 #### Sample XML Layout
 
-```
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:tools="http://schemas.android.com/tools"
@@ -95,7 +96,7 @@ _Note:_ An example Android application that uses this library may be found in th
 
 The Support SDK can be intialized using the following code, where R.raw.support_sdk is a raw resource containing the JSON configuration.
 
-```
+```java
 SupportButton supportButton = (SupportButton) findViewById(R.id.supportButton);
 supportButton.setListener(this);
 supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
@@ -107,7 +108,7 @@ supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
 
 The plugin depends on a server JSON configuration file (www/config.json here) that you must obtain from your provider. The file looks like this:
 
-```
+```json
 {
   "apiHost": "https://api.goboomtown.com",
   "integrationId": "xxxxxx",
@@ -124,7 +125,7 @@ This file enables communication with the server and configures the available fea
 
 The desired menu type is typically set after the settings are retrieved, as shown here:
 
-```
+```java
 public void supportButtonDidGetSettings() {
     mSupportButton.menuStyle = SupportButton.MenuStyle.ICON_LIST;
 }
@@ -133,7 +134,7 @@ public void supportButtonDidGetSettings() {
 
 The available choices are:
 
-```
+```java
     public enum MenuStyle {
         NO_MENU,
         MENU,
@@ -156,7 +157,7 @@ A specific customer may be selected using the getCustomerInformation() method as
 
 The customer may be identified by providing values for any combination of the following keys:
 
-```
+```java
  public static final String kCustomerId                   = "members_id";
  public static final String kCustomerExternalId           = "members_external_id";
  public static final String kCustomerLocationId           = "members_locations_id";
@@ -172,7 +173,7 @@ The customer may be identified by providing values for any combination of the fo
 
 Much of the application (menus, icons, and colors currently) can be configured using a JSON file as follows:
 
-```
+```java
 try {
     String configJsonString = Utils.readRawTextFile(this, R.raw.ui_appearance);
     if ( configJsonString != null ) {
@@ -185,7 +186,7 @@ try {
 
 This is the default JSON.
 
-```
+```json
 {
   "navigationBarAppearance":
   {
@@ -336,10 +337,10 @@ textColorDark
 ```
 
 
-### Connect Intelligent Agent (mDNS) Broadcasts Using SupportButton
+## Connect Intelligent Agent (mDNS) Broadcasts Using SupportButton
 The SupportButton provides a convenient way to connect to Boomtown onsite intelligence agents.  This provides a mechanism for broadcasting mDNS data.  This can be done with a call to SupportButton#advertiseServiceWithPublicData(Map, Map) method.
 
-```
+```java
 Map<String, String> myPubData = new HashMap<String, String>();
 myPubData.put("public", "fooData");
 Map<String, String> myPrivData = new HashMap<String, String>();
@@ -354,7 +355,130 @@ manage the lifecycle yourself you can invoke SupportButton#stopAdvertiseServiceW
 Two methods in SupportButtonButtonListener provide for insight into the broadcast of mDNS data:
 
 1. SupportButtonListener#supportButtonDidAdvertiseService()
-1. SupporrButtonListener#supportButtonDidFailToAdvertiseService()
+2. SupportButtonListener#supportButtonDidFailToAdvertiseService()
+
+
+## Supporting Point of Sale (POS) Systems (i.e. Clover, Pax)
+
+POS systems may be supported by extending the POSConnectorBase class. This sample code demonstrates 
+how to implement a POSConnector, which should be called after settings have been retrieved.
+
+```java
+    public void supportButtonDidGetSettings() {
+        POSConnector posConnector = new POSConnector(mSupportButton);
+    }
+```
+
+Selecting a Clover or Pax build variant for the sample application will show the provided POSConnector 
+class for those POS systems. The gradle build will also include the appropriate platform libraries. 
+
+Here is the POSConnector for Clover that retrieves the current merchant account information: 
+
+```java
+public class POSConnector extends POSConnectorBase
+        implements MerchantConnector.OnMerchantChangedListener, ServiceConnector.OnServiceConnectedListener {
+
+    private Account account;
+    private MerchantConnector   merchantConnector;
+
+    POSConnector(SupportButton supportButton) {
+        super(supportButton);
+        getAccount();
+    }
+
+    @Override
+    public void getAccount() {
+        account = CloverAccount.getAccount(mContext);
+        connect(mContext);
+        getMerchant();
+    }
+
+    private void connect(Context context) {
+        if (account != null) {
+            merchantConnector = new MerchantConnector(context, account, null);
+        }
+    }
+
+    private void disconnect() {
+        if (merchantConnector != null) {
+            merchantConnector.disconnect();
+            merchantConnector = null;
+        }
+    }
+
+
+    private void getMerchant() {
+        try {
+            merchantConnector.getMerchant(new MerchantConnector.MerchantCallback<Merchant>() {
+                @Override
+                public void onServiceSuccess(Merchant merchant, ResultStatus status) {
+                    super.onServiceSuccess(merchant, status);
+
+                    BTMerchant btMerchant = new BTMerchant();
+                    btMerchant.mid          = merchant.getMid();
+                    btMerchant.deviceId     = merchant.getDeviceId();
+                    btMerchant.name         = merchant.getName();
+                    MerchantAddress address = merchant.getAddress();
+                    btMerchant.address1     = address.getAddress1();
+                    btMerchant.city         = address.getCity();
+                    btMerchant.state        = address.getState();
+                    btMerchant.zip          = address.getZip();
+                    btMerchant.country      = address.getCountry();
+                    btMerchant.latitude     = address.getLatitude();
+                    btMerchant.longitude    = address.getLongitude();
+                    btMerchant.supportEmail = merchant.getSupportEmail();
+                    Account account         = merchant.getAccount();
+                    if (mListener != null) {
+                        mListener.posConnectorDidRetrieveAccount(btMerchant);
+                    }
+                }
+
+                @Override
+                public void onServiceFailure(ResultStatus status) {
+                    super.onServiceFailure(status);
+                    if (mListener != null) {
+                        mListener.posConnectorDidToFailRetrieveAccount(status.getStatusMessage());
+                    }
+                }
+
+                @Override
+                public void onServiceConnectionFailure() {
+                    super.onServiceConnectionFailure();
+                    if (mListener != null) {
+                        mListener.posConnectorDidToFailRetrieveAccount("");
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    @Override
+    public void onMerchantChanged(Merchant merchant) {
+
+    }
+
+    @Override
+    public void onServiceConnected(ServiceConnector<? extends IInterface> connector) {
+
+    }
+
+    @Override
+    public void onServiceDisconnected(ServiceConnector<? extends IInterface> connector) {
+
+    }
+
+
+}
+```
+
+Two methods in SupportButtonListener inform the calling user of account retrieval success or failure and related data:
+
+1. SupportButtonListener#supportButtonDidRetrieveAccount()
+2. SupportButtonListener#supportButtonDidFailToRetrieveAccount()
 
 
 ## Building Library from Sources

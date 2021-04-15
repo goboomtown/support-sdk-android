@@ -36,8 +36,6 @@ public class POSConnector extends POSConnectorBase
     private void connect(Context context) {
         if (account != null) {
             merchantConnector = new MerchantConnector(context, account, null);
-//            merchantConnector.setOnMerchantChangedListener(this);
-//            merchantConnector.connect();
         }
     }
 

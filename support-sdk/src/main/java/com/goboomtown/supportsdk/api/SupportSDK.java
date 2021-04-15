@@ -304,7 +304,7 @@ public class SupportSDK {
             ContextCompat.startForegroundService(mContext.get(), intent);
 
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)
-                    activity.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                    activity.getApplicationContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
             // This initiates a prompt dialog for the user to confirm screen projection.
             try {
