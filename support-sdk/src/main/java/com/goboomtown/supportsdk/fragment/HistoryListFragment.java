@@ -2,16 +2,22 @@ package com.goboomtown.supportsdk.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +30,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -38,6 +45,8 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +56,11 @@ public class HistoryListFragment extends Fragment
 
     private static final String TAG = HistoryListFragment.class.getSimpleName();
 
+    private static final String kActionSettingSortDescending    = "com.goboomtownn.history.sort_descending";
+    private static final String kActionSettingShowOpen          = "com.goboomtownn.history.show_open";
+    private static final String kActionSettingShowResolved      = "com.goboomtownn.history.show_resolved";
+    private static final String kActionSettingShowClosed        = "com.goboomtownn.history.show_closed";
+
     private FragmentActivity    mActivity;
     private SupportFormFragment mFormFragment;
     private RecyclerView        mRecyclerView;
@@ -55,6 +69,15 @@ public class HistoryListFragment extends Fragment
     public  Context             mContext;
     public  SupportButton       supportButton;
     public  SupportSDK          supportSDK;
+    private MenuItem            mMenuSelect;
+
+    private boolean             sortDescending;
+    private boolean             showOpen;
+    private boolean             showResolved;
+    private boolean             showClosed;
+
+    public ArrayList<BTConnectIssue>    filteredEntries = new ArrayList<>();
+    public ArrayList<BTConnectIssue>    sortedEntries = new ArrayList<>();
 
     public OnFragmentInteractionListener mListener;
 
@@ -96,6 +119,8 @@ public class HistoryListFragment extends Fragment
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_history_list, container, false);
 
+        loadActionSettings();
+        sort();
         mRecyclerView = mView.findViewById(R.id.recyclerView);
         setupRecyclerView(mRecyclerView);
         return mView;
@@ -178,6 +203,7 @@ public class HistoryListFragment extends Fragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mActivity = getActivity();
         EventManager.notify(EventManager.kEventHistoryStarted, null);
         if ( supportSDK.isRetrievingHistory ) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -197,10 +223,134 @@ public class HistoryListFragment extends Fragment
     }
 
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_history, menu);
+        mMenuSelect = menu.findItem(R.id.action_select);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_select) {
+            View menuItemView = mActivity.findViewById(R.id.action_select);
+            showMenu(menuItemView);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    public void showMenu(View v) {
+        PopupMenu popup = new PopupMenu(mActivity, v);
+        popup.inflate(R.menu.menu_history_popup);
+        popup.getMenu().getItem(0).setChecked(sortDescending);
+        popup.getMenu().getItem(1).setChecked(showOpen);
+        popup.getMenu().getItem(2).setChecked(showResolved);
+        popup.getMenu().getItem(3).setChecked(showClosed);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+//                int id = item.getItemId();
+//                if        ( id == R.id.action_sort_descending ) {
+//                    popup.show();
+//                    return true;
+//                } else if ( id == R.id.action_show_open ) {
+//                    return true;
+//                } else if ( id == R.id.action_show_resolved ) {
+//                    return true;
+//                } else if ( id == R.id.action_show_closed ) {
+//                    return true;
+//                }
+//                return false;
+
+                item.setChecked(!item.isChecked());
+
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                item.setActionView(new View(mContext));
+                item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem item) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem item) {
+                        return false;
+                    }
+                });
+                saveActionSettings();
+                int id = item.getItemId();
+                if ( id == R.id.action_sort_descending ) {
+                    sortDescending = item.isChecked();
+                } else if ( id == R.id.action_show_open ) {
+                    showOpen = item.isChecked();
+                } else if ( id == R.id.action_show_resolved ) {
+                    showResolved = item.isChecked();
+                } else if ( id == R.id.action_show_closed ) {
+                    showClosed = item.isChecked();
+                }
+                sort();
+                mRecyclerView.getAdapter().notifyDataSetChanged();
+                return false;
+
+            }
+        });
+        popup.show();
+    }
+
+    private void sort() {
+        filteredEntries.clear();
+        for ( BTConnectIssue entry : supportSDK.historyEntries ) {
+            if ( entry .status<BTConnectIssue.RESOLVED && showOpen ) {
+                filteredEntries.add(entry);
+            }
+            else if ( entry.status==BTConnectIssue.RESOLVED && showResolved ) {
+                filteredEntries.add(entry);
+            }
+            else if ( entry.status>BTConnectIssue.RESOLVED && showClosed ) {
+                filteredEntries.add(entry);
+            }
+        }
+        Collections.sort(filteredEntries, new OptionComparator());
+    }
+
+
+    public class OptionComparator implements Comparator<BTConnectIssue> {
+        public int compare(BTConnectIssue left, BTConnectIssue right) {
+            Date leftDate = dateFromString(left.created, "yyyy-MM-dd HH:mm:ss");
+            Date rightDate = dateFromString(right.created, "yyyy-MM-dd HH:mm:ss");
+            return sortDescending ? rightDate.compareTo(leftDate) : leftDate.compareTo(rightDate);
+        }
+    }
+
+
+    private void saveActionSettings() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(kActionSettingSortDescending, sortDescending);
+        editor.putBoolean(kActionSettingShowOpen, showOpen);
+        editor.putBoolean(kActionSettingShowResolved, showResolved);
+        editor.putBoolean(kActionSettingShowClosed, showClosed);
+        editor.apply();     // This line is IMPORTANT !!!
+    }
+
+
+    private void loadActionSettings() {
+        BTConnectIssue issue = null;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        sortDescending = prefs.getBoolean(kActionSettingSortDescending, true);
+        showOpen = prefs.getBoolean(kActionSettingShowOpen, true);
+        showResolved = prefs.getBoolean(kActionSettingShowResolved, true);
+        showClosed = prefs.getBoolean(kActionSettingShowClosed, true);
+    }
+
+
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         recyclerView.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(supportSDK.historyEntries));
+//        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(supportSDK.historyEntries));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(filteredEntries));
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(
             new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -422,6 +572,17 @@ public class HistoryListFragment extends Fragment
 //                mTextView.setText(entry.name);
             }
         }
+    }
+
+
+    private Date dateFromString(String dateString, String format) {
+        Date date = null;
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        try {
+            date = sdf.parse(dateString);
+        } catch (ParseException ex) {
+        }
+        return date;
     }
 
 

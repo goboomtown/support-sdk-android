@@ -5,6 +5,13 @@
     <string name="action_search">Search</string>
     <string name="action_resolve">End Chat</string>
     <string name="action_end_call">End Call</string>
+
+    <string name="action_ellipsis">...</string>
+    <string name="action_sort_descending">Sort Descending</string>
+    <string name="action_show_open">Open</string>
+    <string name="action_show_resolved">Resolved</string>
+    <string name="action_show_closed">Closed</string>
+
     <string name="ticket">Reference</string>
     <string name="msg_not_in_room">You have not joined the room so you will be unable to send messages.</string>
     <string name="cancel_failed">"Unable to cancel issue."</string>
