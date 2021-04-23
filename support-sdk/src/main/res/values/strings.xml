@@ -106,6 +106,8 @@
     <string name="error_could_not_load_file_with_resource_id">could not load file with resource ID=</string>
     <string name="warn_screen_share_unavailable">Screen sharing is not available</string>
 
+    <string name="msg_error_no_photo_save_permission">You do not have permission to save an image.</string>
+
     <string name="text_yes">Yes</string>
     <string name="text_no">No</string>
     <string name="text_ok">OK</string>

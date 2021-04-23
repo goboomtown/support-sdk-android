@@ -32,7 +32,7 @@
     implementation "joda-time:joda-time:2.3"
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
     implementation "org.apache.commons:commons-compress:1.18"
-    implementation('com.twilio:video-android:5.11.1') {
+    implementation('com.twilio:video-android:6.3.0') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 ```
@@ -360,7 +360,7 @@ Two methods in SupportButtonButtonListener provide for insight into the broadcas
 
 ## Supporting Point of Sale (POS) Systems (i.e. Clover, Pax)
 
-POS systems may be supported by extending the POSConnectorBase class. This sample code demonstrates 
+POS systems may be supported by extending the POSConnectorBase class. This sample code demonstrates
 how to implement a POSConnector, which should be called after settings have been retrieved.
 
 ```java
@@ -369,10 +369,10 @@ how to implement a POSConnector, which should be called after settings have been
     }
 ```
 
-Selecting a Clover or Pax build variant for the sample application will show the provided POSConnector 
-class for those POS systems. The gradle build will also include the appropriate platform libraries. 
+Selecting a Clover or Pax build variant for the sample application will show the provided POSConnector
+class for those POS systems. The gradle build will also include the appropriate platform libraries.
 
-Here is the POSConnector for Clover that retrieves the current merchant account information: 
+Here is the POSConnector for Clover that retrieves the current merchant account information:
 
 ```java
 public class POSConnector extends POSConnectorBase

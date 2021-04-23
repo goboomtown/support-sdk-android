@@ -1,12 +1,27 @@
 package com.goboomtown.supportsdk.activity;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.video.AVChatSessionFragment;
 import com.goboomtown.video.BTParticipant;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -76,26 +91,54 @@ public class VideoActivity extends com.goboomtown.video.VideoActivity {
 
     }
 
-//    /**
-//     * Call {@link NotificationManagerCompat#cancel(String, int)} for given notifications.
-//     *
-//     * @param notifId notifId to cancel
-//     */
-//    protected void gcNotifications(Integer notifId) {
-////        AsyncTask<Integer, Void, Void> gcNotifsTask = new com.goboomtown.core.activity.BaseActivity.GCNotifAsyncTask(new WeakReference<>(getApplicationContext()));
-////        gcNotifsTask.execute(notifId);
-//    }
-//
-//    public void showErrorMessage(final String titleToShow,
-//                                 final String msgToShow) {
-////        runOnUiThread(() -> DialogHelper.showAlertDialog(VideoActivity.this, titleToShow, msgToShow));
-//    }
 
     @Override
     public void saveImageToSysGallery(ContentResolver contentResolver, byte[] bytes) {
-//        Utils.saveImageToSysGallery(contentResolver, bytes, "video chat snapshot", "snapshot from video chat");
+        if ( ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+            Toast.makeText(this, getString(R.string.msg_error_no_photo_save_permission), Toast.LENGTH_LONG).show();
+            return;
+        }
+        savePhoto(getApplicationContext(), bytes);
     }
 
+
+    private File savePhoto(Context context, byte[] bytes){
+        File pictureFileDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        if (!pictureFileDir.exists()) {
+            boolean isDirectoryCreated = pictureFileDir.mkdirs();
+            if(!isDirectoryCreated)
+                Log.i("TAG", "Can't create directory to save the image");
+            return null;
+        }
+        String filename = pictureFileDir.getPath() +File.separator+ System.currentTimeMillis()+".jpg";
+        File pictureFile = new File(filename);
+//        Bitmap bitmap = getBitmapFromView(drawView);
+        try {
+            pictureFile.createNewFile();
+            FileOutputStream oStream = new FileOutputStream(pictureFile);
+            oStream.write(bytes);
+//            bitmap.compress(Bitmap.CompressFormat.PNG, 100, oStream);
+            oStream.flush();
+            oStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("TAG", "There was an issue saving the image.");
+        }
+        scanGallery(context, pictureFile.getAbsolutePath());
+        return pictureFile;
+    }
+
+    private void scanGallery(Context cntx, String path) {
+        try {
+            MediaScannerConnection.scanFile(cntx, new String[]{path}, null, new MediaScannerConnection.OnScanCompletedListener() {
+                public void onScanCompleted(String path, Uri uri) {
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("TAG", "There was an issue scanning gallery.");
+        }
+    }
 
     public void commEnter(String callId) {
         super.commEnter(callId);
