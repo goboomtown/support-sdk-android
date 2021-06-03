@@ -1,7 +1,5 @@
 package com.goboomtown.supportsdk.fragment;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,12 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
-import android.widget.ListView;
-import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -35,8 +28,6 @@ import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.view.SupportButton;
 
-import java.util.List;
-
 
 /**
  * A fragment representing a list of Items.
@@ -46,7 +37,6 @@ import java.util.List;
  */
 public class KBListFragment extends Fragment
     implements SupportSDK.SupportSDKKBListener,
-        KBExpandableListAdapter.KBExpandableListAdapterListener,
         KBListAdapter.KBListAdapterListener {
 
     public static final String KBLISTFRAGMENT_TAG   = "com.goboomtown.supportsdk.kblistfragment2";
@@ -56,11 +46,8 @@ public class KBListFragment extends Fragment
     public  SupportButton   mSupportButton = null;
     public  SupportSDK      supportSDK = null;
     public  Context         mContext;
-    private OnListFragmentInteractionListener mListener;
     private KBViewModel             kbViewModel = null;
     private RecyclerView            recyclerView;
-    private ExpandableListView      expandableListView;
-    private KBExpandableListAdapter expandableListAdapter;
     private View                    mView;
     private FragmentActivity        mActivity;
 
@@ -93,6 +80,9 @@ public class KBListFragment extends Fragment
 
     private void refreshModel() {
         if ( kbViewModel == null ) {
+            if ( supportSDK == null ) {
+                return;
+            }
             if ( supportSDK.kbViewModel() != null ) {
                 kbViewModel = supportSDK.kbViewModel();
             } else {
@@ -113,7 +103,6 @@ public class KBListFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_article_list, container, false);
 
         recyclerView = view.findViewById(R.id.recyclerView);
-        expandableListView = view.findViewById(R.id.expandableListView);
 
         if ( kbViewModel != null ) {
             setupAdapter(kbViewModel);
@@ -158,23 +147,10 @@ public class KBListFragment extends Fragment
                 adapter.mListener = listener;
                 recyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
-
-//                expandableListAdapter = new KBExpandableListAdapter(mActivity, kbViewModel.folderHeadings(), kbViewModel.allEntriesByFolderName());
-//                if ( expandableListView!=null && expandableListAdapter!=null ) {
-//                    expandableListAdapter.mListener = listener;
-//                    expandableListAdapter.supportSDK = supportSDK;
-//                    expandableListAdapter.expandableListView = expandableListView;
-//                    expandableListView.setAdapter(expandableListAdapter);
-//                    expandableListAdapter.notifyDataSetChanged();
-//                    for(int i=0; i < expandableListAdapter.getGroupCount(); i++) {
-//                        expandableListView.expandGroup(i);
-//                    }
-//                }
             }
         });
      }
 
-    @Override
     public void adapterDidSelectEntry(int groupPosition, int childPosition, Object object) {
         if ( object instanceof KBEntryModel ) {
             KBEntryModel entry = (KBEntryModel) object;
@@ -268,7 +244,6 @@ public class KBListFragment extends Fragment
     public void onDetach() {
         super.onDetach();
         EventManager.notify(EventManager.kEventKnowledgeEnded, null);
-        mListener = null;
     }
 
 

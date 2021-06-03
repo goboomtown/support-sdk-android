@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,8 +46,6 @@ public class CallMeView {
     public  PopupWindow mPopupWindow;
 
     private String      mCallbackNumber;
-    private TextView    callbackNumberLabel;
-    private TextView callbackDescriptionLabel;
 
     private EditText    mCallbackNumberEditText;
     private EditText    mCallbackDescriptionEditText;
@@ -79,11 +76,12 @@ public class CallMeView {
         final View dialogView = inflater.inflate(R.layout.call_me_dialog, null);
         dialogBuilder.setView(dialogView);
 
-       callbackNumberLabel      = dialogView.findViewById(R.id.callbackNumberLabel);
-       if ( callbackNumberLabel != null ) {
+        TextView callbackNumberLabel = dialogView.findViewById(R.id.callbackNumberLabel);
+        if ( callbackNumberLabel != null ) {
            callbackNumberLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor());
-       }
-       callbackDescriptionLabel =dialogView.findViewById(R.id.callbackDescriptionLabel);
+        }
+
+        TextView callbackDescriptionLabel = dialogView.findViewById(R.id.callbackDescriptionLabel);
         if ( callbackDescriptionLabel != null ) {
             callbackDescriptionLabel.setTextColor(supportSDK.appearance.callMeLabelTextColor());
         }

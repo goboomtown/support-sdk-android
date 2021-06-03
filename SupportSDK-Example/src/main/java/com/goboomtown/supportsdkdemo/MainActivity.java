@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity
         mSupportButton.setVisibility(View.GONE);
         mSupportButton.setListener(this);
 
-        int configResource = R.raw.support_sdk_preprod; // R.raw.support_sdk;
+        int configResource = R.raw.support_sdk;
         mSupportButton.loadConfiguration(configResource, null);
 
         Map<String, String> myPubData = new HashMap<>();

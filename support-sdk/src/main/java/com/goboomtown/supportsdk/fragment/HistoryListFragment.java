@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -50,6 +49,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 public class HistoryListFragment extends Fragment
     implements SupportSDK.SupportSDKHistoryListener {
@@ -69,7 +69,6 @@ public class HistoryListFragment extends Fragment
     public  Context             mContext;
     public  SupportButton       supportButton;
     public  SupportSDK          supportSDK;
-    private MenuItem            mMenuSelect;
 
     private boolean             sortDescending;
     private boolean             showOpen;
@@ -226,7 +225,6 @@ public class HistoryListFragment extends Fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_history, menu);
-        mMenuSelect = menu.findItem(R.id.action_select);
     }
 
 
@@ -499,10 +497,10 @@ public class HistoryListFragment extends Fragment
                      return;
                 }
                 String displayDate = entry.isOpen() ? entry.created : entry.resolved;
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
                 try {
                     Date date = format.parse(displayDate);
-                    format = new SimpleDateFormat("MMMM dd/yyyy");
+                    format = new SimpleDateFormat("MMMM dd/yyyy", Locale.US);
                     displayDate = format.format(date);
                     System.out.println("Date ->" + date);
                 } catch (ParseException e) {
@@ -577,7 +575,7 @@ public class HistoryListFragment extends Fragment
 
     private Date dateFromString(String dateString, String format) {
         Date date = null;
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
         try {
             date = sdf.parse(dateString);
         } catch (ParseException ex) {
@@ -588,7 +586,7 @@ public class HistoryListFragment extends Fragment
 
     private Date dateFromString(String dateString) {
         Date date = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
         try {
             date = sdf.parse(dateString);
         } catch (ParseException ex) {

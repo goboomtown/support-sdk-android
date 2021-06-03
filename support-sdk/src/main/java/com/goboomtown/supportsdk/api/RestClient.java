@@ -282,9 +282,7 @@ public class RestClient {
         String ua = Utils.buildBoomtownUserAgent(context);
         headerMap.put("Boomtown-Agent", ua);
         if ( headers != null ) {
-            Iterator<String> iter = headers.keySet().iterator();
-            while (iter.hasNext()) {
-                String key = iter.next();
+            for (String key : headers.keySet()) {
                 headerMap.put(key, headerMap.get(key));
             }
         }

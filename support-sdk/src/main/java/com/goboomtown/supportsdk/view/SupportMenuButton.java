@@ -3,15 +3,12 @@ package com.goboomtown.supportsdk.view;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.Appearance;
-
-import java.lang.ref.WeakReference;
 
 /**
  * TODO: document your custom view class.

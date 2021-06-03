@@ -38,5 +38,47 @@
         android:layout_alignParentRight="true"
         android:visibility="gone"/>
 
-
 </RelativeLayout>
+
+<!--<LinearLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:id="@+id/kbEntryLayout"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:gravity="center_vertical"-->
+<!--    android:weightSum="10">-->
+
+<!--    <ImageView-->
+<!--        android:id="@+id/kbEntryIcon"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="25dp"-->
+<!--        android:layout_weight="1"-->
+<!--        android:contentDescription="@string/desc_kb_acticle_type_image" />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/kbEntryLabel"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_weight="8"-->
+<!--        android:maxLines="2"-->
+<!--        android:textSize="17dp"/>-->
+
+<!--    <ImageView-->
+<!--        android:id="@+id/kbEntryIndicator"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="30dp"-->
+<!--        android:layout_weight="1"-->
+<!--        android:contentDescription="@string/desc_kb_acticle_type_image"-->
+<!--        android:visibility="gone"/>-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/kbEntryViewIndicator"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_weight="1"-->
+<!--        android:layout_marginRight="10dp"-->
+<!--        android:text=">"-->
+<!--        android:textSize="20dp"-->
+<!--        android:visibility="gone"/>-->
+
+<!--</LinearLayout>-->

@@ -1,6 +1,5 @@
 package com.goboomtown.supportsdk.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,11 +7,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
@@ -21,13 +18,10 @@ import android.os.Looper;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.goboomtown.chat.BoomtownChat;
@@ -35,7 +29,6 @@ import com.goboomtown.chat.BoomtownChatMessage;
 import com.goboomtown.chat.ChatRecord;
 import com.goboomtown.fragment.BaseChatFragment;
 import com.goboomtown.activity.KBActivity;
-import com.goboomtown.fragment.ChatAdapter;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -46,10 +39,8 @@ import com.goboomtown.supportsdk.view.SupportButton;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

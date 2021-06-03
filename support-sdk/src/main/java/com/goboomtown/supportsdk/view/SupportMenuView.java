@@ -2,22 +2,12 @@ package com.goboomtown.supportsdk.view;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import androidx.annotation.NonNull;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.InsetDrawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.DynamicDrawableSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,21 +20,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.goboomtown.chat.BoomtownChat;
-import com.goboomtown.chat.BoomtownChatMessage;
-import com.goboomtown.fragment.ChatAdapter;
 import com.goboomtown.supportsdk.R;
-import com.goboomtown.supportsdk.api.Appearance;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.wefika.flowlayout.FlowLayout;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,25 +45,22 @@ public class SupportMenuView extends FrameLayout {
 
     private static final String TAG = SupportMenuView.class.getSimpleName();
 
-    public SupportButton    supportButton;
-    public SupportSDK       supportSDK;
-    public Activity         mActivity;
-
-    private Context         mContext;
-
-    private LinearLayout        mEmailEntryView;
-    private LinearLayout        mMenuView;
-    private EditText            mEmailEditText;
-    private GridView            mGridView;
-    private FlowLayout          mFlowView;
-    private RecyclerView        mRecyclerView;
-    private SupportButton.MenuStyle     mMenuStyle;
-    public  boolean             showLoginPrompt;
+    public SupportButton            supportButton;
+    public SupportSDK               supportSDK;
+    public Activity                 mActivity;
+    private Context                 mContext;
+    private LinearLayout            mEmailEntryView;
+    private LinearLayout            mMenuView;
+    private EditText                mEmailEditText;
+    private GridView                mGridView;
+    private RecyclerView            mRecyclerView;
+    private SupportButton.MenuStyle mMenuStyle;
+    public  boolean                 showLoginPrompt;
+    private SupportMenuView         mSupportMenuView = null;
+    public  boolean                 dismissOnClick = false;
     private ArrayList<View> mButtons = new ArrayList<>();
     private ArrayList<SupportMenuEntry> mEntries = new ArrayList<>();
 
-    private SupportMenuView      mSupportMenuView = null;
-    public  boolean             dismissOnClick = false;
 
     public SupportMenuView(Context context, Activity activity, ArrayList<SupportMenuEntry> entries, SupportButton.MenuStyle menuStyle, boolean showLoginPrompt) {
         super(context);
@@ -114,17 +94,8 @@ public class SupportMenuView extends FrameLayout {
         });
 
         mGridView = view.findViewById(R.id.gridView);
-//        mGridView.setOnItemClickListener((parent, view1, position, id) -> {
-////            SupportMenuButton button = mButtons.get(position);
-//        });
-
-        mFlowView = view.findViewById(R.id.flowView);
-
         mRecyclerView = view.findViewById(R.id.recyclerView);
-
         mMenuView.setVisibility(View.GONE);
-
-//        refresh();
     }
 
 

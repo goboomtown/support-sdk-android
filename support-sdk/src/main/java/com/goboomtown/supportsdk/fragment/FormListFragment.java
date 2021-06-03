@@ -1,16 +1,11 @@
 package com.goboomtown.supportsdk.fragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -25,16 +20,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.goboomtown.activity.KBActivity;
 import com.goboomtown.forms.fragment.FormFragment;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
-import com.goboomtown.supportsdk.model.KBEntryModel;
-import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.view.SupportButton;
-import com.goboomtown.supportsdk.view.SupportMenuEntry;
-import com.goboomtown.supportsdk.view.SupportMenuView;
 import com.goboomtown.supportsdk.view.TrackSelectionAdapter;
 
 import java.util.ArrayList;
@@ -45,8 +35,6 @@ public class FormListFragment extends Fragment {
     private static final String TAG = FormListFragment.class.getSimpleName();
 
     private FragmentActivity    mActivity;
-    private SupportFormFragment mFormFragment;
-    private RecyclerView        mRecyclerView;
     private View                mView;
 
     public  Context             mContext;
@@ -80,28 +68,10 @@ public class FormListFragment extends Fragment {
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_form_list, container, false);
 
-        mRecyclerView = mView.findViewById(R.id.recyclerView);
-        setupRecyclerView(mRecyclerView);
+        RecyclerView recyclerView = mView.findViewById(R.id.recyclerView);
+        setupRecyclerView(recyclerView);
         return mView;
     }
-
-
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        inflater.inflate(R.menu.menu_kblist, menu);
-//        MenuItem home = menu.findItem(R.id.action_home);
-//    }
-//
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//        if (id == R.id.action_home) {
-//            backToHome();
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 
 
     private void backToHome() {
@@ -109,30 +79,22 @@ public class FormListFragment extends Fragment {
             FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
             fragmentManager.popBackStackImmediate();
         }
-//        supportSDK.kbSubscreensOnStack = 0;
-//        if ( mActivity instanceof AppCompatActivity ) {
-//            AppCompatActivity activity = (AppCompatActivity) mActivity;
-//            ActionBar actionBar = activity.getSupportActionBar();
-//            if ( actionBar != null ) {
-//                actionBar.hide();
-//            }
-//        }
     }
 
 
     private void form(FormModel formModel) {
-        mFormFragment = new SupportFormFragment();
-        mFormFragment.mContext = getContext();
-        mFormFragment.mFormModel = formModel;
-        mFormFragment.supportSDK = supportSDK;
-        mFormFragment.mSupportButton = supportButton;
-        mFormFragment.isFromList = true;
+        SupportFormFragment formFragment = new SupportFormFragment();
+        formFragment.mContext = getContext();
+        formFragment.mFormModel = formModel;
+        formFragment.supportSDK = supportSDK;
+        formFragment.mSupportButton = supportButton;
+        formFragment.isFromList = true;
         try {
             FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             ViewGroup viewGroup = (ViewGroup) mView.getParent();
             int viewId = viewGroup.getId();
-            fragmentTransaction.replace(viewId, mFormFragment, TAG);
+            fragmentTransaction.replace(viewId, formFragment, TAG);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
             supportSDK.kbSubscreensOnStack++;
@@ -152,12 +114,6 @@ public class FormListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnListFragmentInteractionListener) {
-//            mListener = (OnListFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnListFragmentInteractionListener");
-//        }
     }
 
     @Override
@@ -191,8 +147,6 @@ public class FormListFragment extends Fragment {
                 @Override
                 public void onListItemClick(FormModel formModel) {
                     View v = new View(mContext);
-//                    v.setOnClickListener(formModel.onClickListener);
-//                    v.performClick();
                 }
 
             };
@@ -211,33 +165,15 @@ public class FormListFragment extends Fragment {
             return result;
         }
 
-//        @Override
-//        public void onBindViewHolder(@NonNull SimpleItemRecyclerViewAdapter.ViewHolder holder, int position) {
-//            if (mSelectedPosition == position) {
-//                holder.itemView.setBackgroundColor(getResources().getColor(R.color.homeSelectedColor));
-//            } else {
-//                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
-//            }
-//            holder.itemView.setSelected(mSelectedPosition == position);
-//            FormModel form = mForms.get(position);
-//            holder.bind(form);
-//        }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            // super.onBindViewHolder(holder, position);
             if (mSelectedPosition == position) {
                 holder.itemView.setBackgroundColor(Color.parseColor("#993ED4CA"));
             } else {
                 holder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
             FormModel formModel = mForms.get(position);
-//            holder.itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    form(mForms.get(position));
-//                }
-//            });
             holder.bind(formModel);
         }
 
@@ -287,13 +223,9 @@ public class FormListFragment extends Fragment {
                         notifyItemChanged(mSelectedPosition);
                         mSelectedPosition = getLayoutPosition();
                         notifyItemChanged(mSelectedPosition);
-//                        v.setOnClickListener(form.onClickListener);
-//                        v.performClick();
                         form(mForms.get(mSelectedPosition));
                     }
                 });
-//                mItemView.setOnClickListener(entry.onClickListener);
-//                mIconView.setImageDrawable(getResources().getDrawable(entry.resourceId));
                 mTextView.setText(form.name);
             }
         }

@@ -92,7 +92,7 @@ dependencies {
     implementation "joda-time:joda-time:$jodatime_version"
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
     implementation "org.apache.commons:commons-compress:$commons_compress_version"
-    implementation('com.twilio:video-android:5.11.1') {
+    implementation('com.twilio:video-android:6.3.0') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 //  End Support SDK dependencies

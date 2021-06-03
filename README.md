@@ -121,29 +121,31 @@ The plugin depends on a server JSON configuration file (www/config.json here) th
 
 This file enables communication with the server and configures the available features.
 
-## Menu Types
 
-The desired menu type is typically set after the settings are retrieved, as shown here:
+## Menu Style
 
-```java
-public void supportButtonDidGetSettings() {
-    mSupportButton.menuStyle = SupportButton.MenuStyle.ICON_LIST;
+The menu style is configured in the menuAppearance section of the appearance JSON like this:
+
+```
+"menuAppearance":
+{
+  "style": "iconlist",
+...
 }
 
 ```
+The style value may be one of the following:
 
-The available choices are:
-
-```java
-    public enum MenuStyle {
-        NO_MENU,
-        MENU,
-        BUTTON,
-        ICON_LIST,
-        ICON_LIST_EXIT,
-        ICON_GRID
-    };
 ```
+"nomenu"
+"menu"
+"button"
+"iconlist"
+"iconlistexit"
+```
+
+If no value is set the default is iconlist.
+
 
 ## Customer Configuration
 
@@ -196,6 +198,7 @@ This is the default JSON.
   },
   "menuAppearance":
   {
+    "style": "iconlist",
     "heading": "Support",
     "textSize": "20",
     "textStyle": "bold",

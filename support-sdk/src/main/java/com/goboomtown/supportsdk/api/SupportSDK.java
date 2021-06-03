@@ -26,15 +26,11 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.goboomtown.chat.BoomtownChat;
-import com.goboomtown.forms.model.BoomtownField;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.BuildConfig;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.model.BTConnectIssue;
-import com.goboomtown.supportsdk.model.BTMerchant;
 import com.goboomtown.supportsdk.model.Configuration;
-import com.goboomtown.supportsdk.model.HistoryEntryModel;
-import com.goboomtown.supportsdk.model.HistoryViewModel;
 import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 import com.goboomtown.supportsdk.service.MediaProjectionService;
@@ -51,10 +47,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -63,7 +56,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.TimeZone;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -129,6 +121,7 @@ public class SupportSDK {
     public boolean                      isRetrievingKB = false;
     public boolean                      isRetrievingHistory = false;
     public boolean                      isRetrievingForms = false;
+    public boolean                      isRetrievingJourneys = false;
     public ArrayList<BTConnectIssue>    historyEntries = new ArrayList<>();
     private JSONArray                   supportFormsIdsJSON;
     private int                         nFormRetrievalAttempts;
@@ -182,6 +175,7 @@ public class SupportSDK {
     public boolean showSupportWebsite;
     public boolean showSupportCallMe;
     public boolean showSupportForms;
+    public boolean showJourneys;
     public boolean showSupportHistory;
     public String  callMeButtonText;
     public String  callMeButtonConfirmation;
@@ -190,6 +184,7 @@ public class SupportSDK {
 
     private KBViewModel             kbViewModel;
     public  ArrayList<FormModel>    forms = new ArrayList<>();
+    public  ArrayList               journeys = new ArrayList();
 
     /**
      * Default member values - from app/get
@@ -764,6 +759,7 @@ public class SupportSDK {
                             supportWebsiteURL = Uri.parse(jsonObject.optString("supportWebsite", "http://example.com"));
                             supportUnavailable = jsonObject.optBoolean("unavailable", false);
                             supportUnavailableSummary = jsonObject.optString("unavailableSummary");
+                            showSupportHistory = jsonObject.optBoolean("supportHistoryEnabled");
                             JSONObject defaultMember = jsonObject.optJSONObject("defaultMember");
                             if (defaultMember != null) {
                                 defaultMemberID = defaultMember.optString("memberId");
@@ -772,7 +768,6 @@ public class SupportSDK {
                                 defaultMemberDeviceID = defaultMember.optString("memberDeviceId");
                                 handleUnknownCustomer(null);
                             }
-                            showSupportHistory = jsonObject.optBoolean("supportHistoryEnabled");
                         } else {
                             message = jsonObject.optString("message", "");
                         }
@@ -947,9 +942,18 @@ public class SupportSDK {
         mFormsListener = formsListener;
         String url = SupportSDK.kSDKV1Endpoint + "/forms/logs_put/?form_id=" + id;
 
+        JSONObject formData = formJSON;
+        try {
+            formData.put("members_id", memberID);
+            formData.put("members_users_id", memberUserID);
+            formData.put("members_locations_id", memberLocationID);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         JSONObject params = new JSONObject();
         try {
-             params.put("checklists_log", formJSON);
+             params.put("checklists_log", formData);
         } catch (JSONException e) {
             Log.e(TAG, "error when forming payload to get customer info");
             handleUnknownCustomer(e.getLocalizedMessage());
@@ -1098,6 +1102,55 @@ public class SupportSDK {
 
     public KBViewModel kbViewModel() {
         return kbViewModel;
+    }
+
+
+    //  Journey endpoints
+
+    /**
+     * Retrieve a list of customer journeys
+     */
+    public void getJourneys() {
+        if ( !showJourneys ) {
+            return;
+        }
+        if ( isRetrievingJourneys ) {
+            return;
+        }
+        isRetrievingJourneys = true;
+        String url = SupportSDK.kSDKV1Endpoint + "/journeys/get/";
+        get(url, new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                isRetrievingJourneys = false;
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+                processHeadersForResonse(response);
+                boolean success = false;
+
+                JSONObject jsonObject = SupportSDK.successJSONObject(response);
+                if ( jsonObject != null ) {
+                    if ( jsonObject.has("results") ) {
+                        try {
+                            journeys.clear();
+                            JSONArray resultsJSON = jsonObject.getJSONArray("results");
+                            for ( int n=0; n<resultsJSON.length(); n++ ) {
+                            }
+                            success = true;
+                        } catch (JSONException e) {
+//                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                    }
+                }
+                if ( !success ) {
+//                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
+                }
+                isRetrievingJourneys = false;
+            }
+        });
     }
 
 

@@ -8,7 +8,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.goboomtown.supportsdk.api.Appearance;
 import com.goboomtown.supportsdk.util.Utils;
-import com.goboomtown.supportsdk.view.SupportButton;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

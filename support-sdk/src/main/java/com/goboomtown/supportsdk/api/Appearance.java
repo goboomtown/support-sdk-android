@@ -1,17 +1,14 @@
 package com.goboomtown.supportsdk.api;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.view.Window;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -236,14 +233,12 @@ public class Appearance {
     public void configureFromJSON(String jsonString) {
         Hashtable<String, Object> newConfiguration = new Hashtable<>();
         try {
-            Iterator iter;
             JSONObject json = new JSONObject(jsonString);
-
             JSONObject navigationBarAppearanceJSON = json.optJSONObject(navigationBar);
             if ( navigationBarAppearanceJSON != null ) {
-                iter = navigationBarAppearanceJSON.keys();
-                while (iter.hasNext()) {
-                    String key = (String) iter.next();
+                Iterator<String> iter = navigationBarAppearanceJSON.keys();
+                while ( iter.hasNext() ) {
+                    String key = iter.next();
                     if (key.toLowerCase().contains("color")) {
                         String colorString = navigationBarAppearanceJSON.getString(key);
                         int color = Color.parseColor(colorString);
@@ -258,9 +253,9 @@ public class Appearance {
 
             JSONObject menu = json.optJSONObject("menu");
             if ( menu != null ) {
-                iter = menu.keys();
+                Iterator<String> iter = menu.keys();
                 while (iter.hasNext()) {
-                    String key = (String) iter.next();
+                    String key = iter.next();
                     JSONObject menuItem = menu.getJSONObject(key);
                     String text = menuItem.optString("text");
                     if (text != null) {
@@ -285,9 +280,9 @@ public class Appearance {
 
             JSONObject colors = json.optJSONObject("colors");
             if ( colors != null ) {
-                iter = colors.keys();
+                Iterator<String> iter = colors.keys();
                 while (iter.hasNext()) {
-                    String key = (String) iter.next();
+                    String key = iter.next();
                     String colorString = colors.getString(key);
                     int color = Color.parseColor(colorString);
                     newConfiguration.put(key, color);
@@ -308,9 +303,9 @@ public class Appearance {
             if (menuAppearanceJSON == null) {
                 return;
             }
-            Iterator iter = menuAppearanceJSON.keys();
+            Iterator<String> iter = menuAppearanceJSON.keys();
             while (iter.hasNext()) {
-                String key = (String) iter.next();
+                String key = iter.next();
                 if (key.toLowerCase().contains("color")) {
                     String colorString = menuAppearanceJSON.getString(key);
                     int color = Color.parseColor(colorString);
@@ -335,14 +330,14 @@ public class Appearance {
             if ( formAppearanceJSON == null ) {
                 return;
             }
-            Iterator iter = formAppearanceJSON.keys();
+            Iterator <String> iter = formAppearanceJSON.keys();
             while (iter.hasNext()) {
-                String key = (String) iter.next();
+                String key = iter.next();
                 if ( key.equalsIgnoreCase(label) || key.equalsIgnoreCase(entry) ) {
                     JSONObject itemJSON = formAppearanceJSON.getJSONObject(key);
-                    Iterator itemIter = itemJSON.keys();
+                    Iterator<String> itemIter = itemJSON.keys();
                     while ( itemIter.hasNext() ) {
-                        String itemKey = (String) itemIter.next();
+                        String itemKey = itemIter.next();
                         String storekey = (key + itemKey).toLowerCase();
                         if ( itemKey.toLowerCase().contains("color") ) {
                             String colorString = itemJSON.getString(itemKey);

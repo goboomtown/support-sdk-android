@@ -2,35 +2,21 @@ package com.goboomtown.supportsdk.fragment;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Editable;
-import android.text.Selection;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.goboomtown.fragment.ChatAdapter;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
 import com.goboomtown.supportsdk.model.KBEntryModel;
 import com.goboomtown.supportsdk.model.KBViewModel;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class KBListAdapter
@@ -90,7 +76,7 @@ public class KBListAdapter
                 RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(mViewModel.indentForEntry(entryModel)+20, 10, 10, 10);
+        params.setMargins(mViewModel.indentForEntry(entryModel)+20, 10, 10+(2*mViewModel.indentForEntry(entryModel)), 10);
         holder.mLabel.setLayoutParams(params);
 
         if ( entryModel.isArticle() ) {

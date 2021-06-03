@@ -49,8 +49,7 @@ public class KBViewModel {
         folders.add(rootEntry);
     }
 
-
-     private void processEntries(JSONArray entriesJSON) {
+    private void processEntries(JSONArray entriesJSON) {
         KBEntryModel parent = null;
         kbRoot = new KBEntryModel();
         ArrayList<KBEntryModel> remainingEntries = new ArrayList<>();
@@ -60,18 +59,41 @@ public class KBViewModel {
                 JSONObject entryJSON = entriesJSON.getJSONObject(n);
                 KBEntryModel entry = new KBEntryModel(entryJSON);
                 entries.add(entry);
-                if ( entry.isRoot() ) {
-                    System.out.println("Entry " + entry.title());
-                    entry.level = 0;
-                    kbRoot.children().add(entry);
-                    parent = entry;
-                } else {
-                    remainingEntries.add(entry);
-                }
+                remainingEntries.add(entry);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+//         while ( remainingEntries.size() > 0 ) {
+             for ( KBEntryModel entry : entries ) {
+                 if ( entry.isRoot() ) {
+//                     System.out.println("Entry " + entry.title());
+                     entry.level = 0;
+                     remainingEntries = entry.addChildrenFromEntries(remainingEntries);
+                     kbRoot.children().add(entry);
+                     remainingEntries.remove(entry);
+                     parent = entry;
+                 }
+             }
+//         }
+
+//         for ( int n=0; n<remainingEntries.size(); n++  ) {
+//            try {
+//                JSONObject entryJSON = entriesJSON.getJSONObject(n);
+//                KBEntryModel entry = new KBEntryModel(entryJSON);
+//                entries.add(entry);
+//                if ( entry.isRoot() ) {
+//                    System.out.println("Entry " + entry.title());
+//                    entry.level = 0;
+//                    kbRoot.children().add(entry);
+//                    parent = entry;
+//                } else {
+//                    remainingEntries.add(entry);
+//                }
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
         while ( remainingEntries.size() > 0 ) {
             int lastRemainingCount = remainingEntries.size();
             for ( Object object : kbRoot.children() ) {
@@ -86,7 +108,8 @@ public class KBViewModel {
 
 
     public int indentForEntry(KBEntryModel entry) {
-        return (entry.level - baseLevel + 1) * kIndentStep;
+        int indent = (entry.level - baseLevel + 1) * kIndentStep;
+        return indent;
     }
 
 

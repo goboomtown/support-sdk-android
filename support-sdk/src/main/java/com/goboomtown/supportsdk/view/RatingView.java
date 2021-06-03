@@ -1,22 +1,16 @@
 package com.goboomtown.supportsdk.view;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import androidx.annotation.NonNull;
 
 import android.content.DialogInterface;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -43,12 +37,8 @@ public class RatingView {
     public Activity         mActivity;
 
     private Context     mContext;
-    public  PopupWindow mPopupWindow;
 
-    private TextView    mRatingLabel;
-    private TextView    mRatingDescriptionLabel;
     private EditText    mRatingDescriptionEditText;
-    private Button      mOkButton;
 
     private ImageView rate1;
     private ImageView rate2;
@@ -78,11 +68,11 @@ public class RatingView {
         rate5 = dialogView.findViewById(R.id.rate5);
         setUpRatingsButtons();
 
-        mRatingLabel      = dialogView.findViewById(R.id.ratingLabel);
+        TextView mRatingLabel      = dialogView.findViewById(R.id.ratingLabel);
         if ( mRatingLabel != null ) {
             mRatingLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor());
         }
-        mRatingDescriptionLabel =dialogView.findViewById(R.id.ratingDescriptionLabel);
+        TextView mRatingDescriptionLabel =dialogView.findViewById(R.id.ratingDescriptionLabel);
         if ( mRatingDescriptionLabel != null ) {
             mRatingDescriptionLabel.setTextColor(supportSDK.appearance.ratingLabelTextColor());
         }
@@ -169,8 +159,6 @@ public class RatingView {
     }
 
     private void enableSubmitButtonIfPossible() {
-        boolean shouldEnable = rating != 0;
-//        mOkButton.setEnabled(shouldEnable);
     }
 
     private void rateIssue(String issue_id, int rating, String description) {

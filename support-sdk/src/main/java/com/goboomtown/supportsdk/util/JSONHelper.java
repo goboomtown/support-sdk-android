@@ -46,16 +46,16 @@ public class JSONHelper {
     public static Map<String, Object> toMap(JSONObject object) throws JSONException {
         HashMap<String, Object> map = new HashMap<>();
         if ( object != null ) {
-            Iterator keys = object.keys();
+            Iterator<String> keys = object.keys();
             while (keys.hasNext()) {
-                String key = (String) keys.next();
+                String key = keys.next();
                 map.put(key, fromJson(object.get(key)));
             }
         }
         return map;
     }
 
-    public static List toList(JSONArray array) throws JSONException {
+    public static List<Object> toList(JSONArray array) throws JSONException {
         ArrayList<Object> list = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             Object item = fromJson(array.get(i));

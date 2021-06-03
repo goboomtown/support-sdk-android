@@ -95,13 +95,15 @@ public class KBEntryModel {
         ArrayList<KBEntryModel> remainingEntries = new ArrayList<>(entries);
         for ( KBEntryModel entry : entries ) {
             if (  entry.parentId.equalsIgnoreCase(id) ) {
+//                System.out.println("Parent " + title() + " id " + id() + " Child " + entry.title() + " id " + entry.id());
                 entry.level = level + 1;
+                remainingEntries = entry.addChildrenFromEntries(remainingEntries);
                 addChild(entry);
                 remainingEntries.remove(entry);
             } else {
-                for ( Object child : children ) {
-                    remainingEntries = ((KBEntryModel)child).addChildrenFromEntries(remainingEntries);
-                }
+//                for ( Object child : children ) {
+//                    remainingEntries = ((KBEntryModel)child).addChildrenFromEntries(remainingEntries);
+//                }
             }
         }
         return remainingEntries;

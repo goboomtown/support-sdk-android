@@ -1,35 +1,21 @@
 package com.goboomtown.supportsdk.fragment;
 
 import com.goboomtown.activity.KBActivity;
-import com.goboomtown.forms.fragment.FormFragment;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.goboomtown.forms.activity.BaseActivity;
 import com.goboomtown.forms.model.BoomtownField;
 import com.goboomtown.forms.model.FormModel;
-import com.goboomtown.forms.view.DateCompositeView;
-import com.goboomtown.forms.view.SeekbarCompositeView;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
@@ -40,8 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;

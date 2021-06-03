@@ -4,11 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import com.goboomtown.supportsdk.model.BTMerchant;
 
 import org.json.JSONObject;
 

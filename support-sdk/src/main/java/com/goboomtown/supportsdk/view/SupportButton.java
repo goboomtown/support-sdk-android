@@ -7,10 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import androidx.annotation.NonNull;
@@ -20,7 +17,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -152,7 +148,6 @@ public class SupportButton extends View
     private SupportSDK          supportSDK;
     private ChatFragment        chatFragment;
     private SupportFormFragment formFragment;
-    private FormListFragment    mFormListFragment;
     private HistoryListFragment mHistoryListFragment;
     private KBListFragment      kbListFragment;
     public  ArrayList<SupportMenuEntry> mEntries = new ArrayList<>();
@@ -899,12 +894,12 @@ public class SupportButton extends View
 
     private void form() {
         if ( supportSDK.forms.size() > 1 ) {
-            mFormListFragment = new FormListFragment();
-            mFormListFragment.mContext = getContext();
-            mFormListFragment.supportSDK = supportSDK;
-            mFormListFragment.supportButton = this;
+            FormListFragment formListFragment = new FormListFragment();
+            formListFragment.mContext = getContext();
+            formListFragment.supportSDK = supportSDK;
+            formListFragment.supportButton = this;
             if (mListener != null) {
-                mListener.supportButtonDisplayFragment(mFormListFragment, null);
+                mListener.supportButtonDisplayFragment(formListFragment, null);
                 mListener.supportButtonSetTitle(getResources().getString(R.string.text_forms));
             }
         } else if ( supportSDK.forms.size() == 1 ) {
@@ -918,7 +913,6 @@ public class SupportButton extends View
                 mListener.supportButtonSetTitle(getResources().getString(R.string.text_form));
             }
         } else {
-//            Toast.makeText(mContext.get(), getResources().getString(R.string.text_forms_unavailable), Toast.LENGTH_SHORT).show();
             supportSDK.getForms(this);
         }
     }
@@ -940,18 +934,13 @@ public class SupportButton extends View
 //            supportSDK.getHistory(this);
         }
 
-//        if ( supportSDK.historyEntries.size() > 0 ) {
-            mHistoryListFragment = new HistoryListFragment();
-            mHistoryListFragment.mContext = getContext();
-            mHistoryListFragment.supportSDK = supportSDK;
-            mHistoryListFragment.supportButton = this;
-            if (mListener != null) {
-                mListener.supportButtonDisplayFragment(mHistoryListFragment, getResources().getString(R.string.text_site_history));
-//                mListener.supportButtonSetTitle(getResources().getString(R.string.text_site_history));
-            }
-//        } else {
-//            Toast.makeText(mContext.get(), getResources().getString(R.string.text_history_unavailable), Toast.LENGTH_SHORT).show();
-//        }
+        mHistoryListFragment = new HistoryListFragment();
+        mHistoryListFragment.mContext = getContext();
+        mHistoryListFragment.supportSDK = supportSDK;
+        mHistoryListFragment.supportButton = this;
+        if (mListener != null) {
+            mListener.supportButtonDisplayFragment(mHistoryListFragment, getResources().getString(R.string.text_site_history));
+        }
     }
 
 
@@ -991,12 +980,6 @@ public class SupportButton extends View
             issuesJSON.put("members_locations_id", supportSDK.memberLocationID);
             issuesJSON.put("user_agent", supportSDK.clientAppIdentifier()); // redundant - already in headers
             params.put("issues", issuesJSON);
-//            if ( callbackNumber != null ) {
-//                params.put("callbackNumber", callbackNumber);
-//            }
-//            if ( description != null ) {
-//                params.put("description", description);
-//            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -1066,9 +1049,6 @@ public class SupportButton extends View
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                if (mListener != null) {
-//                    mListener.supportButtonDidFailWithError(mContext.get().getString(R.string.error_unable_to_retrieve_issue), null);
-//                }
                 createIssue();
             }
 
@@ -1115,9 +1095,6 @@ public class SupportButton extends View
                 }
 
                 if (!success) {
-//                    if (mListener != null) {
-//                        mListener.supportButtonDidFailWithError(mContext.get().getString(R.string.error_unable_to_retrieve_issue), null);
-//                    }
                     createIssue();
                 }
             }
@@ -1133,9 +1110,6 @@ public class SupportButton extends View
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                if (mListener != null) {
-//                    mListener.supportButtonDidFailWithError(mContext.get().getString(R.string.error_unable_to_retrieve_issue), null);
-//                }
                 Log.d(TAG, "refreshIssue onFailure");
             }
 
