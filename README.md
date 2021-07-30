@@ -94,12 +94,12 @@ _Note:_ An example Android application that uses this library may be found in th
 
 #### Initializing the Support SDK
 
-The Support SDK can be intialized using the following code, where R.raw.support_sdk is a raw resource containing the JSON configuration.
+The Support SDK can be intialized using the following code, where `jsonString` is a JSON string containing the server configuration, and `customerInfo` is a JSON string containing key/value pairs that identify a specific customer (or null for the default customer).
 
 ```java
 SupportButton supportButton = (SupportButton) findViewById(R.id.supportButton);
 supportButton.setListener(this);
-supportButton.loadConfigurationFile(R.raw.support_sdk, customerId: null);
+supportButton.loadConfigurationFile(jsonString, customerInfo);
 
 ```
 
@@ -173,18 +173,7 @@ The customer may be identified by providing values for any combination of the fo
 
 ## Appearance Configuration
 
-Much of the application (menus, icons, and colors currently) can be configured using a JSON file as follows:
-
-```java
-try {
-    String configJsonString = Utils.readRawTextFile(this, R.raw.ui_appearance);
-    if ( configJsonString != null ) {
-        mSupportButton.appearance.configureFromJSON(configJsonString);
-    }
-} catch (Exception e) {
-}
-
-```
+Much of the application (menus, icons, and colors currently) can be configured using the advanced configuration tab in the Support SDK Channel configurator as follows:
 
 This is the default JSON.
 
