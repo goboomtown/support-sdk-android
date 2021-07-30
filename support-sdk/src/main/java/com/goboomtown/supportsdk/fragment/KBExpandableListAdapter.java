@@ -93,6 +93,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             Drawable icon = groupIcons.get(groupPosition);
             if (icon != null) {
                 iconView.setImageDrawable(icon);
+                iconView.setColorFilter(supportSDK.appearance.kbTextColor());
                 iconView.setVisibility(View.VISIBLE);
             }
         }
@@ -103,6 +104,7 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
             if ( entry.isFolder() ) {
                 if ( supportSDK.appearance.kbFolderIcon != null ) {
                     iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon());
+                    iconView.setColorFilter(supportSDK.appearance.kbTextColor());
                     iconView.setVisibility(View.VISIBLE);
                 }
             }
@@ -124,7 +126,10 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition)).size();
+        if ( this.listDataHeader.get(groupPosition) != null ) {
+            return this.listDataChild.get(this.listDataHeader.get(groupPosition)).size();
+        }
+        return 0;
     }
 
     @Override
@@ -155,12 +160,13 @@ public class KBExpandableListAdapter extends BaseExpandableListAdapter {
         ImageView iconView = convertView.findViewById(R.id.sectionHeaderIcon);
         if ( supportSDK!=null && supportSDK.appearance!=null && supportSDK.appearance.kbFolderIcon != null ) {
             iconView.setImageDrawable(supportSDK.appearance.kbFolderIcon());
+            iconView.setColorFilter(supportSDK.appearance.kbTextColor());
             iconView.setVisibility(View.VISIBLE);
         } else {
             iconView.setVisibility(View.GONE);
         }
         TextView sectionHeaderLabel = convertView.findViewById(R.id.sectionHeaderLabel);
-        sectionHeaderLabel.setTextColor(supportSDK.appearance.kbFolderNameTextColor());
+        sectionHeaderLabel.setTextColor(supportSDK.appearance.kbTextColor());
 
         String title = (String) getGroup(groupPosition);
         sectionHeaderLabel.setText(title);

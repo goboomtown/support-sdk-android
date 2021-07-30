@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
@@ -15,14 +16,17 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.Toast;
 
+import com.goboomtown.activity.KBActivity;
 import com.goboomtown.chat.BoomtownChat;
 import com.goboomtown.forms.model.FormModel;
 import com.goboomtown.supportsdk.R;
@@ -35,10 +39,13 @@ import com.goboomtown.supportsdk.dnssd.BTConnectPresenceService;
 import com.goboomtown.supportsdk.fragment.ChatFragment;
 import com.goboomtown.supportsdk.fragment.FormListFragment;
 import com.goboomtown.supportsdk.fragment.HistoryListFragment;
+import com.goboomtown.supportsdk.fragment.JourneysFragment;
+import com.goboomtown.supportsdk.fragment.SettingsFragment;
 import com.goboomtown.supportsdk.fragment.SupportFormFragment;
 import com.goboomtown.supportsdk.fragment.KBListFragment;
-import com.goboomtown.supportsdk.model.BTConnectIssue;
+import com.goboomtown.supportsdk.model.Issue;
 import com.goboomtown.supportsdk.model.BTMerchant;
+import com.goboomtown.supportsdk.model.JourneyModel;
 import com.goboomtown.supportsdk.util.Utils;
 
 import org.json.JSONArray;
@@ -54,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -126,40 +134,31 @@ public class SupportButton extends View
     // TODO: remove unused constants and/or rename with all-caps per Java convention for constants
     private static final String SupportSDKErrorDomain = "com.goboomtown.supportsdk";
 
-    /**
-     Customer information keys
-     */
-    public static final String kCustomerId                   = "members_id";
-    public static final String kCustomerExternalId           = "members_external_id";
-    public static final String kCustomerLocationId           = "members_locations_id";
-    public static final String kCustomerLocationExternalId   = "members_locations_external_id";
-    public static final String kCustomerLocationMid          = "members_locations_mid";
-    public static final String kUserId                       = "members_users_id";
-    public static final String kUserExternalId               = "members_users_external_id";
-    public static final String kUserEmail                    = "members_users_email";
-    public static final String kUserPhone                    = "members_users_phone";
+
+    /* Customer information keys */
+    public  static final String KEY_CUSTOMER_ID                     = "members_id";
+    public  static final String KEY_CUSTOMER_EXTERNAL_ID            = "members_external_id";
+    public  static final String KEY_CUSTOMER_LOCATION_ID            = "members_locations_id";
+    public  static final String KEY_CUSTOMER_LOCATION_EXTERNAL_ID   = "members_locations_external_id";
+    public  static final String KEY_CUSTOMER_LOCATION_MID           = "members_locations_mid";
+    public  static final String KEY_CUSTOMER_USER_ID                = "members_users_id";
+    public  static final String KEY_CUSTOMER_USER_EXTERNAL_ID       = "members_users_external_id";
+    public  static final String KEY_CUSTOMER_USER_EMAIL             = "members_users_email";
+    public  static final String KEY_CUSTOMER_USER_PHONE             = "members_users_phone";
+
 
     public  boolean     useSupportView;
     public  MenuStyle   menuStyle;
     public  boolean     dismissMenuOnClick = false;
     public  boolean     showLoginPrompt;
 
-    public  Appearance          appearance;
     private SupportSDK          supportSDK;
+    private SupportMenuView     supportMenuView;
     private ChatFragment        chatFragment;
     private SupportFormFragment formFragment;
     private HistoryListFragment mHistoryListFragment;
     private KBListFragment      kbListFragment;
     public  ArrayList<SupportMenuEntry> mEntries = new ArrayList<>();
-
-    private String mExampleString; // TODO: use a default from R.string...
-    private int mExampleColor = Color.RED; // TODO: use a default from R.color...
-    private float mExampleDimension = 0; // TODO: use a default from R.dimen...
-    private Drawable mExampleDrawable;
-
-    private TextPaint mTextPaint;
-    private float mTextWidth;
-    private float mTextHeight;
 
     public WeakReference<Context> mContext;
 
@@ -171,33 +170,25 @@ public class SupportButton extends View
 
     private PopupWindow mPopupWindow;
 
+    public Appearance appearance;
+
     private String  xmppdata;
+
+    public  String  appVersion;
 
     public interface SupportButtonListener {
         void supportButtonDidFailWithError(String description, String reason);
-
         void supportButtonDidGetSettings();
-
         void supportButtonDidFailToGetSettings();
-
         void supportButtonDidRetrieveAccount(HashMap<String, String> accountInfo);
-
         void supportButtonDidFailToRetrieveAccount(String message);
-
         void supportButtonDisplayView(View view);
-
         void supportButtonDisplayFragment(Fragment fragment, String title);
-
         void supportButtonRemoveFragment(Fragment fragment);
-
         void supportButtonSetTitle(String title);
-
         void supportButtonDidAdvertiseService();
-
         void supportButtonDidFailToAdvertiseService();
-
         void supportButtonDidRequestExit();
-
         void supportButtonDidCompleteTask();
     }
 
@@ -221,6 +212,12 @@ public class SupportButton extends View
         init(attrs, defStyle);
     }
 
+    public void enableTLSv13(boolean enable) {
+        if ( supportSDK != null ) {
+            supportSDK.isTLSv13Supported = enable;
+        }
+    }
+
     private void init(AttributeSet attrs, int defStyle) {
         mActivity = new WeakReference<>(Utils.getActivity(getContext()));
 
@@ -231,54 +228,13 @@ public class SupportButton extends View
             ((ScreenCaptureActivity) mActivity.get()).supportSDK = supportSDK;
         }
 
-        supportSDK = new SupportSDK(getContext(),this);
-
-        appearance = new Appearance(getContext());
-        supportSDK.appearance = appearance;
-//        supportSDK.getPermissions(mActivity.get());
         setOnClickListener(v -> clicked());
 
         EventManager.setContext(getContext());
-//        EventManager.addObserver(this);
         EventManager.addObserver(mEventReceiver);
         EventManager.notify(EventManager.kEventSDKStarted, null);
-
-        // Load attributes
-//        final TypedArray a = getContext().obtainStyledAttributes(
-//                attrs, R.styleable.SupportButton, defStyle, 0);
-//
-//        mExampleString = a.getString(
-//                R.styleable.SupportButton_exampleString);
-//        if (mExampleString == null)
-//            mExampleString = "";
-//        mExampleColor = a.getColor(
-//                R.styleable.SupportButton_exampleColor,
-//                mExampleColor);
-//        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-//        // values that should fall on pixel boundaries.
-//        mExampleDimension = a.getDimension(
-//                R.styleable.SupportButton_exampleDimension,
-//                mExampleDimension);
-//
-//        if (a.hasValue(R.styleable.SupportButton_exampleDrawable)) {
-//            mExampleDrawable = a.getDrawable(
-//                    R.styleable.SupportButton_exampleDrawable);
-//            Objects.requireNonNull(mExampleDrawable).setCallback(this);
-//        } else {
-//            mExampleDrawable = getResources().getDrawable(R.drawable.support_sdk_icon);
-//            mExampleDrawable.setCallback(this);
-//        }
-//
-//        a.recycle();
-//
-//        // Set up a default TextPaint object
-//        mTextPaint = new TextPaint();
-//        mTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-//        mTextPaint.setTextAlign(Paint.Align.LEFT);
-//
-//        // Update TextPaint and text measurements from attributes
-//        invalidateTextPaintAndMeasurements();
     }
+
 
     /**
      * @param listener {@link SupportButtonListener} to set
@@ -326,11 +282,6 @@ public class SupportButton extends View
     }
 
     private void clicked() {
-//        This is for testing purposes
-//        supportSDK.memberID = "WA3QMJ";
-//        supportSDK.memberUserID = "WA3QMJ-5XK";
-//        supportSDK.memberLocationID = "WA3QMJ-FYH";
-
         if (!supportSDK.cloudConfigComplete) {
             if (!clickedMethodRequeued) {
                 getHandler().post(this::clicked);
@@ -351,31 +302,39 @@ public class SupportButton extends View
         }
     }
 
-    public void loadConfiguration(int configResourceId, HashMap<String, String> customerInfo) {
-        supportSDK.loadConfiguration(configResourceId, customerInfo);
-    }
-
-    public void loadConfiguration(String jsonString, HashMap<String, String> customerInfo) {
-        supportSDK.loadConfiguration(jsonString, customerInfo);
-    }
 
     public void loadConfiguration(String jsonString, String customerInfoJsonString) {
-        if ( customerInfoJsonString != null ) {
-            HashMap<String, String> customerInfo = new HashMap<>();
+        saveDefaultJSONConfig(jsonString);
+        HashMap<String, String> customerInfo = buildCustomerInfo(customerInfoJsonString);
+        supportSDK = new SupportSDK(getContext(), jsonString, customerInfo, this);
+        appearance = supportSDK.appearance;
+        supportSDK.checkAppVersion(appVersion);
+    }
+
+
+    private HashMap<String, String> buildCustomerInfo(String string) {
+        HashMap<String, String> info = new HashMap<>();
+        if ( string != null ) {
             try {
-                JSONObject customerInfoJson = new JSONObject(customerInfoJsonString);
+                JSONObject customerInfoJson = new JSONObject(string);
                 Iterator<String> iter = customerInfoJson.keys();
                 while (iter.hasNext()) {
                     String key = iter.next();
-                    customerInfo.put(key, customerInfoJson.getString(key));
+                    info.put(key, customerInfoJson.getString(key));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            supportSDK.loadConfiguration(jsonString, customerInfo);
-        } else {
-            supportSDK.loadConfiguration(jsonString, null);
         }
+        return info;
+    }
+
+
+    public void saveDefaultJSONConfig(String jsonString) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(SupportSDK.KEY_DEV_MODE_JSON_CONFIG_DEFAULT, jsonString);
+        editor.apply();
     }
 
 
@@ -383,7 +342,8 @@ public class SupportButton extends View
         EventManager.notify(request, null);
     }
 
-    private void displayChat(BTConnectIssue issue) {
+
+    private void displayChat(Issue issue) {
         chatFragment = new ChatFragment();
         chatFragment.mContext = getContext();
         chatFragment.supportSDK = supportSDK;
@@ -402,7 +362,7 @@ public class SupportButton extends View
         kbListFragment.supportSDK = supportSDK;
         kbListFragment.mSupportButton = this;
         if (mListener != null) {
-            String title = (String) appearance.knowledgeMenuText();
+            String title = (String) supportSDK.appearance.knowledgeMenuText();
             mListener.supportButtonDisplayFragment(kbListFragment, title);
         }
     }
@@ -436,45 +396,6 @@ public class SupportButton extends View
             mListener.supportButtonRemoveFragment(kbListFragment);
         }
     }
-
-
-//    private void invalidateTextPaintAndMeasurements() {
-//        mTextPaint.setTextSize(mExampleDimension);
-//        mTextPaint.setColor(mExampleColor);
-//        mTextWidth = mTextPaint.measureText(mExampleString);
-//
-//        Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
-//        mTextHeight = fontMetrics.bottom;
-//    }
-
-
-//    @Override
-//    protected void onDraw(Canvas canvas) {
-//        super.onDraw(canvas);
-//
-//        // TODO: consider storing these as member variables to reduce
-//        // allocations per draw cycle.
-//        int paddingLeft = getPaddingLeft();
-//        int paddingTop = getPaddingTop();
-//        int paddingRight = getPaddingRight();
-//        int paddingBottom = getPaddingBottom();
-//
-//        int contentWidth = getWidth() - paddingLeft - paddingRight;
-//        int contentHeight = getHeight() - paddingTop - paddingBottom;
-//
-//        // Draw the text.
-//        canvas.drawText(mExampleString,
-//                paddingLeft + (contentWidth - mTextWidth) / 2,
-//                paddingTop + (contentHeight + mTextHeight) / 2,
-//                mTextPaint);
-//
-//        // Draw the example drawable on top of the text.
-//        if (mExampleDrawable != null) {
-//            mExampleDrawable.setBounds(paddingLeft, paddingTop,
-//                    paddingLeft + contentWidth, paddingTop + contentHeight);
-//            mExampleDrawable.draw(canvas);
-//        }
-//    }
 
 
     @Override
@@ -511,7 +432,9 @@ public class SupportButton extends View
     }
 
     public void supportSDKDidGetSettings() {
-        if (this.supportSDK.memberID == null) {
+        removePreviousMenuIfNecessary();
+        createSupportEntries();
+         if (this.supportSDK.memberID == null) {
             this.supportSDK.memberID = this.supportSDK.defaultMemberID;
         }
 
@@ -523,20 +446,31 @@ public class SupportButton extends View
             this.supportSDK.memberLocationID = this.supportSDK.defaultMemberLocationID;
         }
         this.supportSDK.saveMemberInfo();
-//        this.supportSDK.showKnowledgeBase = true;
-        if ( this.supportSDK.showKnowledgeBase && !this.supportSDK.isKBRequested ) {
+        if ( supportSDK.journeysEnabled ) {
+            this.supportSDK.getJourneys(new Callable<Void>() {
+                public Void call() {
+                    if (mListener != null) {
+                        mListener.supportButtonDidGetSettings();
+                    }
+                    return null;
+                }
+            });
+        }
+
+        if ( this.supportSDK.kbEnabled && !this.supportSDK.isKBRequested ) {
             this.supportSDK.isKBRequested = true;
             this.supportSDK.getKB(null);
         }
-        if ( this.supportSDK.showSupportForms && this.supportSDK.hasForms() ) {
+        if ( this.supportSDK.formsEnabled && this.supportSDK.hasForms() ) {
             this.supportSDK.getForms(this);
         }
-        if ( this.supportSDK.showSupportHistory ) {
+        if ( this.supportSDK.historyEnabled ) {
             this.supportSDK.getHistory();
         }
-
-        if (mListener != null) {
-            mListener.supportButtonDidGetSettings();
+        if ( !supportSDK.journeysEnabled ) {
+            if (mListener != null) {
+                mListener.supportButtonDidGetSettings();
+            }
         }
     }
 
@@ -559,9 +493,9 @@ public class SupportButton extends View
         if ( merchant != null ) {
             Log.d(TAG, merchant.name);
             HashMap<String, String> customerInfo = new HashMap<>();
-            customerInfo.put(kCustomerExternalId, merchant.mid);
-            customerInfo.put(kCustomerLocationMid, merchant.mid);
-            customerInfo.put(kCustomerLocationExternalId, merchant.deviceId);
+            customerInfo.put(KEY_CUSTOMER_EXTERNAL_ID, merchant.mid);
+            customerInfo.put(KEY_CUSTOMER_LOCATION_MID, merchant.mid);
+            customerInfo.put(KEY_CUSTOMER_LOCATION_EXTERNAL_ID, merchant.deviceId);
             supportSDK.restGetCustomerInformationWithInfo(customerInfo, null);
             if (mListener != null) {
                 mListener.supportButtonDidRetrieveAccount(customerInfo);
@@ -579,10 +513,10 @@ public class SupportButton extends View
 
     private void createSupportEntries() {
         mEntries.clear();
-        if ( supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
+        if ( supportSDK.chatEnabled && supportSDK.memberID!=null && supportSDK.memberUserID!=null && supportSDK.memberLocationID!=null ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = appearance.chatMenuText();
-            entry.drawable = appearance.chatMenuIcon();
+            entry.label = supportSDK.appearance.chatMenuText();
+            entry.drawable = supportSDK.appearance.chatMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -601,10 +535,10 @@ public class SupportButton extends View
             };
             mEntries.add(entry);
         }
-        if ( supportSDK.showSupportCallMe ) {
+        if ( supportSDK.callmeEnabled ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = appearance.callMeMenuText();
-            entry.drawable = appearance.callMeMenuIcon();
+            entry.label = supportSDK.appearance.callMeMenuText();
+            entry.drawable = supportSDK.appearance.callMeMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -614,10 +548,10 @@ public class SupportButton extends View
             };
             mEntries.add(entry);
         }
-        if ( supportSDK.showKnowledgeBase ) {
+        if ( supportSDK.kbEnabled ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.knowledgeMenuText();
-            entry.drawable = (Drawable) appearance.knowledgeMenuIcon();
+            entry.label = (String) supportSDK.appearance.knowledgeMenuText();
+            entry.drawable = (Drawable) supportSDK.appearance.knowledgeMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -627,14 +561,14 @@ public class SupportButton extends View
             };
             mEntries.add(entry);
         }
-        if ( supportSDK.supportWebsiteURL!=null && supportSDK.showSupportWebsite ) {
+        if ( supportSDK.supportWebsiteURL!=null && supportSDK.websiteEnabled ) {
             Intent webIntent = new Intent(Intent.ACTION_VIEW, supportSDK.supportWebsiteURL);
             PackageManager packageManager = mContext.get().getPackageManager();
             List<ResolveInfo> list = packageManager.queryIntentActivities(webIntent, 0);
             if ( list.size() > 0 ) {
                 SupportMenuEntry entry = new SupportMenuEntry();
-                entry.label = (String) appearance.webMenuText();
-                entry.drawable = (Drawable) appearance.webMenuIcon();
+                entry.label = (String) supportSDK.appearance.webMenuText();
+                entry.drawable = (Drawable) supportSDK.appearance.webMenuIcon();
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -645,15 +579,15 @@ public class SupportButton extends View
                 mEntries.add(entry);
             }
         }
-        if ( supportSDK.supportEmailAddress!=null && supportSDK.showSupportEmail ) {
+        if ( supportSDK.supportEmailAddress!=null && supportSDK.emailEnabled ) {
             Intent emailIntent = new Intent(Intent.ACTION_SEND);
             emailIntent.setType("message/rfc822");
             PackageManager packageManager = mContext.get().getPackageManager();
             List<ResolveInfo> list = packageManager.queryIntentActivities(emailIntent, 0);
             if ( list.size() > 0 ) {
                 SupportMenuEntry entry = new SupportMenuEntry();
-                entry.label = (String) appearance.emailMenuText();
-                entry.drawable = (Drawable) appearance.emailMenuIcon();
+                entry.label = (String) supportSDK.appearance.emailMenuText();
+                entry.drawable = (Drawable) supportSDK.appearance.emailMenuIcon();
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -664,12 +598,12 @@ public class SupportButton extends View
                 mEntries.add(entry);
             }
         }
-        if ( supportSDK.supportPhoneNumber!=null && supportSDK.showSupportPhone ) {
+        if ( supportSDK.supportPhoneNumber!=null && supportSDK.phoneEnabled ) {
             PackageManager packageManager = mContext.get().getPackageManager();
             if ( packageManager!=null && packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) ) {
                 SupportMenuEntry entry = new SupportMenuEntry();
-                entry.label = (String) appearance.phoneMenuText();
-                entry.drawable = (Drawable) appearance.phoneMenuIcon();
+                entry.label = (String) supportSDK.appearance.phoneMenuText();
+                entry.drawable = (Drawable) supportSDK.appearance.phoneMenuIcon();
                 entry.onClickListener = new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -680,10 +614,10 @@ public class SupportButton extends View
                 mEntries.add(entry);
             }
         }
-        if ( supportSDK.showSupportForms ) {
+        if ( supportSDK.formsEnabled ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.formsMenuText();
-            entry.drawable = (Drawable) appearance.formsMenuIcon();
+            entry.label = (String) supportSDK.appearance.formsMenuText();
+            entry.drawable = (Drawable) supportSDK.appearance.formsMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -693,10 +627,10 @@ public class SupportButton extends View
             };
             mEntries.add(entry);
         }
-        if ( supportSDK.showSupportHistory ) {
+        if ( supportSDK.historyEnabled ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.historyMenuText();
-            entry.drawable = (Drawable) appearance.historyMenuIcon();
+            entry.label = (String) supportSDK.appearance.historyMenuText();
+            entry.drawable = (Drawable) supportSDK.appearance.historyMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -706,10 +640,23 @@ public class SupportButton extends View
             };
             mEntries.add(entry);
         }
+        if ( supportSDK.journeysEnabled && supportSDK.journeys.size()>0 ) {
+            SupportMenuEntry entry = new SupportMenuEntry();
+            entry.label = (String) supportSDK.appearance.journeysMenuText();
+            entry.drawable = (Drawable) supportSDK.appearance.journeysMenuIcon();
+            entry.onClickListener = new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EventManager.notify(EventManager.kEventMenuEnded, null);
+                    journeys();
+                }
+            };
+            mEntries.add(entry);
+        }
         if ( menuStyle == MenuStyle.ICON_LIST_EXIT ) {
             SupportMenuEntry entry = new SupportMenuEntry();
-            entry.label = (String) appearance.exitMenuText();
-            entry.drawable = (Drawable) appearance.exitMenuIcon();
+            entry.label = (String) supportSDK.appearance.exitMenuText();
+            entry.drawable = (Drawable) supportSDK.appearance.exitMenuIcon();
             entry.onClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -766,7 +713,12 @@ public class SupportButton extends View
 
     private void createSupportMenuView() {
         createSupportEntries();
-        SupportMenuView supportMenuView = new SupportMenuView(mContext.get(), mActivity.get(),  mEntries, menuStyle, showLoginPrompt);
+
+        if ( mEntries.size() == 0 ) {
+            Toast.makeText(mContext.get(), getResources().getString(R.string.warn_no_components_enabled), Toast.LENGTH_SHORT).show();
+        }
+
+        supportMenuView = new SupportMenuView(mContext.get(), mActivity.get(),  mEntries, menuStyle, showLoginPrompt);
         supportMenuView.mActivity = mActivity.get();
         supportMenuView.supportSDK = supportSDK;
         supportMenuView.refresh();
@@ -778,6 +730,20 @@ public class SupportButton extends View
             supportMenuView.refresh();
             EventManager.notify(EventManager.kEventMenuStarted, null);
             mListener.supportButtonDisplayView(supportMenuView);
+        }
+    }
+
+    private void removePreviousMenuIfNecessary() {
+        if ( supportMenuView != null ) {
+            ViewGroup parent = (ViewGroup)supportMenuView.getParent();
+            if ( parent != null ) {
+                mActivity.get().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        parent.removeView(supportMenuView);
+                    }
+                });
+            }
         }
     }
 
@@ -802,7 +768,7 @@ public class SupportButton extends View
     }
 
     private void getCallbackNumber() {
-        String uri = String.format("%s/customers/getCallbackNumber/%s", SupportSDK.kSDKV1Endpoint, supportSDK.memberUserID);
+        String uri = String.format("%s/customers/getCallbackNumber/%s", SupportSDK.SDK_V1_ENDPOINT, supportSDK.memberUserID);
 
         this.supportSDK.get(uri, new Callback() {
 
@@ -910,7 +876,7 @@ public class SupportButton extends View
             formFragment.mSupportButton = this;
             if (mListener != null) {
                 mListener.supportButtonDisplayFragment(formFragment, null);
-                mListener.supportButtonSetTitle(getResources().getString(R.string.text_form));
+                mListener.supportButtonSetTitle(supportSDK.appearance.formsMenuText());
             }
         } else {
             supportSDK.getForms(this);
@@ -939,9 +905,43 @@ public class SupportButton extends View
         mHistoryListFragment.supportSDK = supportSDK;
         mHistoryListFragment.supportButton = this;
         if (mListener != null) {
-            mListener.supportButtonDisplayFragment(mHistoryListFragment, getResources().getString(R.string.text_site_history));
+            mListener.supportButtonDisplayFragment(mHistoryListFragment, supportSDK.appearance.historyMenuText());
         }
     }
+
+
+    private void journeys() {
+        if ( supportSDK.journeys.size() > 1 ) {
+            JourneysFragment journeysFragment = new JourneysFragment();
+            journeysFragment.mContext = getContext();
+            journeysFragment.supportSDK = supportSDK;
+            journeysFragment.supportButton = this;
+            if (mListener != null) {
+                mListener.supportButtonDisplayFragment(journeysFragment, null);
+                mListener.supportButtonSetTitle(supportSDK.appearance.journeysMenuText());
+            }
+        } else if ( supportSDK.journeys.size() == 1 ) {
+            JourneyModel model = supportSDK.journeys.get(0);
+            String title = model.title;
+            Intent intent = new Intent(getContext(), KBActivity.class);
+            if ( !model.journey_url.isEmpty() ) {
+                intent.putExtra(KBActivity.ARG_URL, model.journey_url);
+                intent.putExtra(KBActivity.ARG_HTML, "");
+            }
+            intent.putExtra(KBActivity.ARG_TITLE, title);
+            getContext().startActivity(intent);
+        }
+    }
+
+
+    public void settings() {
+        SettingsFragment fragment = new SettingsFragment();
+        fragment.supportSDK = supportSDK;
+        if (mListener != null) {
+            mListener.supportButtonDisplayFragment(fragment, null);
+            mListener.supportButtonSetTitle(getResources().getString(R.string.text_settings));
+        }
+     }
 
 
     private void requestExit() {
@@ -960,7 +960,7 @@ public class SupportButton extends View
 
     private void getOrCreateIssue() {
         supportSDK.showProgressWithMessage(mContext.get().getString(R.string.text_starting_chat));
-        BTConnectIssue currentIssue = BTConnectIssue.getCurrentIssue(mContext.get());
+        Issue currentIssue = Issue.getCurrentIssue(mContext.get());
         xmppdata = null;
         if ( currentIssue != null ) {
             xmppdata = currentIssue.xmpp_data;
@@ -984,12 +984,13 @@ public class SupportButton extends View
             e.printStackTrace();
         }
 
-        String uri = String.format("%s/issues/create", SupportSDK.kSDKV1Endpoint);
+        String uri = String.format("%s/issues/create", SupportSDK.SDK_V1_ENDPOINT);
 
         supportSDK.post(uri, params, new Callback() {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                supportSDK.hideProgress();
                 if (mListener != null) {
                     mListener.supportButtonDidFailWithError(mContext.get().getString(R.string.error_unable_to_create_issue), e.getLocalizedMessage());
                 }
@@ -998,9 +999,10 @@ public class SupportButton extends View
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 boolean success = false;
-                BTConnectIssue issue = null;
+                Issue issue = null;
                 String message = "";
 
+                supportSDK.hideProgress();
                 JSONObject jsonObject;
                 try {
                     ResponseBody responseBody = response.body();
@@ -1015,14 +1017,14 @@ public class SupportButton extends View
                             JSONObject issueJSON;
                             try {
                                 issueJSON = results.getJSONObject(0);
-                                issue = new BTConnectIssue(issueJSON);
+                                issue = new Issue(issueJSON);
                                 success = true;
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
 
                             if (issue != null) {
-                                BTConnectIssue.saveCurrentIssue(mContext.get(), issue);
+                                Issue.saveCurrentIssue(mContext.get(), issue);
                                 displayChat(issue);
                             }
                         }
@@ -1043,7 +1045,7 @@ public class SupportButton extends View
 
     private void checkForActiveIssue(String issueId) {
 
-        String uri = String.format("%s/issues/%s", SupportSDK.kSDKV1Endpoint, issueId);
+        String uri = String.format("%s/issues/%s", SupportSDK.SDK_V1_ENDPOINT, issueId);
 
         supportSDK.get(uri, new Callback() {
 
@@ -1055,9 +1057,10 @@ public class SupportButton extends View
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 boolean success = false;
-                BTConnectIssue issue = null;
+                Issue issue = null;
                 String message = "";
 
+                supportSDK.hideProgress();
                 JSONObject jsonObject;
                 try {
                     ResponseBody responseBody = response.body();
@@ -1071,7 +1074,7 @@ public class SupportButton extends View
                             JSONObject issueJSON;
                             try {
                                 issueJSON = results.getJSONObject(0);
-                                issue = new BTConnectIssue(issueJSON);
+                                issue = new Issue(issueJSON);
                                 supportSDK.historyEntries.add(issue);
                                 success = true;
                             } catch (JSONException e) {
@@ -1079,7 +1082,7 @@ public class SupportButton extends View
                             }
 
                             if ( issue != null ) {
-                                if ( issue.status < BTConnectIssue.RESOLVED ) {
+                                if ( issue.status < Issue.RESOLVED ) {
                                     if ( issue.xmpp_data==null && xmppdata!=null ) {
                                         issue.xmpp_data = xmppdata;
                                     }
@@ -1104,7 +1107,7 @@ public class SupportButton extends View
 
     public void refreshIssue(String issueId) {
 
-        String uri = String.format("%s/issues/%s", SupportSDK.kSDKV1Endpoint, issueId);
+        String uri = String.format("%s/issues/%s", SupportSDK.SDK_V1_ENDPOINT, issueId);
 
         supportSDK.get(uri, new Callback() {
 
@@ -1116,7 +1119,7 @@ public class SupportButton extends View
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 boolean success;
-                BTConnectIssue issue = null;
+                Issue issue = null;
                 String message = "";
 
                 JSONObject jsonObject;
@@ -1132,12 +1135,12 @@ public class SupportButton extends View
                             JSONObject issueJSON;
                             try {
                                 issueJSON = results.getJSONObject(0);
-                                issue = new BTConnectIssue(issueJSON);
+                                issue = new Issue(issueJSON);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
 
-                            if ( issue!=null && issue.status>=BTConnectIssue.RESOLVED ) {
+                            if ( issue!=null && issue.status>= Issue.RESOLVED ) {
                                 supportSDK.rateableIssueId = issue.id;
                             }
                         }

@@ -128,7 +128,13 @@ dependencies {
 //    implementation('com.twilio:video-android:5.1.0') {
 //        exclude group: 'com.android.support', module: 'support-annotations'
 //    }
-    implementation 'org.conscrypt:conscrypt-android:2.4.0'
+//    implementation 'org.conscrypt:conscrypt-android:2.4.0'
+
+    implementation ('com.journeyapps:zxing-android-embedded:3.1.0@aar', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation 'com.google.zxing:core:3.2.0'
+
 
 //  End Support SDK dependencies
 

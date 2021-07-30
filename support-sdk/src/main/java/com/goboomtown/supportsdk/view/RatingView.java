@@ -106,8 +106,8 @@ public class RatingView {
             public void onShow(DialogInterface dialogInterface) {
                 Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
                 Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(supportButton.appearance.ratingButtonTextColor());
-                negativeButton.setTextColor(supportButton.appearance.ratingLabelTextColor());
+                positiveButton.setTextColor(supportSDK.appearance.ratingButtonTextColor());
+                negativeButton.setTextColor(supportSDK.appearance.ratingLabelTextColor());
             }
         });
         dialog.show();
@@ -173,7 +173,7 @@ public class RatingView {
             e.printStackTrace();
         }
 
-        String uri = String.format("%s/issues/rate/%s", SupportSDK.kSDKV1Endpoint, issue_id);
+        String uri = String.format("%s/issues/rate/%s", SupportSDK.SDK_V1_ENDPOINT, issue_id);
 
         supportSDK.post(uri, params, new Callback() {
 

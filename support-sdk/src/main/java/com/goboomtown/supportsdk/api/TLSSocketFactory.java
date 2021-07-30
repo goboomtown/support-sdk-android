@@ -21,9 +21,12 @@ public class TLSSocketFactory extends SSLSocketFactory {
 
     public static final String SSL_CONTEXT_TLS = "TLS";
 
+    private boolean isTLSv13Supported;
+
     private SSLSocketFactory internalSSLSocketFactory;
 
-    public TLSSocketFactory() throws KeyManagementException, NoSuchAlgorithmException {
+    public TLSSocketFactory(boolean enableTLSv13) throws KeyManagementException, NoSuchAlgorithmException {
+        isTLSv13Supported = enableTLSv13;
         SSLContext context = SSLContext.getInstance(SSL_CONTEXT_TLS);
         context.init(null, null, null);
         internalSSLSocketFactory = context.getSocketFactory();
@@ -78,7 +81,11 @@ public class TLSSocketFactory extends SSLSocketFactory {
 
     private Socket enableTLSOnSocket(Socket socket) {
         if (socket instanceof SSLSocket) {
-            ((SSLSocket) socket).setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"});
+            if ( isTLSv13Supported ) {
+                ((SSLSocket) socket).setEnabledProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"});
+            } else {
+                ((SSLSocket) socket).setEnabledProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"});
+            }
 //            ((SSLSocket) socket).setEnabledProtocols(new String[] {"TLSv1.2", "TLSv1.3"});
             String[] protocols = ((SSLSocket) socket).getEnabledProtocols();
             for (String p : protocols) {

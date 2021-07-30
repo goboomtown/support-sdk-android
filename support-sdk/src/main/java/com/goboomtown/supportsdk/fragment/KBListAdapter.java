@@ -60,6 +60,7 @@ public class KBListAdapter
                 int indicator = entryModel.isCollapsed() ? R.drawable.ic_expand_more_24px : R.drawable.ic_expand_less_24px;
                 Drawable iconImage = mContext.getResources().getDrawable(indicator);
                 holder.mIndicator.setImageDrawable(iconImage);
+                holder.mIndicator.setColorFilter(supportSDK.appearance.kbTextColor());
                 holder.mIndicator.setVisibility(View.VISIBLE);
             }
         }
@@ -84,7 +85,7 @@ public class KBListAdapter
             holder.mViewindicator.setTextColor(supportSDK.appearance.kbTextColor());
          } else {
             holder.mLabel.setTextColor(supportSDK.appearance.kbFolderNameTextColor());
-            holder.mLayout.setBackgroundColor(mContext.getResources().getColor(R.color.kbFolderL0BackgroundColor));
+//            holder.mLayout.setBackgroundColor(mContext.getResources().getColor(R.color.kbFolderL0BackgroundColor));
         }
 
         if ( supportSDK!=null && supportSDK.appearance!=null && supportSDK.appearance.kbFolderIcon != null ) {

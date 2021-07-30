@@ -39,8 +39,8 @@ public final class SupportSDKProactive implements SupportSDK.SupportSDKListener 
 
     private static final int DEFAULT_CHECK_QUEUE_SIZE = 5;
     private static final int DEFAULT_CHECK_QUEUE_FLUSH_INTERVAL_MS = 15000;
-    private static final String EP_CONTEXT_PUT_CHECKS = SupportSDK.kSDKV1Endpoint + "/technology/putChecks";
-    private static final String EP_CONTEXT_PUT_DUMP_FILE = SupportSDK.kSDKV1Endpoint + "/technology/putDump";
+    private static final String EP_CONTEXT_PUT_CHECKS = SupportSDK.SDK_V1_ENDPOINT + "/technology/putChecks";
+    private static final String EP_CONTEXT_PUT_DUMP_FILE = SupportSDK.SDK_V1_ENDPOINT + "/technology/putDump";
     public static final String DUMPCHECK_COMPRESSED_FILENAME = "appdumpcheck";
 
     private final WeakReference<Context> ctx;
@@ -50,16 +50,17 @@ public final class SupportSDKProactive implements SupportSDK.SupportSDKListener 
     private final Thread checkQueueFlushHandlerThread;
     private final Object lockObj_checkQueueFlushing;
 
-    public SupportSDKProactive(final Context ctx, final int configResourceId, final HashMap<String, String> customerInfo) {
+    public SupportSDKProactive(final Context ctx, final String jsonString) {
         this.ctx = new WeakReference<>(ctx);
-        this.sdk = new SupportSDK(ctx, this);
-        this.sdk.loadConfiguration(configResourceId, customerInfo);
+        this.sdk = new SupportSDK(ctx, jsonString, null, this);
+//        this.sdk.loadConfiguration(configResourceId, customerInfo);
         this.checkQueue = new ConcurrentLinkedQueue<>();
         this.lockObj_checkQueue = new Object();
         this.lockObj_checkQueueFlushing = new Object();
         this.checkQueueFlushHandlerThread = (new Thread(new CheckQueueFlushHandler(DEFAULT_CHECK_QUEUE_FLUSH_INTERVAL_MS)));
         this.checkQueueFlushHandlerThread.start();
     }
+
 
     @Override
     public void supportSDKDidFailWithError(String description, String reason) {

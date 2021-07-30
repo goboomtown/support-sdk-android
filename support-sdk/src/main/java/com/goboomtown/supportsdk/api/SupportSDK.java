@@ -1,70 +1,52 @@
 package com.goboomtown.supportsdk.api;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
+import android.app.*;
+import android.content.*;
+import android.content.pm.*;
+import android.content.res.*;
+import android.graphics.*;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
-import android.os.Build;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.ConfigurationCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.*;
 
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
+
+import android.preference.PreferenceManager;
+import android.util.*;
 import android.util.Base64;
-import android.util.Log;
 import android.view.ViewGroup;
 
-import com.goboomtown.chat.BoomtownChat;
-import com.goboomtown.forms.model.FormModel;
-import com.goboomtown.supportsdk.BuildConfig;
-import com.goboomtown.supportsdk.R;
-import com.goboomtown.supportsdk.model.BTConnectIssue;
+import com.goboomtown.chat.*;
+import com.goboomtown.forms.model.*;
+import com.goboomtown.supportsdk.*;
+import com.goboomtown.supportsdk.model.*;
 import com.goboomtown.supportsdk.model.Configuration;
-import com.goboomtown.supportsdk.model.KBEntryModel;
-import com.goboomtown.supportsdk.model.KBViewModel;
-import com.goboomtown.supportsdk.service.MediaProjectionService;
-import com.goboomtown.supportsdk.util.Utils;
+import com.goboomtown.supportsdk.service.*;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+
 import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Queue;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import okhttp3.*;
 
 /**
  * Created by Larry Borsato on 2016-07-12.
@@ -74,24 +56,47 @@ public class SupportSDK {
     private static final String TAG = SupportSDK.class.getSimpleName();
     private static final String SupportSDKHelpName = "SupportSDK";
 
+    private static final boolean TLSv13Support = false;
+
     public static final String HTTP_HEADER_DOWNLOAD_TOKEN = "X-Boomtown-DownloadSessionToken";
 
-    /* Customer information keys */
-    private static final String kCustomerId                   = "members_id";
-    private static final String kCustomerExternalId           = "members_external_id";
-    private static final String kCustomerLocationId           = "members_locations_id";
-    private static final String kCustomerLocationExternalId   = "members_locations_external_id";
-    private static final String kCustomerLocationMid          = "members_locations_mid";
-    private static final String kUserId                       = "members_users_id";
-    private static final String kUserExternalId               = "members_users_external_id";
-    private static final String kUserEmail                    = "members_users_email";
-    private static final String kUserPhone                    = "members_users_phone";
+    public  static final String KEY_DEV_MODE_ENABLED                = "com.goboomtown.supportsdk.dev_mode_enabled";
+    public  static final String KEY_DEV_MODE_JSON_CONFIG            = "com.goboomtown.supportsdk.dev_mode_json_config";
+    public  static final String KEY_DEV_MODE_JSON_CONFIG_DEFAULT    = "com.goboomtown.supportsdk.dev_mode_json_config_default";
+    public  static final String KEY_LAST_VERSION                    = "com.goboomtown.supportsdk.last_version";
+
+    private static final String PRODUCTION          = "Production";
+    private static final String PREPROD             = "Preprod";
+    private static final String INTEG               = "Integ";
+    private static final String UAT                 = "UAT";
+    private static final String SANDBOX             = "Sandbox";
+    private static final String LOCAL_ENV           = "Local Environment";
+
+    private static final String SERVER_PRODUCTION   = "https://api.goboomtown.com";
+    private static final String SERVER_PREPROD      = "https://api.preprod.goboomtown.com";
+    private static final String SERVER_INTEG        = "https://api.integ.goboomtown.com";
+    private static final String SERVER_UAT          = "https://api.uat.goboomtown.com";
+    private static final String SERVER_SANDBOX      = "https://api.sandbox.goboomtown.com";
+    private static final String SERVER_LOCAL_ENV    = "https://api.local-env.goboomtown.com";
+
+    public  static final String JSON_API_HOST       = "apiHost";
+    public  static final String JSON_INTEGRATION_ID = "integrationId";
+    public  static final String JSON_API_KEY        = "apiKey";
+
+    public  static final Map<String, String> servers = new HashMap<String, String>() {{
+        put(PRODUCTION, SERVER_PRODUCTION);
+        put(PREPROD, SERVER_PREPROD);
+        put(INTEG, SERVER_INTEG);
+        put(UAT, SERVER_UAT);
+        put(SANDBOX, SERVER_SANDBOX);
+        put(LOCAL_ENV, SERVER_LOCAL_ENV);
+    }};
 
     private static final int    REQUEST_SCREEN_CAPTURE = 100;
 
     public RestClient client = null;
 
-    public static String kSDKV1Endpoint = "/sdk/v1";
+    public static final String SDK_V1_ENDPOINT = "/sdk/v1";
 
     private WeakReference<Context> mContext;
 
@@ -103,6 +108,8 @@ public class SupportSDK {
     public  SessionManager  sessionManager;
     public  int             screenCapturePermissionResultCode;
     public  Intent          screenCapturePermissionData;
+
+    public boolean isTLSv13Supported = false;
 
     public  Boolean isLocationPermitted = false;
     public  Boolean isCameraPermitted = false;
@@ -122,7 +129,7 @@ public class SupportSDK {
     public boolean                      isRetrievingHistory = false;
     public boolean                      isRetrievingForms = false;
     public boolean                      isRetrievingJourneys = false;
-    public ArrayList<BTConnectIssue>    historyEntries = new ArrayList<>();
+    public ArrayList<Issue>    historyEntries = new ArrayList<>();
     private JSONArray                   supportFormsIdsJSON;
     private int                         nFormRetrievalAttempts;
     private ProgressDialog              mProgress;
@@ -161,7 +168,17 @@ public class SupportSDK {
 
     public String rateableIssueId;
 
-    private HashMap<String, String>  mCustomerInfo;
+    private HashMap<String, String>  customerInfo;
+
+    public boolean chatEnabled;
+    public boolean callmeEnabled;
+    public boolean kbEnabled;
+    public boolean websiteEnabled;
+    public boolean emailEnabled;
+    public boolean phoneEnabled;
+    public boolean formsEnabled;
+    public boolean historyEnabled;
+    public boolean journeysEnabled;
 
     public boolean supportProactiveEnabled;
     public boolean supportScreenShareEnabled;
@@ -169,22 +186,16 @@ public class SupportSDK {
     public String  supportPhoneNumber;
     public String  supportWebsite;
     public Uri     supportWebsiteURL;
-    public boolean showKnowledgeBase;
-    public boolean showSupportEmail;
-    public boolean showSupportPhone;
-    public boolean showSupportWebsite;
-    public boolean showSupportCallMe;
-    public boolean showSupportForms;
-    public boolean showJourneys;
-    public boolean showSupportHistory;
     public String  callMeButtonText;
     public String  callMeButtonConfirmation;
     public boolean supportUnavailable;
     public String  supportUnavailableSummary;
 
+    public boolean  isV2Settings;
+
     private KBViewModel             kbViewModel;
     public  ArrayList<FormModel>    forms = new ArrayList<>();
-    public  ArrayList               journeys = new ArrayList();
+    public  ArrayList<JourneyModel> journeys = new ArrayList();
 
     /**
      * Default member values - from app/get
@@ -201,13 +212,58 @@ public class SupportSDK {
 
     public String   downloadSessionToken = null;
 
-    public SupportSDK(Context context, SupportSDKListener listener) {
+    public SupportSDK(Context context, String jsonString, HashMap<String, String> customerInfo, SupportSDKListener listener) {
         mContext = new WeakReference<>(context);
+        this.customerInfo = customerInfo;
         mListener = listener;
         cloudConfigComplete = false;
-        configuration = new Configuration(mContext.get());
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
         setAPIInfo();
+        appearance = new Appearance(context);
+        configuration = new Configuration(mContext.get(), jsonString);
+        client = new RestClient(isTLSv13Supported);
+        providerId = configuration.configAPIIntegrationId;
+        this.customerInfo = customerInfo;
+        restGetSettings();
+    }
+
+
+    public void reset() {
+        cloudConfigComplete = false;
+    }
+
+
+    public boolean isProduction() {
+        return configuration.configAPIHost.equalsIgnoreCase(SERVER_PRODUCTION);
+    }
+
+
+    public String getHost() {
+        return configuration.configAPIHost;
+    }
+
+
+    public void checkAppVersion(String appVersion) {
+        if ( appVersion!= null ) {
+            if (isNewAppVersion(appVersion)) {
+                configuration.enableDeveloperMode(false);
+            }
+        }
+    }
+
+
+    private boolean isNewAppVersion(String appVersion) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
+        String lastVersion = prefs.getString(SupportSDK.KEY_LAST_VERSION, null);
+        if ( appVersion.equalsIgnoreCase(lastVersion) ) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public boolean isDeveloperMode() {
+        return configuration.isDeveloperMode();
     }
 
 
@@ -237,58 +293,22 @@ public class SupportSDK {
     }
 
 
-    /**
-     * Load SupportSDK configuration.
-     *
-     * @param configResourceId raw JSON resource
-     * @param customerInfo list of possible customer identification keys and values
-     */
-    public void loadConfiguration(int configResourceId, HashMap<String, String> customerInfo) {
-        try {
-            String jsonString = Utils.readRawTextFile(mContext.get(), configResourceId);
-            loadConfiguration(jsonString, customerInfo);
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
-    }
-
-    /**
-     * Load SupportSDK configuration.
-     *
-     * @param jsonString   JSON string
-     * @param customerInfo list of possible customer identification keys and values
-     */
-    public void loadConfiguration(String jsonString, HashMap<String, String> customerInfo) {
-        if ( cloudConfigComplete ) {
-            return;
-        }
+    public void reloadConfiguration(JSONObject json) {
         cloudConfigComplete = false;
-
-        try {
-            boolean loaded = configuration.read(jsonString);
-            if (loaded) {
-                InputStream customCAFile = null;
-                if (configuration.configAPIHost.contains(".integ.")) {
-                    customCAFile = mContext.get().getAssets().open("api_integ_goboomtown_com.crt");
-                } else if (configuration.configAPIHost.contains(".uat.")) {
-                    customCAFile = mContext.get().getAssets().open("api_uat_thinkrelay_com.crt");
-                } else if (configuration.configAPIHost.contains(".boom.loc") || configuration.configAPIHost.contains(".local-env.")) {
-                    customCAFile = mContext.get().getAssets().open("boomloc.crt");
-                }
-                client = new RestClient(customCAFile);
-                providerId = configuration.configAPIIntegrationId;
-                mCustomerInfo = customerInfo;
-                restGetSettings();
-            } else {
-                if (mListener != null) {
-                    mListener.supportSDKDidFailWithError(mContext.get().getString(R.string.error_unable_to_load_configuration), mContext.get().getString(R.string.error_could_not_load_file_with_resource_id));
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
+        configuration.tryNewConfiguration(json);
+        restGetSettings();
     }
 
+
+    public void resetToDefault() {
+        configuration.restoreDefaultConfiguration();
+        restGetSettings();
+    }
+
+
+    public void enableDeveloperMode(boolean enable) {
+        configuration.enableDeveloperMode(enable);
+    }
 
     public void requestScreenCapturePermission(Activity activity) {
         int version = Build.VERSION.SDK_INT;
@@ -360,9 +380,6 @@ public class SupportSDK {
         return String.format(Locale.US, "%s %s, %s", SupportSDKHelpName, supportSDKVersion, osVersion);
     }
 
-    public String hostname() {
-        return configuration.configAPIHost;
-    }
 
     /**
      * Encrypt a string.
@@ -478,6 +495,33 @@ public class SupportSDK {
         client.get(mContext.get(), requestUrl, localCallback);
     }
 
+
+    /**
+     * HTTP GET from the SupportSDK cloud.
+     * @param uri URL context to GET
+     * @param params    query parameters
+     * @param callback handler to execute on HTTP response
+     */
+    public void get(String uri, JSONObject params, Callback callback) {
+        final Callback remoteCallback = callback;
+        Callback localCallback = new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                remoteCallback.onFailure(call, e);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                processHeadersForResonse(response);
+                remoteCallback.onResponse(call, response);
+            }
+        };
+        String requestUrl = String.format("%s%s", configuration.configAPIHost, uri);
+        client.headers = addHeaders();
+        client.get(mContext.get(), requestUrl, params, localCallback);
+    }
+
+
     private HashMap<String, String> addHeaders() {
         HashMap<String, String> headerMap = new HashMap<>();
 
@@ -497,6 +541,7 @@ public class SupportSDK {
         BoomtownChat.sharedInstance().httpHeaders = headerMap;
         return headerMap;
     }
+
 
     public boolean isProactiveEnabled() {
         return supportProactiveEnabled;
@@ -637,7 +682,10 @@ public class SupportSDK {
      }
      */
     public void restGetCustomerInformationWithInfo(HashMap<String, String> customerInfo, Callback callback) {
-        String uri = String.format("%s/customers/resolve", SupportSDK.kSDKV1Endpoint);
+        if ( customerInfo==null || customerInfo.isEmpty() ) {
+            return;
+        }
+        String uri = String.format("%s/customers/resolve", SupportSDK.SDK_V1_ENDPOINT);
 
         JSONObject infoJson = new JSONObject();
         JSONObject params = new JSONObject();
@@ -648,7 +696,6 @@ public class SupportSDK {
             params.put("ids", infoJson);
         } catch (JSONException e) {
             Log.e(TAG, "error when forming payload to get customer info");
-            handleUnknownCustomer(e.getLocalizedMessage());
             return;
         }
         if ( callback != null ) {
@@ -659,7 +706,6 @@ public class SupportSDK {
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     cloudConfigComplete = true;
-                    handleUnknownCustomer(e.getLocalizedMessage());
                 }
 
                 @Override
@@ -687,7 +733,6 @@ public class SupportSDK {
                     }
                     if ( !success ) {
                         cloudConfigComplete = true;
-                        handleUnknownCustomer(message);
                         Log.i(TAG, "unable to get customer info, response (" + message + ")");
                     }
                 }
@@ -696,22 +741,8 @@ public class SupportSDK {
     }
 
 
-    private void handleUnknownCustomer(String message) {
-        memberID            = defaultMemberID;
-        memberUserID        = defaultMemberUserID;
-        memberLocationID    = defaultMemberLocationID;
-        saveMemberInfo();
-    }
-
-
-    public void saveMemberInfo() {
-        BoomtownChat.sharedInstance().formsUserKey = memberUserID;
-    }
-
-
-
     private void restGetSettings() {
-        String uri = String.format("%s/app/get", SupportSDK.kSDKV1Endpoint);
+        String uri = String.format("%s/app/get", SupportSDK.SDK_V1_ENDPOINT);
 
         JSONObject params = new JSONObject();
         this.get(uri, new Callback() {
@@ -719,6 +750,10 @@ public class SupportSDK {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 cloudConfigComplete = false;
+                disableAllComponents();
+                if ( configuration.isTryingNewConfiguration ) {
+                    configuration.restoreConfiguration();
+                }
                 if (mListener != null) {
                     mListener.supportSDKDidFailToGetSettings();
                 }
@@ -735,39 +770,7 @@ public class SupportSDK {
                     if ( jsonObject != null ) {
                         success = jsonObject.optBoolean("success", false);
                         if ( success ) {
-                            showKnowledgeBase = jsonObject.optBoolean("supportKBEnabled");
-                            showSupportForms = jsonObject.optBoolean("supportFormsEnabled");
-                            supportProactiveEnabled = jsonObject.optBoolean("supportProactiveEnabled", false);
-                            supportScreenShareEnabled = jsonObject.optBoolean("supportScreenShareEnabled", true);
-                            supportWebsite = jsonObject.optString("supportWebsite");
-                            supportEmailAddress = jsonObject.optString("supportEmail");
-                            supportPhoneNumber = jsonObject.optString("supportPhone");
-                            showSupportWebsite = jsonObject.optBoolean("supportWebsiteEnabled");
-                            showSupportEmail = jsonObject.optBoolean("supportEmailEnabled");
-                            showSupportPhone = jsonObject.optBoolean("supportPhoneEnabled");
-                            showSupportCallMe = jsonObject.optBoolean("supportCallmeEnabled");
-                            showSupportCallMe = jsonObject.optBoolean("supportCallmeEnabled");
-                            callMeButtonText = jsonObject.optString("callmeButtonText", mContext.get().getString(R.string.label_call_me));
-                            if (callMeButtonText.isEmpty()) {
-                                callMeButtonText = mContext.get().getString(R.string.label_call_me);
-                            }
-                            callMeButtonConfirmation = jsonObject.optString("callmeButtonConfirmation", mContext.get().getString(R.string.label_call_me_confirmation));
-                            if (callMeButtonConfirmation.isEmpty()) {
-                                callMeButtonConfirmation = mContext.get().getString(R.string.label_call_me_confirmation);
-                            }
-                            supportFormsIdsJSON = jsonObject.optJSONArray("supportForms");
-                            supportWebsiteURL = Uri.parse(jsonObject.optString("supportWebsite", "http://example.com"));
-                            supportUnavailable = jsonObject.optBoolean("unavailable", false);
-                            supportUnavailableSummary = jsonObject.optString("unavailableSummary");
-                            showSupportHistory = jsonObject.optBoolean("supportHistoryEnabled");
-                            JSONObject defaultMember = jsonObject.optJSONObject("defaultMember");
-                            if (defaultMember != null) {
-                                defaultMemberID = defaultMember.optString("memberId");
-                                defaultMemberUserID = defaultMember.optString("memberUserId");
-                                defaultMemberLocationID = defaultMember.optString("memberLocationId");
-                                defaultMemberDeviceID = defaultMember.optString("memberDeviceId");
-                                handleUnknownCustomer(null);
-                            }
+                            processSettings(jsonObject);
                         } else {
                             message = jsonObject.optString("message", "");
                         }
@@ -775,20 +778,214 @@ public class SupportSDK {
                 }
                 cloudConfigComplete = true;
                 if (!success) {
+                    disableAllComponents();
+                    if ( configuration.isTryingNewConfiguration ) {
+                        configuration.restoreConfiguration();
+                    }
                     if (mListener != null) {
                         mListener.supportSDKDidFailToGetSettings();
                     }
                     Log.i(TAG, "unable to get app settings, response (" + message + ")");
                 } else {
+                    if ( configuration.isTryingNewConfiguration ) {
+                        configuration.saveConfiguration();
+                    }
                     if (mListener != null) {
                         mListener.supportSDKDidGetSettings();
                     }
-                    if ( mCustomerInfo != null ) {
-                        restGetCustomerInformationWithInfo(mCustomerInfo, null);
+                    if ( customerInfo != null ) {
+                        restGetCustomerInformationWithInfo(customerInfo, null);
                     }
                 }
             }
         });
+    }
+
+    private void disableAllComponents() {
+        chatEnabled = false;
+        callmeEnabled = false;
+        kbEnabled = false;
+        websiteEnabled = false;
+        emailEnabled = false;
+        phoneEnabled = false;
+        formsEnabled = false;
+        historyEnabled = false;
+        journeysEnabled = false;
+    }
+
+
+    private void setMemberInfo(JSONObject defaultMember) {
+        if (defaultMember != null) {
+            defaultMemberID = defaultMember.optString("memberId");
+            defaultMemberUserID = defaultMember.optString("memberUserId");
+            defaultMemberLocationID = defaultMember.optString("memberLocationId");
+            defaultMemberDeviceID = defaultMember.optString("memberDeviceId");
+
+            memberID            = defaultMemberID;
+            memberUserID        = defaultMemberUserID;
+            memberLocationID    = defaultMemberLocationID;
+
+            saveMemberInfo();
+        }
+    }
+
+
+//    private void handleUnknownCustomer(String message) {
+//        memberID            = defaultMemberID;
+//        memberUserID        = defaultMemberUserID;
+//        memberLocationID    = defaultMemberLocationID;
+//        saveMemberInfo();
+//    }
+
+
+    public void saveMemberInfo() {
+        BoomtownChat.sharedInstance().formsUserKey = memberUserID;
+    }
+
+    private void processSettings(JSONObject jsonObject) {
+        JSONObject advancedConfiguration = null;
+        advancedConfiguration = jsonObject.optJSONObject("advancedConfiguration");
+        if ( advancedConfiguration != null ) {
+            String version = advancedConfiguration.optString("version", "1");
+            if ( version.equalsIgnoreCase("2") ) {
+                processV2Settings(advancedConfiguration);
+                return;
+            }
+        }
+        processV1Settings(jsonObject, advancedConfiguration);
+    }
+
+    private void processV1Settings(JSONObject settings, JSONObject advanced) {
+        chatEnabled = settings.optBoolean("supportChatEnabled");
+        callmeEnabled = settings.optBoolean("supportCallmeEnabled");
+        kbEnabled = settings.optBoolean("supportKBEnabled");
+        websiteEnabled = settings.optBoolean("supportWebsiteEnabled");
+        emailEnabled = settings.optBoolean("supportEmailEnabled");
+        phoneEnabled = settings.optBoolean("supportPhoneEnabled");
+        formsEnabled = settings.optBoolean("supportFormsEnabled");
+        historyEnabled = settings.optBoolean("supportHistoryEnabled");
+        journeysEnabled = settings.optBoolean("supportJourneysEnabled", true);
+
+        appearance.chatTitle = settings.optString("chatTitle", null);
+        appearance.callmeTitle = settings.optString("callmeMenuTitle", null);
+        appearance.kbTitle = settings.optString("kbTitle", null);
+        appearance.websiteTitle = settings.optString("webTitle", null);
+        appearance.emailTitle = settings.optString("emailTitle", null);
+        appearance.phoneTitle = settings.optString("phoneTitle", null);
+        appearance.formsTitle = settings.optString("formsTitle", null);
+        appearance.historyTitle = settings.optString("historyTitle", null);
+        appearance.journeysTitle = settings.optString("journeysTitle", null);
+
+        supportProactiveEnabled = settings.optBoolean("supportProactiveEnabled", false);
+        supportScreenShareEnabled = settings.optBoolean("supportScreenShareEnabled", true);
+
+        supportWebsite = settings.optString("supportWebsite");
+        supportEmailAddress = settings.optString("supportEmail");
+        supportPhoneNumber = settings.optString("supportPhone");
+        callMeButtonText = settings.optString("callmeButtonText", mContext.get().getString(R.string.label_call_me));
+        if (callMeButtonText.isEmpty()) {
+            callMeButtonText = mContext.get().getString(R.string.label_call_me);
+        }
+        callMeButtonConfirmation = settings.optString("callmeButtonConfirmation", mContext.get().getString(R.string.label_call_me_confirmation));
+        if (callMeButtonConfirmation.isEmpty()) {
+            callMeButtonConfirmation = mContext.get().getString(R.string.label_call_me_confirmation);
+        }
+        supportFormsIdsJSON = settings.optJSONArray("supportForms");
+        supportWebsiteURL = Uri.parse(supportWebsite); //, "http://example.com"));
+
+        supportUnavailable = settings.optBoolean("unavailable", false);
+        supportUnavailableSummary = settings.optString("unavailableSummary");
+
+        JSONObject defaultMember = settings.optJSONObject("defaultMember");
+        setMemberInfo(defaultMember);
+
+        if ( advanced != null ) {
+            appearance.configureWithJSON(advanced);
+        }
+    }
+
+    private void processV2Settings(JSONObject settings) {
+        isV2Settings = true;
+        if ( settings == null ) {
+            return;
+        }
+        JSONObject components = null;
+        JSONObject advancedConfiguration = null;
+        try {
+            components = settings.getJSONObject("components");
+            if ( components != null ) {
+                JSONObject json = components.getJSONObject("chat");
+                if ( json != null ) {
+                    chatEnabled = json.optBoolean("enabled");
+                    appearance.chatTitle = json.optString("title");
+                }
+                json = components.optJSONObject("callme");
+                if ( json != null ) {
+                    callmeEnabled = json.optBoolean("enabled");
+                    appearance.callmeTitle = json.optString("menuTitle");
+                    callMeButtonText = json.optString("callmeButtonText", mContext.get().getString(R.string.label_call_me));
+                    if (callMeButtonText.isEmpty()) {
+                        callMeButtonText = mContext.get().getString(R.string.label_call_me);
+                    }
+                    callMeButtonConfirmation = json.optString("callmeButtonConfirmation", mContext.get().getString(R.string.label_call_me_confirmation));
+                    if (callMeButtonConfirmation.isEmpty()) {
+                        callMeButtonConfirmation = mContext.get().getString(R.string.label_call_me_confirmation);
+                    }
+                }
+                json = components.optJSONObject("kb");
+                if ( json != null ) {
+                    kbEnabled = json.optBoolean("enabled");
+                    appearance.kbTitle = json.optString("title");
+                }
+                json = components.optJSONObject("website");
+                if ( json != null ) {
+                    websiteEnabled = json.optBoolean("enabled");
+                    appearance.websiteTitle = json.optString("title");
+                    supportWebsite = json.optString("supportWebsite");
+                    supportWebsiteURL = Uri.parse(json.optString("supportWebsite", "http://example.com"));
+                }
+                json = components.optJSONObject("email");
+                if ( json != null ) {
+                    emailEnabled = json.optBoolean("enabled");
+                    appearance.emailTitle = json.optString("title");
+                    supportEmailAddress = json.optString("supportEmail");
+                }
+                json = components.optJSONObject("phone");
+                if ( json != null ) {
+                    phoneEnabled = json.optBoolean("enabled");
+                    appearance.phoneTitle = json.getString("title");
+                    supportPhoneNumber = json.optString("supportPhone");
+                }
+                json = components.optJSONObject("forms");
+                if ( json != null ) {
+                    formsEnabled = json.optBoolean("enabled");
+                    appearance.formsTitle = json.optString("title");
+                    supportFormsIdsJSON = json.optJSONArray("forms");
+                }
+                json = components.optJSONObject("history");
+                if ( json != null ) {
+                    historyEnabled = json.optBoolean("enabled");
+                    appearance.historyTitle = json.optString("title");
+                }
+                json = components.optJSONObject("journeys");
+                if ( json != null ) {
+                    journeysEnabled = json.optBoolean("enabled");
+                    appearance.journeysTitle = json.optString("title");
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        supportProactiveEnabled = settings.optBoolean("supportProactiveEnabled", false);
+        supportScreenShareEnabled = settings.optBoolean("supportScreenShareEnabled", true);
+
+        supportUnavailable = settings.optBoolean("unavailable", false);
+        supportUnavailableSummary = settings.optString("unavailableSummary");
+
+        JSONObject defaultMember = settings.optJSONObject("defaultMember");
+        setMemberInfo(defaultMember);
+
+        appearance.configureWithJSON(settings);
     }
 
 
@@ -797,13 +994,12 @@ public class SupportSDK {
             return;
         }
         isRetrievingHistory = true;
-        String url = SupportSDK.kSDKV1Endpoint + "/issues/history/?members_locations_id=" + memberLocationID;
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/issues/history/?members_locations_id=" + memberLocationID;
         get(url, new Callback() {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 isRetrievingHistory = false;
-//                hideProgress();
             }
 
             @Override
@@ -812,7 +1008,6 @@ public class SupportSDK {
                 processHeadersForResonse(response);
 
                 isRetrievingHistory = false;
-//                hideProgress();
                 JSONObject jsonObject = SupportSDK.successJSONObject(response);
                 if ( jsonObject != null ) {
                     if ( jsonObject.has("results") ) {
@@ -822,7 +1017,7 @@ public class SupportSDK {
                             for ( int n=0; n<resultsJSON.length(); n++ ) {
                                 try {
                                     JSONObject issueJSON = resultsJSON.getJSONObject(n);
-                                    BTConnectIssue issue = new BTConnectIssue(issueJSON);
+                                    Issue issue = new Issue(issueJSON);
                                     historyEntries.add(issue);
 
                                     if ( mHistoryListener != null ) {
@@ -877,7 +1072,7 @@ public class SupportSDK {
 
 
     public void getForm(String id) {
-        String url = SupportSDK.kSDKV1Endpoint + "/forms/get/";
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/forms/get/";
         if ( id != null ) {
             url = url + "?id=" + id;
         }
@@ -940,7 +1135,7 @@ public class SupportSDK {
 
     public void putForm(final SupportSDKFormsListener formsListener,  String id, JSONObject formJSON) {
         mFormsListener = formsListener;
-        String url = SupportSDK.kSDKV1Endpoint + "/forms/logs_put/?form_id=" + id;
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/forms/logs_put/?form_id=" + id;
 
         JSONObject formData = formJSON;
         try {
@@ -956,7 +1151,6 @@ public class SupportSDK {
              params.put("checklists_log", formData);
         } catch (JSONException e) {
             Log.e(TAG, "error when forming payload to get customer info");
-            handleUnknownCustomer(e.getLocalizedMessage());
             return;
         }
 
@@ -1009,7 +1203,7 @@ public class SupportSDK {
                 mKBListener.supportSDKDidRetrieveKB(kbViewModel);
             }
         }
-        String url = SupportSDK.kSDKV1Endpoint + "/kb/get";
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/kb/get";
         if ( isRetrievingKB ) {
             return;
         }
@@ -1054,7 +1248,7 @@ public class SupportSDK {
 
 
     public void searchKB(final SupportSDKKBListener kbListener, String query) {
-        String url = SupportSDK.kSDKV1Endpoint + "/kb/search?query=" + query;
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/kb/search?query=" + query;
 
         get(url, new Callback() {
 
@@ -1110,20 +1304,28 @@ public class SupportSDK {
     /**
      * Retrieve a list of customer journeys
      */
-    public void getJourneys() {
-        if ( !showJourneys ) {
-            return;
+    public void getJourneys(Callable<Void> method) {
+//        if ( isRetrievingJourneys ) {
+//            return;
+//        }
+//        isRetrievingJourneys = true;
+        JSONObject params = new JSONObject();
+        try {
+            params.put("members_id", memberID);
+        } catch (JSONException e) {
+            Log.e(TAG, "error when forming payload to get customer info");
         }
-        if ( isRetrievingJourneys ) {
-            return;
-        }
-        isRetrievingJourneys = true;
-        String url = SupportSDK.kSDKV1Endpoint + "/journeys/get/";
-        get(url, new Callback() {
 
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/journeys/data?members_id=" + memberID;
+        get(url, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 isRetrievingJourneys = false;
+                try {
+                    method.call();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
 
             @Override
@@ -1138,6 +1340,8 @@ public class SupportSDK {
                             journeys.clear();
                             JSONArray resultsJSON = jsonObject.getJSONArray("results");
                             for ( int n=0; n<resultsJSON.length(); n++ ) {
+                                JourneyModel journeyModel = new JourneyModel((JSONObject)resultsJSON.get(n));
+                                journeys.add(journeyModel);
                             }
                             success = true;
                         } catch (JSONException e) {
@@ -1149,6 +1353,11 @@ public class SupportSDK {
 //                    warn(getString(R.string.app_name), getString(R.string.warn_unable_to_retrieve_kb));
                 }
                 isRetrievingJourneys = false;
+                try {
+                    method.call();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
     }
@@ -1168,6 +1377,9 @@ public class SupportSDK {
 
     public interface SupportSDKFormsListener {
         void supportSDKDidRetrieveForms();
+        default void supportSDKDidFailToRetrieveForms() {
+            // default method implementation
+        }
         void supportSDKDidRetrieveForm(FormModel form);
         void supportSDKDidUpdateForm();
         void supportSDKFailedToUpdateForm();
@@ -1175,6 +1387,9 @@ public class SupportSDK {
 
     public interface SupportSDKHistoryListener {
         void supportSDKDidRetrieveHistory();
+        default void supportSDKDidFailToRetrieveHistory() {
+            // default method implementation
+        }
     }
 
 
@@ -1190,13 +1405,6 @@ public class SupportSDK {
         return jsonObject;
     }
 
-
-//    private static byte[] encrypt(byte[] raw, byte[] clear) throws Exception {
-//        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES/ECB/NoPadding");
-//        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-//        cipher.init(1, skeySpec);
-//        return cipher.doFinal(clear);
-//    }
 
     private static byte[] decrypt(String key, String data) throws Exception {
         byte[] keyBytes = new byte[32];
@@ -1285,18 +1493,6 @@ public class SupportSDK {
             isForegroundPermitted = true;
         }
 
-//        if (ContextCompat.checkSelfPermission(mContext.get(),
-//                Manifest.permission.CAPTURE_VIDEO_OUTPUT) != PackageManager.PERMISSION_GRANTED) {
-//            isVideoCapturePermitted = false;
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
-//                    Manifest.permission.CAPTURE_VIDEO_OUTPUT)) {
-//                permissionRationaleDisplayQueue.add(Manifest.permission.CAPTURE_VIDEO_OUTPUT);
-//            } else {
-//                permRequestsNeeded.add(Manifest.permission.CAPTURE_VIDEO_OUTPUT);
-//            }
-//        } else {
-//            isVideoCapturePermitted = true;
-//        }
         if (ContextCompat.checkSelfPermission(mContext.get(),
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             isAudioCapturePermitted = false;
@@ -1321,18 +1517,6 @@ public class SupportSDK {
         } else {
             isExtStorageWriteable = true;
         }
-//        if (ContextCompat.checkSelfPermission(mContext.get(),
-//                Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
-//            isSystemOverlayPermitted = false;
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
-//                    Manifest.permission.SYSTEM_ALERT_WINDOW)) {
-//                permissionRationaleDisplayQueue.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
-//            } else {
-//                permRequestsNeeded.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
-//            }
-//        } else {
-//            isSystemOverlayPermitted = true;
-//        }
         activity.runOnUiThread(() -> {
             displayPermissionRationales(activity, permissionRationaleDisplayQueue);
             if (permRequestsNeeded.size() > 0) {
@@ -1361,8 +1545,6 @@ public class SupportSDK {
             case Manifest.permission.FOREGROUND_SERVICE:
                 displayForegroundPermissionRationale(activity, permissionRationaleDisplayQueue);
                 break;
-//            case Manifest.permission.CAPTURE_VIDEO_OUTPUT:
-//                displayAVCapturePermissionRationale(activity, permissionRationaleDisplayQueue);
             case Manifest.permission.RECORD_AUDIO:
                 // handle both perms in one rationale
                 permissionRationaleDisplayQueue.remove(Manifest.permission.RECORD_AUDIO);
@@ -1516,33 +1698,6 @@ public class SupportSDK {
                 });
         builder.show();
     }
-
-    /**
-     * Show an explanation to the user *asynchronously* -- don't block
-     * this thread waiting for the user's response! After the user
-     * sees the explanation, try again to request the permission.
-     *
-     * @param permissionRationaleDisplayQueue   Queue to add permission rationales to
-     */
-    protected void displayAVCapturePermissionRationale(final Activity activity, final Queue<String> permissionRationaleDisplayQueue) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(mContext.get());
-//        builder.setTitle(R.string.text_ask_av_capture);
-//        builder.setMessage(R.string.text_why_av_capture);
-//        builder.setNegativeButton(mContext.get().getString(R.string.text_no),
-//                (dialog, which) -> dialog.dismiss());
-//        builder.setPositiveButton(mContext.get().getString(R.string.text_yes),
-//                (dialog, which) -> {
-//                    dialog.dismiss();
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//                        ActivityCompat.requestPermissions(activity,
-//                                new String[]{Manifest.permission.CAPTURE_VIDEO_OUTPUT, Manifest.permission.RECORD_AUDIO},
-//                                0);
-//                    }
-//                    displayPermissionRationales(activity, permissionRationaleDisplayQueue);
-//                });
-//        builder.show();
-    }
-
 
 
 }

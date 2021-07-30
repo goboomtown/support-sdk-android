@@ -72,9 +72,6 @@ public class EventManager {
 
 
     public static void notify(String eventOrRequest, JSONObject userInfo) {
-//        for ( EventManagerListener listener : mListeners ) {
-//            listener.event(kSupportSDKEvent, eventOrRequest, userInfo);
-//        }
         Intent intent = new Intent();
         intent.setAction(kSupportSDKEvent);
         intent.putExtra(kSupportSDKEventType, eventOrRequest);

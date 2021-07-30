@@ -12,10 +12,11 @@
 <!--    tools:context=".fragment.KBListFragment"-->
 <!--    tools:listitem="@layout/fragment_article" />-->
 
+<!--    android:background="?android:attr/colorBackground"-->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="?android:attr/colorBackground"
     android:orientation="vertical" >
 
     <androidx.recyclerview.widget.RecyclerView

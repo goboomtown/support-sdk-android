@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.goboomtown.supportsdk.service.SupportOverlayService;
+import com.goboomtown.supportsdk.util.Utils;
 import com.goboomtown.supportsdk.view.SupportButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -66,7 +67,13 @@ public class MainActivity extends AppCompatActivity
         mSupportButton.setListener(this);
 
         int configResource = R.raw.support_sdk;
-        mSupportButton.loadConfiguration(configResource, null);
+        try {
+            String jsonString = Utils.readRawTextFile(this, configResource);
+            mSupportButton.loadConfiguration(jsonString, (String)null);
+        } catch (Exception e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+
 
         Map<String, String> myPubData = new HashMap<>();
         myPubData.put("public", "fooData");

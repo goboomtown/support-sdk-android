@@ -67,6 +67,13 @@
         android:orientation="vertical"
         android:gravity="center" >
 
+        <TextView
+            android:id="@+id/infoLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
         <GridView
             android:id="@+id/gridView"
             android:layout_width="match_parent"

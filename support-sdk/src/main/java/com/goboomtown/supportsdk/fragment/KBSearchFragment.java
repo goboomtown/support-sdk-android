@@ -67,6 +67,7 @@ public class KBSearchFragment extends Fragment
     private KBListAdapter           listAdapter;
     private KBExpandableListAdapter expandableListAdapter;
     private SearchView              searchView;
+    private boolean                 hideRecentSearches;
 
     private ArrayList<String> sectionHeadings   = new ArrayList<>();
     private ArrayList<Object> recentSearches    = new ArrayList<>();
@@ -113,6 +114,7 @@ public class KBSearchFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_kbsearch, container, false);
         searchView = view.findViewById(R.id.searchView);
+        expandableListView = view.findViewById(R.id.expandableListView);
         final KBSearchFragment thisFragment = this;
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -125,6 +127,8 @@ public class KBSearchFragment extends Fragment
             @Override
             public boolean onQueryTextChange(String newText) {
                 //    adapter.getFilter().filter(newText);
+                hideRecentSearches = false;
+                setupAdapter();
                 return false;
             }
         });
@@ -136,9 +140,20 @@ public class KBSearchFragment extends Fragment
         this.query = query;
     }
 
+    private ArrayList<String> createHeadings() {
+        ArrayList<String> headings = new ArrayList<>();
+        if ( !hideRecentSearches ) {
+            headings.add(sectionHeadings.get(0));
+        }
+        headings.add(sectionHeadings.get(1));
+        return headings;
+    }
+
     private HashMap<String, List<Object>> createEntries() {
         HashMap<String, List<Object>> entries = new HashMap<>();
-        entries.put(sectionHeadings.get(0), recentSearches);
+        if ( !hideRecentSearches ) {
+            entries.put(sectionHeadings.get(0), recentSearches);
+        }
         entries.put(sectionHeadings.get(1), topResults);
         return entries;
     }
@@ -148,12 +163,13 @@ public class KBSearchFragment extends Fragment
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                expandableListAdapter = new KBExpandableListAdapter(mActivity, sectionHeadings, createEntries());
+                expandableListAdapter = new KBExpandableListAdapter(mActivity, createHeadings(), createEntries());
+                expandableListAdapter.supportSDK = supportSDK;
                 ArrayList<Drawable> groupIcons = new ArrayList<>();
                 groupIcons.add(getResources().getDrawable(R.drawable.ic_search_24px));
                 groupIcons.add(null);
                 expandableListAdapter.groupIcons = groupIcons;
-                if ( expandableListView!=null ) {
+                if ( expandableListView != null ) {
                     expandableListAdapter.mListener = listener;
                     expandableListAdapter.expanded = true;
                     expandableListView.setAdapter(expandableListAdapter);
@@ -183,7 +199,7 @@ public class KBSearchFragment extends Fragment
 
 
     public void retrieveKB(String id) {
-        String url = SupportSDK.kSDKV1Endpoint + "/kb/get?id=" + id;
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/kb/get?id=" + id;
 
         supportSDK.get(url, new Callback() {
 
@@ -237,12 +253,14 @@ public class KBSearchFragment extends Fragment
             recentSearches.add(search);
             saveRecentSearches(getActivity());
             setupAdapter();
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    expandableListAdapter.updateData(sectionHeadings, createEntries());
-                }
-            });
+            if ( !hideRecentSearches ) {
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        expandableListAdapter.updateData(createHeadings(), createEntries());
+                    }
+                });
+            }
         }
     }
 
@@ -315,6 +333,7 @@ public class KBSearchFragment extends Fragment
             topResults.addAll(kbViewModel.entries);
             if ( mActivity != null ) {
                 addRecentSearch(query);
+                hideRecentSearches = true;
                 setupAdapter();
             }
         } else {

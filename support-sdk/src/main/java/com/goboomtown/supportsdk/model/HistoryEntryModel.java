@@ -1,4 +1,4 @@
 package com.goboomtown.supportsdk.model;
 
-public class HistoryEntryModel extends BTConnectIssue {
+public class HistoryEntryModel extends Issue {
 }

@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.SupportSDK;
-import com.goboomtown.supportsdk.model.BTConnectIssue;
+import com.goboomtown.supportsdk.model.Issue;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -140,6 +140,7 @@ public class CallMeView {
             public void onShow(DialogInterface dialogInterface) {
                 Button negativeButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_NEGATIVE);
                 Button positiveButton = ((androidx.appcompat.app.AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setText(supportSDK.callMeButtonText);
                 positiveButton.setTextColor(supportSDK.appearance.callMeLabelTextColor());
                 negativeButton.setTextColor(supportSDK.appearance.callMeLabelTextColor());
                 positiveButton.setOnClickListener(new View.OnClickListener() {
@@ -198,7 +199,7 @@ public class CallMeView {
             e.printStackTrace();
         }
 
-        String uri = String.format("%s/issues/create", SupportSDK.kSDKV1Endpoint);
+        String uri = String.format("%s/issues/create", SupportSDK.SDK_V1_ENDPOINT);
 
         supportSDK.post(uri, params, new Callback() {
 
@@ -212,7 +213,7 @@ public class CallMeView {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 boolean success = false;
-                BTConnectIssue issue = null;
+                Issue issue = null;
                 String message = "";
 
                 JSONObject jsonObject;
@@ -228,14 +229,14 @@ public class CallMeView {
                                 JSONObject issueJSON;
                                 try {
                                     issueJSON = results.getJSONObject(0);
-                                    issue = new BTConnectIssue(issueJSON);
+                                    issue = new Issue(issueJSON);
                                     success = true;
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 
                                 if (issue != null) {
-                                    BTConnectIssue.saveCurrentIssue(mContext, issue);
+                                    Issue.saveCurrentIssue(mContext, issue);
                                 }
                                 showConfirmation(supportSDK.callMeButtonConfirmation);
                             }

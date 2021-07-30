@@ -134,7 +134,7 @@ public class SupportFormFragment extends com.goboomtown.forms.fragment.FormFragm
 
 
     public void retrieveKB(String id) {
-        String url = SupportSDK.kSDKV1Endpoint + "/kb/get?id=" + id;
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/kb/get?id=" + id;
 
         supportSDK.get(url, new Callback() {
 

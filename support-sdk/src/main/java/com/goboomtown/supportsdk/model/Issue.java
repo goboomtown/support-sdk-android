@@ -10,7 +10,7 @@ import org.json.JSONObject;
 /**
  * Created by larry on 2016-07-21.
  */
-public class BTConnectIssue
+public class Issue
 {
     private static final String kSupportSDKCurrentIssue     = "supportSDKCurrentIssue";
 
@@ -96,11 +96,11 @@ public class BTConnectIssue
     public boolean  isRated;
 
 
-    public BTConnectIssue() {
+    public Issue() {
         clear();
     }
 
-    public BTConnectIssue(JSONObject issueJSON) {
+    public Issue(JSONObject issueJSON) {
         clear();
         populateFromJSON(issueJSON);
     }
@@ -211,7 +211,7 @@ public class BTConnectIssue
     }
 
 
-    public static void saveCurrentIssue(Context context, BTConnectIssue issue) {
+    public static void saveCurrentIssue(Context context, Issue issue) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(kSupportSDKCurrentIssue, issue.toJSON());
@@ -227,15 +227,15 @@ public class BTConnectIssue
     }
 
 
-    public static BTConnectIssue getCurrentIssue(Context context) {
-        BTConnectIssue issue = null;
+    public static Issue getCurrentIssue(Context context) {
+        Issue issue = null;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String jsonString = prefs.getString(kSupportSDKCurrentIssue,"");
         if ( !jsonString.isEmpty() ) {
             JSONObject json;
             try {
                 json = new JSONObject(jsonString);
-                issue = new BTConnectIssue();
+                issue = new Issue();
                 issue.populateFromJSON(json);
             } catch (JSONException e) {
                 e.printStackTrace();

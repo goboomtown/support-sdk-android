@@ -111,6 +111,7 @@
     <string name="text_yes">Yes</string>
     <string name="text_no">No</string>
     <string name="text_ok">OK</string>
+    <string name="text_cancel">Cancel</string>
     <string name="text_submit">Submit</string>
     <string name="text_ask_location">May we ask for your location?</string>
     <string name="text_why_location">We use your location to inform customers of your proximity to their location for a job.</string>
@@ -157,4 +158,22 @@
     <string name="text_closed">Closed</string>
     <string name="text_retrieving">Retrieving</string>
 
+    <string name="text_settings">Settings</string>
+    <string name="text_developer_mode">Developer Mode</string>
+    <string name="text_scan_qr_code">Scan QR Code</string>
+    <string name="text_paste_json_configuration">Paste JSON Configuration</string>
+    <string name="text_enter_parameters">Enter Parameters</string>
+    <string name="text_return_to_default">Return to Default</string>
+    <string name="text_paste_json_here">Paste JSON here</string>
+    <string name="text_integration_id">Integration Id</string>
+    <string name="text_api_key">API Key</string>
+    <string name="text_enter_integration_id">Enter integration id</string>
+    <string name="text_enter_api_key">Enter api key</string>
+    <string name="text_select_server">Select Server</string>
+
+    <string name="warn_invalid_json">That does not appear to be valid JSON. Please try again.</string>
+    <string name="warn_missing_parameters">Both an integration id and api key are required.</string>
+    <string name="warn_bad_qr_code">That QR code does not provide any usable information.</string>
+    <string name="warn_unable_to_retrieve_settings">Unable to retrieve settings for that server.</string>
+    <string name="warn_no_components_enabled">You do not have any components enabled so you will see an empty menu.</string>
 </resources>

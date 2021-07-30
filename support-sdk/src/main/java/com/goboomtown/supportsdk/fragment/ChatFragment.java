@@ -32,7 +32,7 @@ import com.goboomtown.activity.KBActivity;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
-import com.goboomtown.supportsdk.model.BTConnectIssue;
+import com.goboomtown.supportsdk.model.Issue;
 import com.goboomtown.supportsdk.activity.VideoActivity;
 import com.goboomtown.supportsdk.view.SupportButton;
 
@@ -61,7 +61,7 @@ public class ChatFragment extends BaseChatFragment
 
     public  SupportButton   mSupportButton = null;
     public  SupportSDK      supportSDK = null;
-    public  BTConnectIssue  mIssue = null;
+    public Issue mIssue = null;
     public  Context         mContext;
     private MenuItem        mMenuItemEndCall;
     private boolean         isScreenShare = false;
@@ -415,7 +415,7 @@ public class ChatFragment extends BaseChatFragment
         intent.putExtra(VideoActivity.kCallId, callId);
         intent.putExtra(VideoActivity.kAccessToken, accessToken);
         intent.putExtra(VideoActivity.kUsername, "Support SDK");
-        intent.putExtra(VideoActivity.kHostname, supportSDK.hostname());
+        intent.putExtra(VideoActivity.kHostname, supportSDK.getHost());
         if ( isCallable(intent) ) {
             startActivity(intent);
         }
@@ -434,7 +434,7 @@ public class ChatFragment extends BaseChatFragment
 
     private void resolveIssueIfPossible() {
 
-        String uri = String.format("%s/issues/%s", SupportSDK.kSDKV1Endpoint, mIssue.id);
+        String uri = String.format("%s/issues/%s", SupportSDK.SDK_V1_ENDPOINT, mIssue.id);
 
         supportSDK.get(uri, new Callback() {
 
@@ -446,7 +446,7 @@ public class ChatFragment extends BaseChatFragment
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 boolean success = false;
-                BTConnectIssue issue = null;
+                Issue issue = null;
                 JSONObject jsonObject;
                 try {
                     ResponseBody responseBody = response.body();
@@ -461,14 +461,14 @@ public class ChatFragment extends BaseChatFragment
                                 JSONObject issueJSON;
                                 try {
                                     issueJSON = results.getJSONObject(0);
-                                    issue = new BTConnectIssue(issueJSON);
+                                    issue = new Issue(issueJSON);
                                     success = true;
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 
                                 if (issue != null) {
-                                    if ( issue.status < BTConnectIssue.RESOLVED ) {
+                                    if ( issue.status < Issue.RESOLVED ) {
                                         resolveIssue();
                                     } else {
                                         exitIssue();
@@ -498,7 +498,7 @@ public class ChatFragment extends BaseChatFragment
 
         showProgressWithMessage(getString(R.string.cancelling_issue));
 
-        String uri = String.format("%s/issues/cancel/%s", SupportSDK.kSDKV1Endpoint, mIssue.id);
+        String uri = String.format("%s/issues/cancel/%s", SupportSDK.SDK_V1_ENDPOINT, mIssue.id);
 
         JSONObject params = new JSONObject();
         try {
@@ -536,11 +536,11 @@ public class ChatFragment extends BaseChatFragment
 
         showProgressWithMessage(getString(R.string.resolving_issue));
 
-        String uri = String.format("%s/issues/resolve/%s", SupportSDK.kSDKV1Endpoint, mIssue.id);
+        String uri = String.format("%s/issues/resolve/%s", SupportSDK.SDK_V1_ENDPOINT, mIssue.id);
 
         JSONObject params = new JSONObject();
         try {
-            params.put("resolution", BTConnectIssue.kIssueResolutionCompleted);
+            params.put("resolution", Issue.kIssueResolutionCompleted);
             params.put("members_users_id", supportSDK.memberUserID);
         } catch (JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -583,7 +583,7 @@ public class ChatFragment extends BaseChatFragment
     private void exitIssue() {
 //        mSupportButton.refreshIssue(mIssue.id);
         EventManager.notify(EventManager.kEventChatIssueResolved, null);
-        BTConnectIssue.clearCurrentIssue(mContext);
+        Issue.clearCurrentIssue(mContext);
         mIssue = null;
         FragmentActivity activity = getActivity();
         if ( activity != null ) {
@@ -596,7 +596,7 @@ public class ChatFragment extends BaseChatFragment
      * Retrieve chat information.
      */
     public void commGet(final String comm_id) {
-        String uri = String.format("%s/chat/get/%s", SupportSDK.kSDKV1Endpoint, comm_id);
+        String uri = String.format("%s/chat/get/%s", SupportSDK.SDK_V1_ENDPOINT, comm_id);
 
         JSONObject params = new JSONObject();
         try {
@@ -651,7 +651,7 @@ public class ChatFragment extends BaseChatFragment
      * Retrieve chat information.
      */
     public void commGetVideo(final String comm_id) {
-        String uri = String.format("%s/chat/get/%s", SupportSDK.kSDKV1Endpoint, comm_id);
+        String uri = String.format("%s/chat/get/%s", SupportSDK.SDK_V1_ENDPOINT, comm_id);
 
         JSONObject params = new JSONObject();
         try {
@@ -694,7 +694,7 @@ public class ChatFragment extends BaseChatFragment
      * Enter a chat.
      */
     public void commEnter(final String comm_id) {
-        String uri = String.format("%s/chat/enter/%s", SupportSDK.kSDKV1Endpoint, comm_id);
+        String uri = String.format("%s/chat/enter/%s", SupportSDK.SDK_V1_ENDPOINT, comm_id);
 
         JSONObject params = new JSONObject();
         try {
@@ -730,7 +730,7 @@ public class ChatFragment extends BaseChatFragment
      * Exit a chat.
      */
     public void commExit(final String comm_id) {
-        String uri = String.format("%s/chat/exit/%s", SupportSDK.kSDKV1Endpoint, comm_id);
+        String uri = String.format("%s/chat/exit/%s", SupportSDK.SDK_V1_ENDPOINT, comm_id);
 
         JSONObject params = new JSONObject();
         try {
@@ -780,7 +780,7 @@ public class ChatFragment extends BaseChatFragment
 
 
     public void commPutFile(String commId, Bitmap image) {
-        String url = String.format("%s/chat/filePut/%s", SupportSDK.kSDKV1Endpoint, commId);
+        String url = String.format("%s/chat/filePut/%s", SupportSDK.SDK_V1_ENDPOINT, commId);
 
         JSONObject params = new JSONObject();
         try {
@@ -834,7 +834,7 @@ public class ChatFragment extends BaseChatFragment
     }
 
     public void retrieveKB(String id) {
-        String url = SupportSDK.kSDKV1Endpoint + "/kb/get?id=" + id;
+        String url = SupportSDK.SDK_V1_ENDPOINT + "/kb/get?id=" + id;
 
         supportSDK.get(url, new Callback() {
 

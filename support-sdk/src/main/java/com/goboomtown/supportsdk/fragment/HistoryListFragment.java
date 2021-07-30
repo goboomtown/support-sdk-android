@@ -33,7 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.goboomtown.supportsdk.R;
 import com.goboomtown.supportsdk.api.EventManager;
 import com.goboomtown.supportsdk.api.SupportSDK;
-import com.goboomtown.supportsdk.model.BTConnectIssue;
+import com.goboomtown.supportsdk.model.Issue;
 import com.goboomtown.supportsdk.view.RatingView;
 import com.goboomtown.supportsdk.view.SupportButton;
 import com.goboomtown.supportsdk.view.TrackSelectionAdapter;
@@ -75,8 +75,8 @@ public class HistoryListFragment extends Fragment
     private boolean             showResolved;
     private boolean             showClosed;
 
-    public ArrayList<BTConnectIssue>    filteredEntries = new ArrayList<>();
-    public ArrayList<BTConnectIssue>    sortedEntries = new ArrayList<>();
+    public ArrayList<Issue>    filteredEntries = new ArrayList<>();
+    public ArrayList<Issue>    sortedEntries = new ArrayList<>();
 
     public OnFragmentInteractionListener mListener;
 
@@ -134,7 +134,7 @@ public class HistoryListFragment extends Fragment
     }
 
 
-    private void showEntry(BTConnectIssue issue) {
+    private void showEntry(Issue issue) {
         if ( issue.isResolved() && !issue.isRated ) {
             displayRatingScreen(issue);
         } else {
@@ -143,7 +143,7 @@ public class HistoryListFragment extends Fragment
     }
 
 
-    private void displayChat(BTConnectIssue issue) {
+    private void displayChat(Issue issue) {
         if ( (issue.xmpp_data==null && issue.comm_id==null) || issue.transcripts==null ) {
             Activity activity = getActivity();
             if ( activity != null ) {
@@ -177,7 +177,7 @@ public class HistoryListFragment extends Fragment
         }
     }
 
-    private void displayRatingScreen(BTConnectIssue issue) {
+    private void displayRatingScreen(Issue issue) {
         supportSDK.rateableIssueId = issue.id;
         final SupportButton button = supportButton;
         if ( mActivity != null ) {
@@ -299,14 +299,14 @@ public class HistoryListFragment extends Fragment
 
     private void sort() {
         filteredEntries.clear();
-        for ( BTConnectIssue entry : supportSDK.historyEntries ) {
-            if ( entry .status<BTConnectIssue.RESOLVED && showOpen ) {
+        for ( Issue entry : supportSDK.historyEntries ) {
+            if ( entry .status< Issue.RESOLVED && showOpen ) {
                 filteredEntries.add(entry);
             }
-            else if ( entry.status==BTConnectIssue.RESOLVED && showResolved ) {
+            else if ( entry.status== Issue.RESOLVED && showResolved ) {
                 filteredEntries.add(entry);
             }
-            else if ( entry.status>BTConnectIssue.RESOLVED && showClosed ) {
+            else if ( entry.status> Issue.RESOLVED && showClosed ) {
                 filteredEntries.add(entry);
             }
         }
@@ -314,8 +314,8 @@ public class HistoryListFragment extends Fragment
     }
 
 
-    public class OptionComparator implements Comparator<BTConnectIssue> {
-        public int compare(BTConnectIssue left, BTConnectIssue right) {
+    public class OptionComparator implements Comparator<Issue> {
+        public int compare(Issue left, Issue right) {
             Date leftDate = dateFromString(left.created, "yyyy-MM-dd HH:mm:ss");
             Date rightDate = dateFromString(right.created, "yyyy-MM-dd HH:mm:ss");
             return sortDescending ? rightDate.compareTo(leftDate) : leftDate.compareTo(rightDate);
@@ -335,7 +335,7 @@ public class HistoryListFragment extends Fragment
 
 
     private void loadActionSettings() {
-        BTConnectIssue issue = null;
+        Issue issue = null;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         sortDescending = prefs.getBoolean(kActionSettingSortDescending, true);
         showOpen = prefs.getBoolean(kActionSettingShowOpen, true);
@@ -371,10 +371,10 @@ public class HistoryListFragment extends Fragment
             extends TrackSelectionAdapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private int mSelectedPosition = RecyclerView.NO_POSITION;
-        public  List<BTConnectIssue> mEntries = new ArrayList<>();
+        public  List<Issue> mEntries = new ArrayList<>();
         private final ListItemClickListener mListClickListener;
 
-        public SimpleItemRecyclerViewAdapter(List<BTConnectIssue> entries) {
+        public SimpleItemRecyclerViewAdapter(List<Issue> entries) {
             if (entries == null) {
                 mEntries = new ArrayList<>();
             } else {
@@ -382,7 +382,7 @@ public class HistoryListFragment extends Fragment
             }
             mListClickListener = new ListItemClickListener() {
                 @Override
-                public void onListItemClick(BTConnectIssue model) {
+                public void onListItemClick(Issue model) {
                     View v = new View(mContext);
 //                    v.setOnClickListener(formModel.onClickListener);
 //                    v.performClick();
@@ -415,7 +415,7 @@ public class HistoryListFragment extends Fragment
             } else {
                 holder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
-            BTConnectIssue entryModel = mEntries.get(position);
+            Issue entryModel = mEntries.get(position);
 //            holder.itemView.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View v) {
@@ -448,7 +448,7 @@ public class HistoryListFragment extends Fragment
             return true;
         }
 
-        public String displayStatus(BTConnectIssue issue) {
+        public String displayStatus(Issue issue) {
             if ( issue.isClosed() ) {
                 return getString(R.string.text_closed);
             } else if ( issue.isResolved() ) {
@@ -492,7 +492,7 @@ public class HistoryListFragment extends Fragment
             }
 
 
-            public void bind(BTConnectIssue entry) {
+            public void bind(Issue entry) {
                 if (entry == null) {
                      return;
                 }
@@ -561,7 +561,7 @@ public class HistoryListFragment extends Fragment
                         notifyItemChanged(mSelectedPosition);
 //                        v.setOnClickListener(form.onClickListener);
 //                        v.performClick();
-                        BTConnectIssue issue = mEntries.get(mSelectedPosition);
+                        Issue issue = mEntries.get(mSelectedPosition);
                         showEntry(issue);
                     }
                 });
@@ -599,7 +599,7 @@ public class HistoryListFragment extends Fragment
         ListItemClickListener NULL_LISTENER = item -> {
         };
 
-        void onListItemClick(BTConnectIssue entry);
+        void onListItemClick(Issue entry);
     }
 
 

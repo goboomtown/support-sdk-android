@@ -13,7 +13,8 @@ import android.util.Log;
 
 import com.goboomtown.chat.BoomtownChat;
 
-import org.conscrypt.Conscrypt;
+
+//import org.conscrypt.Conscrypt;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,6 +46,7 @@ import javax.net.ssl.X509TrustManager;
 import okhttp3.Call;
 import okhttp3.ConnectionSpec;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -62,50 +64,16 @@ public class RestClient {
     private X509TrustManager trustManager;
     private TLSSocketFactory tlsSocketFactory;
     private boolean caUnknown;
+    private boolean isTLSv13Supported;
 
     public  HashMap<String, String> headers;
 
-    /**
-     * @see "https://developer.android.com/training/articles/security-ssl.html#java"
-     * @param customCACert override default CA keystore by providing this cert
-     */
-    public RestClient(InputStream customCACert) {
-        Provider provider = Conscrypt.newProvider();
-        Security.insertProviderAt(provider, 1);
 
-        try {
-            KeyStore keyStore = null;
-            if (customCACert != null) {
-                caUnknown = true;
-                CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                Certificate ca;
-                try (InputStream caInput = new BufferedInputStream(customCACert)) {
-                    ca = cf.generateCertificate(caInput);
-                    Log.d(TAG, "ca=" + ((X509Certificate) ca).getSubjectDN());
-                }
-                // create KeyStore containing our trusted CAs
-                String keyStoreType = KeyStore.getDefaultType();
-                keyStore = KeyStore.getInstance(keyStoreType);
-                keyStore.load(null, null);
-                keyStore.setCertificateEntry("ca", ca);
-            } else {
-                caUnknown = false;
-            }
-            // create TrustManager that trusts CAs in KeyStore
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
-            trustManagers = trustManagerFactory.getTrustManagers();
-            tlsSocketFactory = new TLSSocketFactory();
-        } catch (IOException | CertificateException | KeyManagementException | KeyStoreException | NoSuchAlgorithmException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
-        if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-            throw new IllegalStateException("Unexpected default trust managers: "
-                    + Arrays.toString(trustManagers));
-        }
-        trustManager = (X509TrustManager) trustManagers[0];
+    public RestClient(boolean enableTLSv13) {
+        isTLSv13Supported = enableTLSv13;
         client = createClient();
     }
+
 
     public OkHttpClient getClient() {
         return client;
@@ -118,33 +86,28 @@ public class RestClient {
      */
     protected OkHttpClient createClient() {
         OkHttpClient client = null;
+        OkHttpClient.Builder clientBuilder = null;
         try {
-//            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-//                .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-//                .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-//                .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                    .connectionSpecs(Collections.singletonList(ConnectionSpec.RESTRICTED_TLS))
-                    .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-                    .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-                    .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-            if (caUnknown) {
-                // create SSLContext that uses our TrustManager
-                SSLContext sslCtx = SSLContext.getInstance("TLS");
-                sslCtx.init(null, trustManagers, null);
-                clientBuilder.sslSocketFactory(sslCtx.getSocketFactory(), trustManager);
-//                clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
-                Log.w(TAG, "using self-signed cert trust mgr for HTTPS");
+            if ( isTLSv13Supported ) {
+                clientBuilder = new OkHttpClient.Builder()
+                        .connectionSpecs(Collections.singletonList(ConnectionSpec.RESTRICTED_TLS))
+                        .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                        .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                        .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
             } else {
-                try {
-//                    clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
-//                    clientBuilder.sslSocketFactory(tlsSocketFactory, trustManager);
-                    clientBuilder.sslSocketFactory(new TLSSocketFactory(), new InternalX509TrustManager());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+                clientBuilder = new OkHttpClient.Builder()
+                        .connectionSpecs(Collections.singletonList(ConnectionSpec.MODERN_TLS))
+                        .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                        .writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+                        .readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
             }
+
+            try {
+                clientBuilder.sslSocketFactory(new TLSSocketFactory(isTLSv13Supported), new InternalX509TrustManager());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             client = clientBuilder.build();
         } catch (Exception e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -252,6 +215,41 @@ public class RestClient {
         Log.v(TAG, "GET (" + requestUrl + ")");
         client.newCall(request).enqueue(callback);
     }
+
+
+    /**
+     * Perform an HTTP GET with params.
+     *
+     * @param context used to get last known location
+     * @param requestUrl URL to GET
+     * @param params    JSONObject containing query parameters
+     * @param callback concrete callback implementation to execute on response
+     */
+    public void get(Context context, String requestUrl, JSONObject params, okhttp3.Callback callback) {
+//        Request request = new Request.Builder()
+//                .url(requestUrl)
+//                .headers(Headers.of(addBoomtownHeaders(context)))
+//                .build();
+//
+//        Log.v(TAG, "GET (" + requestUrl + ")");
+//        client.newCall(request).enqueue(callback);
+
+        HttpUrl.Builder httpBuilder = HttpUrl.parse(requestUrl).newBuilder();
+        Iterator<String> iterator = params.keys();
+        try {
+            while ( iterator.hasNext() ) {
+                String key = iterator.next();
+                httpBuilder.addQueryParameter(key, params.getString(key));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.v(TAG, "GET (" + requestUrl + ")");
+        Request request = new Request.Builder().url(httpBuilder.build()).build();
+        client.newCall(request).enqueue(callback);
+
+    }
+
 
     /**
      *

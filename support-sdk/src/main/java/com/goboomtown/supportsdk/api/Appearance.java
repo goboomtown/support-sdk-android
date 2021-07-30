@@ -42,6 +42,8 @@ public class Appearance {
     public final static String formsMenuIcon               = "formsMenuIcon";
     public final static String historyMenuText             = "historyMenuText";
     public final static String historyMenuIcon             = "historyMenuIcon";
+    public final static String journeysMenuText            = "journeysMenuText";
+    public final static String journeysMenuIcon            = "journeysMenuIcon";
     public final static String exitMenuText                = "exitMenuText";
     public final static String exitMenuIcon                = "exitMenuIcon";
 
@@ -70,6 +72,7 @@ public class Appearance {
     public final static String navigationBarColorDark      = "navigationBarColorDark";
     public final static String buttonColor                 = "buttonColor";
     public final static String backgroundColor             = "backgroundColor";
+    public final static String backgroundColorDark         = "backgroundColorDark";
     public final static String lineColor                   = "lineColor";
     public final static String lineColorDark               = "lineColorDark";
     public final static String textColor                   = "textColor";
@@ -156,6 +159,16 @@ public class Appearance {
     public int    chatRemoteBackgroundColor;
     public int    chatRemoteBorderColor;
 
+    public String    chatTitle;
+    public String    callmeTitle;
+    public String    kbTitle;
+    public String    websiteTitle;
+    public String    emailTitle;
+    public String    phoneTitle;
+    public String    formsTitle;
+    public String    historyTitle;
+    public String    journeysTitle;
+
     private String  menuStyle;
 
 //    public int      borderColor;
@@ -199,9 +212,14 @@ public class Appearance {
 //        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            window.setNavigationBarColor(navigationBarBackgroundColor());
 //        }
-        Spannable text = new SpannableString(actionBar.getTitle());
-        text.setSpan(new ForegroundColorSpan(navigationBarTextColor()), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        actionBar.setTitle(text);
+        CharSequence title = actionBar.getTitle();
+        if ( title != null ) {
+            Spannable text = new SpannableString(actionBar.getTitle());
+            if (text != null) {
+                text.setSpan(new ForegroundColorSpan(navigationBarTextColor()), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                actionBar.setTitle(text);
+            }
+        }
     }
 
 
@@ -211,8 +229,10 @@ public class Appearance {
 //            window.setNavigationBarColor(navigationBarBackgroundColor());
 //        }
         Spannable text = new SpannableString(title);
-        text.setSpan(new ForegroundColorSpan(navigationBarTextColor()), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        actionBar.setTitle(text);
+        if ( text != null ) {
+            text.setSpan(new ForegroundColorSpan(navigationBarTextColor()), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            actionBar.setTitle(text);
+        }
     }
 
 
@@ -231,9 +251,23 @@ public class Appearance {
     }
 
     public void configureFromJSON(String jsonString) {
-        Hashtable<String, Object> newConfiguration = new Hashtable<>();
+        configureWithJSONString(jsonString);
+    }
+
+
+    public void configureWithJSONString(String jsonString) {
         try {
             JSONObject json = new JSONObject(jsonString);
+            configureWithJSON(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void configureWithJSON(JSONObject json) {
+        Hashtable<String, Object> newConfiguration = new Hashtable<>();
+        try {
             JSONObject navigationBarAppearanceJSON = json.optJSONObject(navigationBar);
             if ( navigationBarAppearanceJSON != null ) {
                 Iterator<String> iter = navigationBarAppearanceJSON.keys();
@@ -592,7 +626,7 @@ public class Appearance {
     public int navigationBarTextColor() {
         int color;
         String colorKey = textColor.toLowerCase();
-        String colorDarkKey = colorKey; //(colorKey + "dark").toLowerCase();
+        String colorDarkKey = (colorKey + "dark").toLowerCase();
         if ( isDarkMode() ) {
             color = navBarConfiguration.get(colorDarkKey)!=null ? (int)navBarConfiguration.get(colorDarkKey) : (int)navBarConfiguration.get(colorKey);
         } else {
@@ -604,7 +638,7 @@ public class Appearance {
     public int navigationBarIconColor() {
         int color;
         String colorKey = iconColor.toLowerCase();
-        String colorDarkKey = colorKey; //(colorKey + "dark").toLowerCase();
+        String colorDarkKey = (colorKey + "dark").toLowerCase();
         if ( isDarkMode() ) {
             color = navBarConfiguration.get(colorDarkKey)!=null ? (int)navBarConfiguration.get(colorDarkKey) : (int)navBarConfiguration.get(colorKey);
         } else {
@@ -616,7 +650,7 @@ public class Appearance {
     public int navigationBarBackgroundColor() {
         int color;
         String colorKey = backgroundColor.toLowerCase();
-        String colorDarkKey = colorKey; //(colorKey + "dark").toLowerCase();
+        String colorDarkKey = (colorKey + "dark").toLowerCase();
         if ( isDarkMode() ) {
             color = navBarConfiguration.get(colorDarkKey)!=null ? (int)navBarConfiguration.get(colorDarkKey) : (int)navBarConfiguration.get(colorKey);
         } else {
@@ -798,6 +832,17 @@ public class Appearance {
         return color;
     }
 
+    public int menuBackgroundColor() {
+        int color;
+        if ( isDarkMode() ) {
+            color = menuConfiguration.get(backgroundColorDark)!=null ? (int)menuConfiguration.get(backgroundColorDark) : (int)menuConfiguration.get(backgroundColor);
+        } else {
+            color = (int)menuConfiguration.get(backgroundColor);
+        }
+        return color;
+    }
+
+
     public int menuBorderWidth() {
         return menuConfiguration.get(borderWidth)!=null ? (int)menuConfiguration.get(borderWidth) : 1;
     }
@@ -811,7 +856,7 @@ public class Appearance {
     }
 
     public String chatMenuText() {
-        return (String) menuConfiguration.get(chatMenuText);
+        return chatTitle!=null ? chatTitle : (String) menuConfiguration.get(chatMenuText);
     }
 
     public Drawable chatMenuIcon() {
@@ -819,7 +864,7 @@ public class Appearance {
     }
 
     public String callMeMenuText() {
-        return (String) menuConfiguration.get(callMeMenuText);
+        return callmeTitle!=null ? callmeTitle : (String)  menuConfiguration.get(callMeMenuText);
     }
 
     public Drawable callMeMenuIcon() {
@@ -827,7 +872,7 @@ public class Appearance {
     }
 
     public String knowledgeMenuText() {
-        return (String) menuConfiguration.get(knowledgeMenuText);
+        return kbTitle!=null ? kbTitle :(String) menuConfiguration.get(knowledgeMenuText);
     }
 
     public Drawable knowledgeMenuIcon() {
@@ -835,7 +880,7 @@ public class Appearance {
     }
 
     public String webMenuText() {
-        return (String) menuConfiguration.get(webMenuText);
+        return websiteTitle!=null ? websiteTitle : (String) menuConfiguration.get(webMenuText);
     }
 
     public Drawable webMenuIcon() {
@@ -843,7 +888,7 @@ public class Appearance {
     }
 
     public String emailMenuText() {
-        return (String) menuConfiguration.get(emailMenuText);
+        return emailTitle!=null ? emailTitle : (String) menuConfiguration.get(emailMenuText);
     }
 
     public Drawable emailMenuIcon() {
@@ -851,7 +896,7 @@ public class Appearance {
     }
 
     public String phoneMenuText() {
-        return (String) menuConfiguration.get(phoneMenuText);
+        return phoneTitle!=null ? phoneTitle : (String) menuConfiguration.get(phoneMenuText);
     }
 
     public Drawable phoneMenuIcon() {
@@ -859,7 +904,7 @@ public class Appearance {
     }
 
     public String formsMenuText() {
-        return (String) menuConfiguration.get(formsMenuText);
+        return formsTitle!=null ? formsTitle : (String) menuConfiguration.get(formsMenuText);
     }
 
     public Drawable formsMenuIcon() {
@@ -867,11 +912,19 @@ public class Appearance {
     }
 
     public String historyMenuText() {
-        return (String) menuConfiguration.get(historyMenuText);
+        return historyTitle!=null ? historyTitle : (String) menuConfiguration.get(historyMenuText);
     }
 
     public Drawable historyMenuIcon() {
         return (Drawable) menuConfiguration.get(historyMenuIcon);
+    }
+
+    public String journeysMenuText() {
+        return journeysTitle!=null ? journeysTitle : (String) menuConfiguration.get(journeysMenuText);
+    }
+
+    public Drawable journeysMenuIcon() {
+        return (Drawable) menuConfiguration.get(journeysMenuIcon);
     }
 
     public String exitMenuText() {

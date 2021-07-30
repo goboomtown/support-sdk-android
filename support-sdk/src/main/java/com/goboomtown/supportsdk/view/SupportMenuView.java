@@ -7,7 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +55,7 @@ public class SupportMenuView extends FrameLayout {
     private LinearLayout            mEmailEntryView;
     private LinearLayout            mMenuView;
     private EditText                mEmailEditText;
+    private TextView                infoLabel;
     private GridView                mGridView;
     private RecyclerView            mRecyclerView;
     private SupportButton.MenuStyle mMenuStyle;
@@ -80,6 +84,7 @@ public class SupportMenuView extends FrameLayout {
 
         mEmailEntryView = view.findViewById(R.id.emailEntryView);
         mMenuView       = view.findViewById(R.id.menuView);
+        infoLabel       = view.findViewById(R.id.infoLabel);
 
         mEmailEditText = view.findViewById(R.id.emailEditText);
         Button submitButton = view.findViewById(R.id.submitButton);
@@ -107,6 +112,8 @@ public class SupportMenuView extends FrameLayout {
             mEmailEntryView.setVisibility(View.GONE);
             mMenuView.setVisibility(View.VISIBLE);
         }
+
+        showInfoLabelIfNecessary();
 
         switch ( mMenuStyle ) {
             case ICON_LIST:
@@ -145,10 +152,24 @@ public class SupportMenuView extends FrameLayout {
         }
     }
 
+    private void showInfoLabelIfNecessary() {
+        if ( !supportSDK.isProduction() ) {
+            infoLabel.setText(supportSDK.getHost());
+            infoLabel.setTextColor(supportSDK.appearance.textColor());
+            infoLabel.setVisibility(View.VISIBLE);
+        } else {
+            infoLabel.setVisibility(View.GONE);
+        }
+    }
+
     private void showMenu() {
-        mActivity.runOnUiThread(() -> {
-            mEmailEntryView.setVisibility(View.GONE);
-            mMenuView.setVisibility(View.VISIBLE);
+        showInfoLabelIfNecessary();
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                mEmailEntryView.setVisibility(View.GONE);
+                mMenuView.setVisibility(View.VISIBLE);
+            }
         });
     }
 
@@ -159,19 +180,20 @@ public class SupportMenuView extends FrameLayout {
         if ( mSupportMenuView != null ) {
             ViewGroup parent = (ViewGroup) mSupportMenuView.getParent();
             if ( parent != null ) {
-                mActivity.runOnUiThread(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         parent.removeView(mSupportMenuView);
                     }
                 });
+
             }
         }
     }
 
     private void getCustomerInfo(String emailAddress) {
         HashMap<String, String> customerInfo = new HashMap<>();
-        customerInfo.put(SupportButton.kUserEmail, emailAddress);
+        customerInfo.put(SupportButton.KEY_CUSTOMER_USER_EMAIL, emailAddress);
         supportSDK.restGetCustomerInformationWithInfo(customerInfo, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -192,7 +214,7 @@ public class SupportMenuView extends FrameLayout {
                         supportSDK.memberDeviceID = jsonObject.optString("members_devices_id");
                         supportSDK.historyEntries.clear();
                         supportSDK.saveMemberInfo();
-                        if ( supportSDK.showSupportHistory ) {
+                        if ( supportSDK.historyEnabled ) {
                             supportSDK.getHistory();
                         }
                     } catch (JSONException e) {
@@ -248,18 +270,20 @@ public class SupportMenuView extends FrameLayout {
                 v.setBackgroundColor(getResources().getColor(R.color.homeSelectedColor));
                 trySelectFocusedItem(result.getAdapterPosition());
             };
+            view.setBackgroundColor(supportSDK.appearance.menuBackgroundColor());
             view.setOnClickListener(clickListener);
             return result;
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            if (mSelectedPosition == position) {
-                holder.itemView.setBackgroundColor(getResources().getColor(R.color.homeSelectedColor));
-            } else {
-                holder.itemView.setBackgroundColor(Color.TRANSPARENT);
-            }
+            int backgroundColor = supportSDK.appearance.menuBackgroundColor();
+            holder.mView.setBackgroundColor(backgroundColor);
             holder.itemView.setSelected(mSelectedPosition == position);
+            if ( holder.layout != null ) {
+                holder.layout.setBackgroundColor(backgroundColor);
+            }
+
             SupportMenuEntry entry = mEntries.get(position);
             holder.bind(entry);
         }
@@ -289,18 +313,22 @@ public class SupportMenuView extends FrameLayout {
 
         public class ViewHolder extends TrackSelectionAdapter.ViewHolder {
             public final View           mView;
+            public final LinearLayout   layout;
             public final ImageView      mIconView;
             public final TextView       mTextView;
 
             public ViewHolder(View view) {
                 super(view);
                 mView     = view;
+                int backgroundColor = supportSDK.appearance.menuBackgroundColor();
+
+                layout    = view.findViewById(R.id.layout);
+                if ( layout != null ) {
+                    layout.setBackgroundColor(backgroundColor);
+                }
+
                 mIconView = view.findViewById(R.id.iconView);
                 mTextView = view.findViewById(R.id.label);
-//                mView.setPadding(supportSDK.appearance.menuPadding(),
-//                        supportSDK.appearance.menuPadding(),
-//                        supportSDK.appearance.menuPadding(),
-//                        supportSDK.appearance.menuPadding());
             }
 
             public void bind(SupportMenuEntry entry) {
@@ -318,6 +346,8 @@ public class SupportMenuView extends FrameLayout {
                         supportSDK.appearance.menuPadding());
                 itemView.setLayoutParams(params);
 
+                int backgroundColor = supportSDK.appearance.menuBackgroundColor();
+                layout.setBackgroundColor(backgroundColor);
                 if ( supportSDK.appearance.hasMenuBorder() ) {
                     addBorder(itemView, (int)supportSDK.appearance.menuBorderColor());
                 }
@@ -339,14 +369,17 @@ public class SupportMenuView extends FrameLayout {
 //                mItemView.setOnClickListener(entry.onClickListener);
                 mIconView.setImageDrawable(entry.drawable);
                 mIconView.setColorFilter(supportSDK.appearance.menuIconColor());
+//                mIconView.setBackgroundColor(supportSDK.appearance.menuBackgroundColor());
                 mTextView.setText(entry.label);
                 mTextView.setTextColor(supportSDK.appearance.menuTextColor());
+//                mTextView.setBackgroundColor(supportSDK.appearance.menuBackgroundColor());
                 mTextView.setTextSize(supportSDK.appearance.menuTextSize());
             }
 
             private void addBorder(View view, int borderColor) {
                 GradientDrawable border = new GradientDrawable();
                 border.setCornerRadius(8);
+                border.setColor(supportSDK.appearance.menuBackgroundColor());
                 border.setStroke(supportSDK.appearance.menuBorderWidth(), borderColor);
                 view.setBackground(border);
             }
